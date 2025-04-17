@@ -39,23 +39,59 @@ h1 {
   line-height: 1.1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+.button {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  height: 36px;
+  width: 100%;
+  border-radius: 6px;
+  color: rgb(13, 46, 89);
+  border: 1px solid #0077B6;
+  background-color: white;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-button:hover {
-  border-color: #646cff;
+.button:active{
+  transform: translateY(2px);
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+
+.button:hover{
+  background-color: #0077B6;
+  color: white;
+}
+
+.primary{
+  background-color: #0077B6;
+  color: white
+}
+
+a:hover{
+  color: #1890ff;
+}
+
+.button-ghost{
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  height: 36px;
+  width: 130px;
+  border-radius: 6px;
+  color: white;
+  background-color: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.button-ghost:hover{
+  border: 1px solid rgb(224, 224, 224);
+  color: rgb(13, 46, 89);
 }
 
 @media (prefers-color-scheme: light) {
