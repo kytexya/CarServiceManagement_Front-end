@@ -1,0 +1,61 @@
+import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+
+export default function LoginPage() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.log("Dữ liệu gửi:", data);
+  };
+
+  return (
+    <div className="flex items-center">
+      <div className="px-8 md:px-10 md:w-1/2 max-w-[680px] w-full mx-auto py-10">
+        <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản</p>
+        <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-2 mb-6">
+            <label className="text-sm">Số điện thoại</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="Nhập số điện thoại"
+              className={`border px-5 py-2 rounded-lg ${errors.phone ? "border-red-500" : "border-gray"
+                }`}
+              {...register("phone", {
+                required: "Vui lòng nhập số điện thoại",
+                minLength: {
+                  value: 10,
+                  message: "Số điện thoại cần ít nhất 10 số",
+                },
+                maxLength: {
+                  value: 10,
+                  message: "Vui lòng nhập đúng định dạng số điện thoại",
+                },
+                pattern: {
+                  value: /^[0-9]+$/,
+                  message: "Chỉ được nhập chữ số",
+                },
+              })}
+            />
+            {errors.phone && (
+              <p className="text-red-500 text-xs">{errors.phone.message}</p>
+            )}
+          </div>
+          <button
+            type="submit"
+            className="button !w-full primary rounded-lg mb-3"
+          >
+            Đăng nhập
+          </button>
+          <Link to="/register" className="button">
+            Đăng ký
+          </Link>
+        </form>
+      </div>
+    </div>
+  );
+}
