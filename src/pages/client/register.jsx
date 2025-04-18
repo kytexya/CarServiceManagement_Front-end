@@ -1,5 +1,8 @@
+import { showError, showSuccess } from "@/utils";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function RegisterPage() {
   const {
@@ -8,8 +11,31 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm();
 
+  const navigate = useNavigate();
   const onSubmit = (data) => {
-    console.log("Dữ liệu đăng ký:", data);
+    const payload = {
+      phoneNumber: data.phone,
+      name: data.fullname,
+    };
+    fetch(`${baseURL}/customers/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          showSuccess("Đăng ký thành công");
+          navigate('/login')
+        } else {
+          showError(result.message || "Đăng ký thất bại");
+        }
+      })
+      .catch(() => {
+        showError();
+      });
   };
 
   return (
@@ -23,9 +49,8 @@ export default function RegisterPage() {
             <input
               type="text"
               placeholder="Nhập họ và tên..."
-              className={`border px-5 py-2 rounded-lg ${
-                errors.fullname ? "border-red-500" : "border-gray"
-              }`}
+              className={`border px-5 py-2 rounded-lg ${errors.fullname ? "border-red-500" : "border-gray"
+                }`}
               {...register("fullname", {
                 required: "Vui lòng nhập họ tên",
                 minLength: {
