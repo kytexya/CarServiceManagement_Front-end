@@ -1,5 +1,8 @@
+import { showError, showSuccess } from "@/utils";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function LoginPage() {
   const {
@@ -9,7 +12,28 @@ export default function LoginPage() {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("Dữ liệu gửi:", data);
+    const payload = {
+      phoneNumber: data.phone,
+    };
+    fetch(`${baseURL}/customers/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          localStorage.setItem("token", result.token ?? "token_temp");
+          window.location.href = "/";
+        } else {
+          showError(result.message || "Đăng nhập thất bại");
+        }
+      })
+      .catch(() => {
+        showError();
+      });
   };
 
   return (
