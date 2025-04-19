@@ -25,8 +25,8 @@ export default function LoginPage() {
       .then(async (res) => {
         const result = await res.json();
         if (res.status === 200) {
-          localStorage.setItem("token", result.token ?? "token_temp");
-          window.location.href = "/";
+          localStorage.setItem("bus-token", result.token ?? "token_temp");
+          // window.location.href = "/";
         } else {
           showError(result.message || "Đăng nhập thất bại");
         }
