@@ -9,7 +9,7 @@ export default function Homepage() {
 
         <div className='text-center'>
 
-            <h1>Welcome to Bug Management</h1>
+            <h1>Welcome to Bus Management</h1>
 
 
         </div>
