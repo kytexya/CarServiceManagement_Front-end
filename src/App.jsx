@@ -1,12 +1,15 @@
-import './index.css';
-import Layout from '@/components/common/layout';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import LoginPage from '@/pages/client/login';
-import RegisterPage from '@/pages/client/register';
-import Homepage from '@/components/common/homepage';
-import LoginAdminPage from '@/pages/client/login-admin';
-import { ToastContainer } from 'react-toastify';
-import ProfilePage from '@/pages/client/profile';
+import "./index.css";
+import Layout from "@/components/common/layout";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import LoginPage from "@/pages/client/login";
+import RegisterPage from "@/pages/client/register";
+import Homepage from "@/components/common/homepage";
+import LoginAdminPage from "@/pages/client/login-admin";
+import { ToastContainer } from "react-toastify";
+import AccountListPage from "@/pages/admin/account";
+import AddAccountList from "@/pages/admin/add-account";
+import EditAccountList from "@/pages/admin/edit-account";
+import ProfilePage from "@/pages/client/profile";
 function App() {
   return (
     <BrowserRouter>
@@ -18,6 +21,9 @@ function App() {
           <Route path="/login-manager" element={<LoginAdminPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin/account" element={<AccountListPage />} />
+          <Route path="/admin/account/add" element={<AddAccountList />} />
+          <Route path="/admin/account/edit/:id" element={<EditAccountList />} />
         </Routes>
       </Layout>
     </BrowserRouter>

@@ -71,7 +71,7 @@ export default function Footer() {
             <hr className="my-6" />
             <div className="flex justify-between items-start">
                 <div className="flex flex-row justify-between w-full">
-                    <p className="font-bold">© 2024 Bug Management. Website đặt vé xe</p>
+                    <p className="font-bold">© 2024 Bus Management. Website đặt vé xe</p>
                     <a href="mailto:bus@gmail.com">Liên hệ: bus@gmail.com</a>
                 </div>
             </div>
