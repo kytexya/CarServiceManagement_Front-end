@@ -9,7 +9,12 @@ export default function SidebarAdmin() {
   };
 
   return (
-    <div className="h-[calc(100vh-72px)] w-[260px] bg-primary drop-shadow-sm">
+    <div className='h-[100vh] min-w-[220px] sticky top-0 bg-primary drop-shadow-sm'>
+      <Link className="px-6 aspect-video flex items-center max-h-[64px]" to='/'>
+        <div className="text-4xl text-white">
+          LOGO
+        </div>
+      </Link>
       <Link to="/admin/account">
         <div
           className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
@@ -100,6 +105,14 @@ export default function SidebarAdmin() {
           Quản lý vé
         </div>
       </Link>
+      <div className="fixed bottom-4 flex flex-col justify-center w-full px-4 gap-3">
+        <button className="button !bg-success !text-white !min-w-[104px]">
+          Admin
+        </button>
+        <button className="button !bg-red-500 !text-white min-w-[104px]">
+          Đăng xuất
+        </button>
+      </div>
     </div>
   );
 }
