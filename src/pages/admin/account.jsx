@@ -62,8 +62,8 @@ export default function AccountListPage() {
   return (
     <div className="flex flex-row w-full">
       <SidebarAdmin />
-      <div className="flex flex-col w-full border-2">
-        <div className="flex justify-between items-center px-4">
+      <div className='flex flex-col w-full'>
+        <div className="flex justify-between items-center px-4 h-[64px]">
           <TabsSelector
             tabs={tabs}
             active={activeTab}
