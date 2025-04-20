@@ -25,6 +25,9 @@ import EditTripPage from "@/pages/admin/edit-trip";
 import BusListPage from "@/pages/admin/bus";
 import AddBusPage from "@/pages/admin/add-bus";
 import EditBusPage from "@/pages/admin/edit-bus";
+import PromotionListPage from '@/pages/admin/promotion';
+import AddPromotionPage from '@/pages/admin/add-promotion';
+import EditPromotionPage from './pages/admin/edit-promotion';
 function App() {
   return (
     <BrowserRouter>
@@ -56,6 +59,9 @@ function App() {
           <Route path="trip" element={<TripListPage />} />
           <Route path="trip/add" element={<AddTripPage />} />
           <Route path="trip/edit/:id" element={<EditTripPage />} />
+          <Route path="promotion" element={<PromotionListPage />} />
+          <Route path="promotion/add" element={<AddPromotionPage />} />
+          <Route path="promotion/edit/:id" element={<EditPromotionPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
