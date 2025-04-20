@@ -17,6 +17,9 @@ import EditLocationPage from "@/pages/admin/edit-location";
 import RouterListPage from "@/pages/admin/router";
 import AddRouterPage from "./pages/admin/add-router";
 import EditRouterPage from "./pages/admin/edit-router";
+import BusListPage from '@/pages/admin/bus';
+import AddBusPage from '@/pages/admin/add-bus';
+import EditBusPage from '@/pages/admin/edit-bus';
 function App() {
   return (
     <BrowserRouter>
