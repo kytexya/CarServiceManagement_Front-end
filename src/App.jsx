@@ -29,8 +29,9 @@ import EditBusPage from "@/pages/admin/edit-bus";
 import PromotionListPage from "@/pages/admin/promotion";
 import AddPromotionPage from "@/pages/admin/add-promotion";
 import EditPromotionPage from "./pages/admin/edit-promotion";
-import SearchTripPage from '@/pages/client/search-trip';
-import OrderPage from '@/pages/client/order';
+import SearchTripPage from "@/pages/client/search-trip";
+import OrderPage from "@/pages/client/order";
+import HistoryTicket from "@/pages/client/history";
 function App() {
   return (
     <BrowserRouter>
@@ -44,6 +45,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/trip" element={<SearchTripPage />} />
           <Route path="/order" element={<OrderPage />} />
+          <Route path="/history" element={<HistoryTicket />} />
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
