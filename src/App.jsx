@@ -17,17 +17,18 @@ import EditLocationPage from "@/pages/admin/edit-location";
 import RouterListPage from "@/pages/admin/router";
 import AddRouterPage from "./pages/admin/add-router";
 import EditRouterPage from "./pages/admin/edit-router";
-import ReportPage from '@/pages/admin/report';
+import ReportPage from "@/pages/admin/report";
 import TransactionListPage from "@/pages/admin/transaction";
+import TicketListPage from "@/pages/admin/ticket";
 import TripListPage from "@/pages/admin/trip";
 import AddTripPage from "@/pages/admin/add-trip";
 import EditTripPage from "@/pages/admin/edit-trip";
 import BusListPage from "@/pages/admin/bus";
 import AddBusPage from "@/pages/admin/add-bus";
 import EditBusPage from "@/pages/admin/edit-bus";
-import PromotionListPage from '@/pages/admin/promotion';
-import AddPromotionPage from '@/pages/admin/add-promotion';
-import EditPromotionPage from './pages/admin/edit-promotion';
+import PromotionListPage from "@/pages/admin/promotion";
+import AddPromotionPage from "@/pages/admin/add-promotion";
+import EditPromotionPage from "./pages/admin/edit-promotion";
 function App() {
   return (
     <BrowserRouter>
@@ -56,6 +57,7 @@ function App() {
           <Route path="bus/add" element={<AddBusPage />} />
           <Route path="bus/edit/:id" element={<EditBusPage />} />
           <Route path="transaction" element={<TransactionListPage />} />
+          <Route path="ticket" element={<TicketListPage />} />
           <Route path="trip" element={<TripListPage />} />
           <Route path="trip/add" element={<AddTripPage />} />
           <Route path="trip/edit/:id" element={<EditTripPage />} />
