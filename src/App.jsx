@@ -17,12 +17,13 @@ import EditLocationPage from "@/pages/admin/edit-location";
 import RouterListPage from "@/pages/admin/router";
 import AddRouterPage from "./pages/admin/add-router";
 import EditRouterPage from "./pages/admin/edit-router";
-import TripListPage from '@/pages/admin/trip';
-import AddTripPage from '@/pages/admin/add-trip';
-import EditTripPage from '@/pages/admin/edit-trip';
-import BusListPage from '@/pages/admin/bus';
-import AddBusPage from '@/pages/admin/add-bus';
-import EditBusPage from '@/pages/admin/edit-bus';
+import TransactionListPage from "@/pages/admin/transaction";
+import TripListPage from "@/pages/admin/trip";
+import AddTripPage from "@/pages/admin/add-trip";
+import EditTripPage from "@/pages/admin/edit-trip";
+import BusListPage from "@/pages/admin/bus";
+import AddBusPage from "@/pages/admin/add-bus";
+import EditBusPage from "@/pages/admin/edit-bus";
 function App() {
   return (
     <BrowserRouter>
@@ -46,6 +47,7 @@ function App() {
           <Route path="router" element={<RouterListPage />} />
           <Route path="router/add" element={<AddRouterPage />} />
           <Route path="router/edit/:id" element={<EditRouterPage />} />
+          <Route path="transaction" element={<TransactionListPage />} />
           <Route path="trip" element={<TripListPage />} />
           <Route path="trip/add" element={<AddTripPage />} />
           <Route path="trip/edit/:id" element={<EditTripPage />} />
