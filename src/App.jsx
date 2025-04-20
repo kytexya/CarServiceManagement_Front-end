@@ -17,6 +17,7 @@ import EditLocationPage from "@/pages/admin/edit-location";
 import RouterListPage from "@/pages/admin/router";
 import AddRouterPage from "./pages/admin/add-router";
 import EditRouterPage from "./pages/admin/edit-router";
+import ReportPage from '@/pages/admin/report';
 import TransactionListPage from "@/pages/admin/transaction";
 import TripListPage from "@/pages/admin/trip";
 import AddTripPage from "@/pages/admin/add-trip";
@@ -47,6 +48,7 @@ function App() {
           <Route path="router" element={<RouterListPage />} />
           <Route path="router/add" element={<AddRouterPage />} />
           <Route path="router/edit/:id" element={<EditRouterPage />} />
+          <Route path="report" element={<ReportPage />} />
           <Route path="bus" element={<BusListPage />} />
           <Route path="bus/add" element={<AddBusPage />} />
           <Route path="bus/edit/:id" element={<EditBusPage />} />
