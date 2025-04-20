@@ -14,6 +14,7 @@ export default {
         background: '#E9ECEF',
         success: '#2ECC71',
         warning: '#F39C12',
+        yellow: '#ffd333',
         danger: '#E74C3C',
         dark: '#1C1C1C',
         gray: {
