@@ -47,6 +47,9 @@ function App() {
           <Route path="router" element={<RouterListPage />} />
           <Route path="router/add" element={<AddRouterPage />} />
           <Route path="router/edit/:id" element={<EditRouterPage />} />
+          <Route path="bus" element={<BusListPage />} />
+          <Route path="bus/add" element={<AddBusPage />} />
+          <Route path="bus/edit/:id" element={<EditBusPage />} />
           <Route path="transaction" element={<TransactionListPage />} />
           <Route path="trip" element={<TripListPage />} />
           <Route path="trip/add" element={<AddTripPage />} />
