@@ -29,6 +29,7 @@ import EditBusPage from "@/pages/admin/edit-bus";
 import PromotionListPage from "@/pages/admin/promotion";
 import AddPromotionPage from "@/pages/admin/add-promotion";
 import EditPromotionPage from "./pages/admin/edit-promotion";
+import SearchTripPage from '@/pages/client/search-trip';
 function App() {
   return (
     <BrowserRouter>
@@ -40,6 +41,7 @@ function App() {
           <Route path="/login-manager" element={<LoginAdminPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/trip" element={<SearchTripPage />} />
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>

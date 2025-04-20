@@ -15,7 +15,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 w-full">
+    <header className="sticky top-0 w-full z-20">
       <div className="relative flex justify-between items-center min-h-[72px] px-6 bg-primary">
         <Link className="min-h-72px aspect-video flex items-center" to='/'>
           <div className="text-4xl py-4 text-white">
