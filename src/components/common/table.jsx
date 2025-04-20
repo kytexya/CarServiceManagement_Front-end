@@ -38,8 +38,12 @@ export default function CustomTable({ columns, data, renderActions }) {
                 className="hover:bg-gray-50 border-b border-gray-100 transition duration-200"
               >
                 {columns.map((col, colIndex) => (
-                  <td key={colIndex} className="px-4 py-2 text-center">
-                    {row[col.field]}
+                  <td key={colIndex} className="px-4 py-2">
+                    <div className="flex justify-center  text-center">
+                      <div className={col.className ? col.className : ""}>
+                        {row[col.field]}
+                      </div>
+                    </div>
                   </td>
                 ))}
                 {renderActions && (
