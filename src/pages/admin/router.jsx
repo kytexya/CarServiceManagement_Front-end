@@ -1,12 +1,15 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import CustomTable from '@/components/common/table';
+import { showError } from '@/utils';
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 const columns = [
-  { header: 'Tên tuyến đường', field: 'RouterName' },
-  { header: 'Khoảng cách', field: 'Distance' },
-  { header: 'Thời gian ước tính', field: 'EstimatedDuration' },
+  { header: 'Tên tuyến đường', field: 'routeName' },
+  { header: 'Khoảng cách', field: 'distance' },
+  { header: 'Thời gian ước tính', field: 'estimatedDuration' },
 ]
 
 const dataTemp = [
@@ -17,15 +20,35 @@ const dataTemp = [
 export default function RouterListPage() {
   const [dataList, setDataList] = useState([]);
   const navigate = useNavigate();
+  const yourToken = localStorage.getItem('bus-token');
 
   useEffect(() => {
-    const convertedData = dataTemp.map((item) => ({
-      ...item,
-      Distance: `${item.Distance} km`,
-      EstimatedDuration: `${item.EstimatedDuration} giờ`,
-    }));
-    setDataList(convertedData);
+    callApi();
   }, [])
+  function callApi() {
+    fetch(`${baseURL}/api/Route`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+        "Authorization": `Bearer ${yourToken}`,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setDataList(result.map((item) => ({
+            ...item,
+            distance: `${item.distance} km`,
+          })));
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }
 
   return (
     <div className='flex flex-row w-full'>
@@ -55,13 +78,35 @@ export default function RouterListPage() {
           renderActions={(row) => (
             <div className="flex gap-2 justify-center">
               <button
-                onClick={() => navigate(`/admin/router/edit/${row.Id}`)}
+                onClick={() => navigate(`/admin/router/edit/${row.routeId}`)}
                 className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Sửa
               </button>
               <button
-                onClick={() => alert(`Xoá ${row.Name}`)}
+                onClick={() => {
+                  if (confirm(`Xoá ${row.routeName}?`)) {
+                    fetch(`${baseURL}/api/Router/${row.routeId}`, {
+                      method: "DELETE",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "ngrok-skip-browser-warning": 69420,
+                        "Authorization": `Bearer ${yourToken}`,
+                      },
+                    })
+                      .then(async (res) => {
+                        const result = await res.json();
+                        if (res.status === 200) {
+                          callApi();
+                        } else {
+                          showError();
+                        }
+                      })
+                      .catch(() => {
+                        showError();
+                      });
+                  }
+                }}
                 className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Xoá

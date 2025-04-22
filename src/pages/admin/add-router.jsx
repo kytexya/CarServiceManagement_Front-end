@@ -2,7 +2,7 @@ import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError, showSuccess } from '@/utils';
 import React from 'react'
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function AddRouterPage() {
@@ -11,15 +11,21 @@ export default function AddRouterPage() {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const navigate = useNavigate();
+  const yourToken = localStorage.getItem('bus-token');
 
   const onSubmit = (data) => {
     const payload = {
-      phoneNumber: data.phone,
+      ...data,
+      distance: parseInt(data.distance),
+      estimatedDuration: parseInt(data.estimatedDuration),
     };
-    fetch(`${baseURL}/customers`, {
+    fetch(`${baseURL}/api/Router`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${yourToken}`,
+        "ngrok-skip-browser-warning": 69420,
       },
       body: JSON.stringify(payload),
     })
@@ -27,6 +33,7 @@ export default function AddRouterPage() {
         // const result = await res.json();
         if (res.status === 200) {
           showSuccess();
+          navigate('/admin/router');
         } else {
           showError();
         }
@@ -50,9 +57,9 @@ export default function AddRouterPage() {
                 <label className="text-sm">Tên tuyến đường</label>
                 <input
                   type="text"
-                  className={`border px-5 py-2 rounded-lg ${errors.RouterName ? "border-red-500" : "border-gray"
+                  className={`border px-5 py-2 rounded-lg ${errors.routeName ? "border-red-500" : "border-gray"
                     }`}
-                  {...register("RouterName", {
+                  {...register("routeName", {
                     required: "Vui lòng nhập dữ liệu",
                     minLength: {
                       value: 6,
@@ -60,8 +67,8 @@ export default function AddRouterPage() {
                     },
                   })}
                 />
-                {errors.RouterName && (
-                  <p className="text-red-500 text-xs">{errors.RouterName.message}</p>
+                {errors.routeName && (
+                  <p className="text-red-500 text-xs">{errors.routeName.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
@@ -69,9 +76,9 @@ export default function AddRouterPage() {
                 <input
                   type="number"
                   inputMode="numeric"
-                  className={`border px-5 py-2 rounded-lg ${errors.Distance ? "border-red-500" : "border-gray"
+                  className={`border px-5 py-2 rounded-lg ${errors.distance ? "border-red-500" : "border-gray"
                     }`}
-                  {...register("Distance", {
+                  {...register("distance", {
                     required: "Vui lòng nhập dữ liệu",
                     pattern: {
                       value: /^[0-9]+$/,
@@ -79,8 +86,8 @@ export default function AddRouterPage() {
                     },
                   })}
                 />
-                {errors.Distance && (
-                  <p className="text-red-500 text-xs">{errors.Distance.message}</p>
+                {errors.distance && (
+                  <p className="text-red-500 text-xs">{errors.distance.message}</p>
                 )}
               </div>
             </div>
@@ -92,18 +99,18 @@ export default function AddRouterPage() {
                 <input
                   type="number"
                   inputMode="numeric"
-                  className={`border px-5 py-2 rounded-lg ${errors.EstimatedDuration ? "border-red-500" : "border-gray"
+                  className={`border px-5 py-2 rounded-lg ${errors.estimatedDuration ? "border-red-500" : "border-gray"
                     }`}
-                  {...register("EstimatedDuration", {
+                  {...register("estimatedDuration", {
                     required: "Vui lòng nhập dữ liệu",
                     pattern: {
                       value: /^[0-9]+$/,
                       message: "Chỉ được nhập số",
                     },
-                  })}
+                  })}estimatedDuration
                 />
-                {errors.EstimatedDuration && (
-                  <p className="text-red-500 text-xs">{errors.EstimatedDuration.message}</p>
+                {errors.estimatedDuration && (
+                  <p className="text-red-500 text-xs">{errors.estimatedDuration.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full"></div>
