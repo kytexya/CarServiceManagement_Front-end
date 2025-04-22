@@ -34,6 +34,7 @@ import OrderPage from "@/pages/client/order";
 import HistoryTicket from "@/pages/client/history";
 import EditProfilePage from "./pages/client/edit-profile";
 import DriveTripPage from "@/pages/admin/drive-trip";
+import DriveTripDetailPage from "./pages/admin/drive-trip-detail";
 function App() {
   return (
     <BrowserRouter>
@@ -52,6 +53,7 @@ function App() {
         </Route>
         <Route path="/drive" element={<AdminLayout />}>
           <Route path="trip" element={<DriveTripPage />} />
+          <Route path="trip/:id" element={<DriveTripDetailPage />} /> 
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
