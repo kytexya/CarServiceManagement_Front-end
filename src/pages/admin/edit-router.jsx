@@ -1,25 +1,60 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError, showSuccess } from '@/utils';
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function EditRouterPage() {
+  const { id } = useParams();
+  const [data, setData] = useState()
+  const navigate = useNavigate();
+  const yourToken = localStorage.getItem('bus-token');
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    const payload = {
-      phoneNumber: data.phone,
-    };
-    fetch(`${baseURL}/customers`, {
-      method: "POST",
+  useEffect(() => {
+    fetch(`${baseURL}/api/Router/${id}`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+        "Authorization": `Bearer ${yourToken}`,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setData(result);
+          setValue('routeId', result.routeId);
+          setValue('routeName', result.routeName);
+          setValue('distance', result.distance);
+          setValue('estimatedDuration', result.estimatedDuration);
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }, [])
+
+  const onSubmit = (data) => {
+    const payload = {
+      ...data,
+      distance: parseInt(data.distance),
+      estimatedDuration: parseInt(data.estimatedDuration),
+    };
+    fetch(`${baseURL}/api/Router/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${yourToken}`,
+        "ngrok-skip-browser-warning": 69420,
       },
       body: JSON.stringify(payload),
     })
@@ -27,6 +62,7 @@ export default function EditRouterPage() {
         // const result = await res.json();
         if (res.status === 200) {
           showSuccess();
+          navigate('/admin/router');
         } else {
           showError();
         }
@@ -41,7 +77,7 @@ export default function EditRouterPage() {
       <SidebarAdmin />
       <div className='flex flex-col w-full'>
         <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-          <h1 className='text-2xl font-bold'>Tạo tuyến đường</h1>
+          <h1 className='text-2xl font-bold'>Sửa tuyến đường</h1>
         </div>
         <div className="bg-white rounded-xl border border-gray-300 p-4 mt-10 mx-10">
           <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
@@ -50,9 +86,10 @@ export default function EditRouterPage() {
                 <label className="text-sm">Tên tuyến đường</label>
                 <input
                   type="text"
-                  className={`border px-5 py-2 rounded-lg ${errors.RouterName ? "border-red-500" : "border-gray"
+                  defaultValue={data?.routeName}
+                  className={`border px-5 py-2 rounded-lg ${errors.routeName ? "border-red-500" : "border-gray"
                     }`}
-                  {...register("RouterName", {
+                  {...register("routeName", {
                     required: "Vui lòng nhập dữ liệu",
                     minLength: {
                       value: 6,
@@ -60,8 +97,8 @@ export default function EditRouterPage() {
                     },
                   })}
                 />
-                {errors.RouterName && (
-                  <p className="text-red-500 text-xs">{errors.RouterName.message}</p>
+                {errors.routeName && (
+                  <p className="text-red-500 text-xs">{errors.routeName.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
@@ -69,9 +106,10 @@ export default function EditRouterPage() {
                 <input
                   type="number"
                   inputMode="numeric"
-                  className={`border px-5 py-2 rounded-lg ${errors.Distance ? "border-red-500" : "border-gray"
+                  defaultValue={data?.distance}
+                  className={`border px-5 py-2 rounded-lg ${errors.distance ? "border-red-500" : "border-gray"
                     }`}
-                  {...register("Distance", {
+                  {...register("distance", {
                     required: "Vui lòng nhập dữ liệu",
                     pattern: {
                       value: /^[0-9]+$/,
@@ -79,8 +117,8 @@ export default function EditRouterPage() {
                     },
                   })}
                 />
-                {errors.Distance && (
-                  <p className="text-red-500 text-xs">{errors.Distance.message}</p>
+                {errors.distance && (
+                  <p className="text-red-500 text-xs">{errors.distance.message}</p>
                 )}
               </div>
             </div>
@@ -92,9 +130,10 @@ export default function EditRouterPage() {
                 <input
                   type="number"
                   inputMode="numeric"
-                  className={`border px-5 py-2 rounded-lg ${errors.EstimatedDuration ? "border-red-500" : "border-gray"
+                  defaultValue={data?.estimatedDuration}
+                  className={`border px-5 py-2 rounded-lg ${errors.estimatedDuration ? "border-red-500" : "border-gray"
                     }`}
-                  {...register("EstimatedDuration", {
+                  {...register("estimatedDuration", {
                     required: "Vui lòng nhập dữ liệu",
                     pattern: {
                       value: /^[0-9]+$/,
@@ -102,8 +141,8 @@ export default function EditRouterPage() {
                     },
                   })}
                 />
-                {errors.EstimatedDuration && (
-                  <p className="text-red-500 text-xs">{errors.EstimatedDuration.message}</p>
+                {errors.estimatedDuration && (
+                  <p className="text-red-500 text-xs">{errors.estimatedDuration.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full"></div>
