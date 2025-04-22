@@ -4,55 +4,139 @@ import CustomTable from "@/components/common/table";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 const columns = {
   user: [
-    { header: "Tên tài khoản", field: "Username" },
+    { header: "Mã tài khoản", field: "userId" },
+    { header: "Tên tài khoản", field: "username" },
     { header: "Tên", field: "Name" },
-    { header: "Email", field: "Email" },
+    { header: "Số điện thoại", field: "phoneNumber" },
+    { header: "Quyền", field: "role" },
   ],
   customer: [
-    { header: "Số điện thoại", field: "PhoneNumber" },
+    { header: "Mã khách hàng", field: "customerId" },
+    { header: "Mã thành viên", field: "membershipId" },
+    { header: "Số điện thoại", field: "phoneNumber" },
     { header: "Tên", field: "Name" },
     { header: "Điểm tích luỹ", field: "Score" },
-    { header: "MembershipId", field: "MembershipId" },
-    { header: "Xếp hạng", field: "RankName" },
+    { header: "Mã khách hàng", field: "customerId" },
   ],
 };
-
-const data = {
-  user: [
-    {
-      Id: 1,
-      Name: "Minh Minh Minh 1",
-      Username: "username1",
-      Email: "minh@example.com",
-    },
-    { Id: 2, Name: "Linh", Username: "username2", Email: "linh@example.com" },
-  ],
-  customer: [
-    {
-      Id: 1,
-      PhoneNumber: "0920292022",
-      Name: "Minh Minh 2",
-      Score: 20,
-      MembershipId: 12,
-      RankName: "Vàng",
-    },
-    {
-      Id: 2,
-      PhoneNumber: "0921221429",
-      Name: "Linh Link",
-      Score: 22,
-      MembershipId: 2,
-      RankName: "Bạc",
-    },
-  ],
-};
-
 export default function AccountListPage() {
   const [activeTab, setActiveTab] = useState("user");
-  const [dataList, setDataList] = useState();
+  const [dataList, setDataList] = useState([]);
+  const [dataCustomer, setDataCustomerList] = useState([]);
   const navigate = useNavigate();
+  const yourToken = localStorage.getItem("bus-token");
+
+  useEffect(() => {
+    callApi();
+  }, []);
+
+  function callApi() {
+    fetch(`${baseURL}/api/User`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setDataList(
+            result.map((item) => ({
+              ...item,
+              role:
+                item.role === 1
+                  ? "Admin"
+                  : item.role === 2
+                  ? "Nhân viên"
+                  : "Tài xế",
+            }))
+          );
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+    fetch(`${baseURL}/customers`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+        Authorization: `Bearer ${yourToken}`,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setDataCustomerList(result);
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }
+
+  useEffect(() => {
+    callApi();
+  }, []);
+
+  function callApi() {
+    fetch(`${baseURL}/api/User`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setDataList(
+            result.map((item) => ({
+              ...item,
+              role:
+                item.role === 1
+                  ? "Admin"
+                  : item.role === 2
+                  ? "Nhân viên"
+                  : "Tài xế",
+            }))
+          );
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+    fetch(`${baseURL}/customers`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+        Authorization: `Bearer ${yourToken}`,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setDataCustomerList(result);
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }
 
   const tabs = [
     { label: "Người dùng", value: "user" },
@@ -62,7 +146,7 @@ export default function AccountListPage() {
   return (
     <div className="flex flex-row w-full">
       <SidebarAdmin />
-      <div className='flex flex-col w-full'>
+      <div className="flex flex-col w-full">
         <div className="flex justify-between items-center px-4 h-[64px]">
           <TabsSelector
             tabs={tabs}
@@ -87,23 +171,51 @@ export default function AccountListPage() {
 
         <CustomTable
           columns={columns[activeTab]}
-          data={data[activeTab]}
-          renderActions={(row) => (
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={() => navigate(`/admin/account/edit/${row.Id}`)}
-                className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Sửa
-              </button>
-              <button
-                onClick={() => alert(`Xoá ${row.Name}`)}
-                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Xoá
-              </button>
-            </div>
-          )}
+          data={activeTab === "user" ? dataList : dataCustomer}
+          renderActions={
+            activeTab === "user"
+              ? (row) => (
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() =>
+                        navigate(`/admin/account/edit/${row.userId}`)
+                      }
+                      className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Sửa
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Xoá ${row.username}?`)) {
+                          fetch(`${baseURL}/api/User/${row.userId}`, {
+                            method: "DELETE",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "ngrok-skip-browser-warning": 69420,
+                              Authorization: `Bearer ${yourToken}`,
+                            },
+                          })
+                            .then(async (res) => {
+                              const result = await res.json();
+                              if (res.status === 200) {
+                                callApi();
+                              } else {
+                                showError();
+                              }
+                            })
+                            .catch(() => {
+                              showError();
+                            });
+                        }
+                      }}
+                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Xoá
+                    </button>
+                  </div>
+                )
+              : null
+          }
         />
       </div>
     </div>

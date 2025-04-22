@@ -1,35 +1,71 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError, showSuccess } from "@/utils";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function EditAccountList() {
   const { id } = useParams();
+  const [data, setData] = useState();
+  const navigate = useNavigate();
+  const yourToken = localStorage.getItem("bus-token");
+
   const {
+    setValue,
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    const payload = {
-      phoneNumber: data.phone,
-    };
-    fetch(`${baseURL}/customers/register`, {
-      method: "POST",
+  useEffect(() => {
+    fetch(`${baseURL}/api/User/${id}`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+        Authorization: `Bearer ${yourToken}`,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setData(result);
+          setValue("name", result.name);
+          setValue("phoneNumber", result.phoneNumber);
+          setValue("userId", result.userId);
+          setValue("username", result.username);
+          setValue("role", result.role);
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }, []);
+
+  const onSubmit = (data) => {
+    const payload = {
+      ...data,
+      role: parseInt(data.role),
+    };
+    fetch(`${baseURL}/api/User/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${yourToken}`,
+        "ngrok-skip-browser-warning": 69420,
       },
       body: JSON.stringify(payload),
     })
       .then(async (res) => {
         const result = await res.json();
         if (res.status === 200) {
-          showSuccess("Đăng ký thành công");
+          showSuccess("Lưu dữ liệu thành công");
+          navigate("/admin/account");
         } else {
-          showError(result.message || "Đăng nhập thất bại");
+          showError(result.message);
         }
       })
       .catch(() => {
@@ -52,6 +88,7 @@ export default function EditAccountList() {
                 <input
                   type="text"
                   placeholder="Nhập tài khoản..."
+                  defaultValue={data?.username}
                   className={`border px-5 py-2 rounded-lg ${
                     errors.username ? "border-red-500" : "border-gray"
                   }`}
@@ -75,7 +112,7 @@ export default function EditAccountList() {
                   type="text"
                   placeholder="Nhập họ và tên..."
                   className={`border px-5 py-2 rounded-lg ${
-                    errors.fullname ? "border-red-500" : "border-gray"
+                    errors.name ? "border-red-500" : "border-gray"
                   }`}
                   {...register("fullname", {
                     required: "Vui lòng nhập họ tên",
@@ -86,9 +123,7 @@ export default function EditAccountList() {
                   })}
                 />
                 {errors.fullname && (
-                  <p className="text-red-500 text-xs">
-                    {errors.fullname.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.name.message}</p>
                 )}
               </div>
             </div>
@@ -100,9 +135,9 @@ export default function EditAccountList() {
                   inputMode="numeric"
                   placeholder="Nhập số điện thoại..."
                   className={`border px-5 py-2 w-full rounded-lg ${
-                    errors.phone ? "border-red-500" : "border-gray"
+                    errors.phoneNumber ? "border-red-500" : "border-gray"
                   }`}
-                  {...register("phone", {
+                  {...register("phoneNumber", {
                     required: "Vui lòng nhập số điện thoại",
                     minLength: {
                       value: 10,
@@ -118,8 +153,10 @@ export default function EditAccountList() {
                     },
                   })}
                 />
-                {errors.phone && (
-                  <p className="text-red-500 text-xs">{errors.phone.message}</p>
+                {errors.phoneNumber && (
+                  <p className="text-red-500 text-xs">
+                    {errors.phoneNumber.message}
+                  </p>
                 )}
               </div>
 
@@ -133,8 +170,9 @@ export default function EditAccountList() {
                     required: "Vui'hui chọn phân quyền",
                   })}
                 >
-                  <option value="admin">Nhân viên</option>
-                  <option value="customer">Khách hàng</option>
+                  <option value="1">Admin</option>
+                  <option value="2">Nhân viên</option>
+                  <option value="3">Tài xế</option>
                 </select>
                 {errors.role && (
                   <p className="text-red-500 text-xs">{errors.role.message}</p>
@@ -147,6 +185,7 @@ export default function EditAccountList() {
                 <input
                   type="password"
                   placeholder="Nhập mật khẩu..."
+                  autoComplete="new-password"
                   className={`border px-5 py-2 rounded-lg ${
                     errors.password ? "border-red-500" : "border-gray"
                   }`}
