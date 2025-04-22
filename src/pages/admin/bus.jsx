@@ -44,7 +44,7 @@ export default function BusListPage() {
             <div className='flex flex-col w-full'>
 
                 <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-                    <h1 className='text-2xl font-bold'>Danh sách xe</h1>
+                    <h1 className='text-2xl font-bold'>  xe</h1>
                 </div>
 
                 <div className="flex justify-between items-center px-4 h-[64px]">

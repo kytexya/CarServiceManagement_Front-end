@@ -1,4 +1,5 @@
 import { formatToMoney, showError } from '@/utils';
+import React, { useEffect, useState } from 'react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
@@ -20,13 +21,25 @@ export default function OrderPage() {
   const seats = new URLSearchParams(location.search).get('seat');
   const seatsList = seats.split(',');
   const trip = new URLSearchParams(location.search).get('trip');
+  const [profile, setProfile] = useState();
 
   const [tripDetail, setTripDetail] = useState(dataTrip)
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
+
+  useEffect(() => {
+    const profile = localStorage.getItem("bus-profile");
+    if (profile) {
+      const parsedProfile = JSON.parse(profile);
+      setProfile(parsedProfile);
+      setValue('name', profile.name)
+      setValue('phoneNumber', profile.phoneNumber)
+    }
+  }, []);
 
   const onSubmit = (data) => {
     const payload = {
@@ -52,8 +65,8 @@ export default function OrderPage() {
   };
 
   return (
-    <div className="px-8 md:px-10 md:w-2/3 mx-auto py-10 my-20">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
+    <div className="px-8 md:px-10 w-full max-w-[1200px] mx-auto py-10 my-20">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex max-md:flex-col w-full gap-6">
         <div className="flex flex-col w-2/3 gap-2 border shadow-md rounded-md p-4">
           <p className='text-xl font-bold '>Thông tin liên hệ</p>
           <div className='flex flex-col gap-2'>
@@ -62,6 +75,7 @@ export default function OrderPage() {
               <input
                 type="text"
                 placeholder="Nhập họ và tên..."
+                defaultValue={profile?.name}
                 className={`border px-5 py-2 rounded-lg ${errors.username ? "border-red-500" : "border-gray"
                   }`}
                 {...register("username", {
@@ -80,6 +94,7 @@ export default function OrderPage() {
               <input
                 inputMode="numeric"
                 placeholder="Nhập số điện thoại..."
+                defaultValue={profile?.phoneNumber}
                 className={`border px-5 py-2 w-full rounded-lg ${errors.phone ? "border-red-500" : "border-gray"
                   }`}
                 {...register("phone", {
@@ -122,11 +137,11 @@ export default function OrderPage() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col w-1/3 gap-2 border shadow-md rounded-md p-4 h-fit sticky top-22">
+        <div className="flex flex-col md:w-[400px] gap-2 border shadow-md rounded-md p-4 h-fit sticky top-22">
           <p className='text-xl font-bold'>Thanh toán</p>
           <div className="flex flex-col gap-2">
             <div className="flex flex-row justify-between">
-              <p className='font-bold text-lg'>Giá vé:</p>
+              <p className='font-semibold text-lg'>Giá vé:</p>
               <p className='text-lg'>{formatToMoney(tripDetail?.Price ?? 0)}</p>
             </div>
             <div className="flex flex-row justify-between">
@@ -135,10 +150,16 @@ export default function OrderPage() {
             </div>
             <hr />
             <div className="flex flex-row justify-between">
-              <p className='font-bold text-lg'>Tổng tiền:</p>
+              <p className='font-semibold text-lg'>Tổng tiền:</p>
               <p className='text-lg'>{formatToMoney(tripDetail?.Price * seatsList?.length)}</p>
             </div>
-            <button type="submit" className="bg-primary text-white font-bold py-2 px-4 rounded-md">Thanh toán</button>
+            <div className="flex flex-row justify-between">
+              <p className='font-semibold text-lg'>Mã khuyến mãi: </p>
+              <input
+                className='p-2 h-[32px] border border-primary rounded-md max-w-[130px]'
+              />
+            </div>
+            <button type="submit" className="bg-primary text-white font-bold py-2 mt-2 px-4 rounded-md">Thanh toán</button>
           </div>
         </div>
       </form>

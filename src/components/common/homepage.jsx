@@ -6,7 +6,7 @@ export default function Homepage() {
     const [date, setDate] = useState(new Date());
     const navigate = useNavigate();
 
-    function handleSearch(e) {
+    function handleSearch(e) {  
         e.preventDefault();
         if (!from || !date) return;
         navigate(`/trip?date=${new Date(date).toISOString().split('T')[0]}&from=${from}&type=earliest`);
@@ -33,9 +33,7 @@ export default function Homepage() {
                                 required
                             />
                             <datalist id="citySuggestions">
-                                <option value="Đà Lạt" />
                                 <option value="Sài Gòn" />
-                                <option value="Nha Trang" />
                                 <option value="Hà Nội" />
                                 <option value="Đà Nẵng" />
                             </datalist>
@@ -47,7 +45,6 @@ export default function Homepage() {
                                 <input
                                     required
                                     type='date'
-                                    min={new Date().toISOString().split('T')[0]}
                                     onChange={(e) => setDate(e.target.value)}
                                     className='p-2 border border-primary rounded-md'
                                 />
