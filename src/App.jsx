@@ -35,6 +35,7 @@ import HistoryTicket from "@/pages/client/history";
 import EditProfilePage from "./pages/client/edit-profile";
 import DriveTripPage from "@/pages/admin/drive-trip";
 import DriveTripDetailPage from "./pages/admin/drive-trip-detail";
+import StaffTripPage from '@/pages/admin/staff-trip';
 function App() {
   return (
     <BrowserRouter>
@@ -54,6 +55,9 @@ function App() {
         <Route path="/drive" element={<AdminLayout />}>
           <Route path="trip" element={<DriveTripPage />} />
           <Route path="trip/:id" element={<DriveTripDetailPage />} /> 
+        </Route>
+        <Route path="/staff" element={<AdminLayout />}>
+          <Route path="trip" element={<StaffTripPage />} />
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
