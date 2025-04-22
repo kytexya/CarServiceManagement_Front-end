@@ -1,64 +1,101 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
+import IconMenu from "@/components/icons/IconMenu";
+import { useEffect, useState } from "react";
+import IconClose from "../icons/IconClose";
 
-export default function Homepage() {
-  const [from, setFrom] = useState();
-  const [date, setDate] = useState(new Date());
-  const navigate = useNavigate();
+export default function Header() {
+  const [openMenu, setOpenMenu] = useState(false)
+  const [profile, setProfile] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  function handleSearch(e) {
-    e.preventDefault();
-    if (!from || !date) return;
-    navigate(`/trip?date=${new Date(date).toISOString().split('T')[0]}&from=${from}&type=earliest`);
-  }
+  useEffect(() => {
+    const profile = localStorage.getItem("bus-profile");
+    if (profile) {
+      const parsedProfile = JSON.parse(profile);
+      setProfile(parsedProfile);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('bus-profile');
+    window.location.href = '/login';
+  };
 
   return (
-    <div className="relative min-h-[501px]"
-      style={{
-        backgroundImage: "url(https:////static.vexere.com/production/banners/1209/leaderboard_1440x480-(1).jpg)",
-      }}>
-      <img className='absolute top-0 left-0 w-full h-full z-10' src="https:////static.vexere.com/production/banners/1209/leaderboard_1440x480-(1).jpg">
-      </img>
-      <div className='mx-auto max-w-fit rounded-xl bg-white z-20 relative mt-60'>
-        <form onSubmit={handleSearch}>
-          <div className="flex flex-wrap gap-4 px-4 py-2 h-full justify-between">
-            <div className="flex flex-col gap-1">
-              <p className='text-sm text-gray-500'>Nơi xuất phát</p>
-              <input
-                className='p-2 h-[44px] border border-primary rounded-md w-[330px]'
-                placeholder='Nhập tên chuyến đi hoặc điểm dừng...'
-                list="citySuggestions"
-                onChange={(e) => setFrom(e.target.value)}
-                required
-              />
-              <datalist id="citySuggestions">
-                <option value="Da Lat" />
-                <option value="Sài Gòn" />
-                <option value="HCM" />
-                <option value="Hà Nội" />
-                <option value="Đà Nẵng" />
-              </datalist>
-            </div>
-
-            <div className="flex flex-row gap-3">
-              <div className="flex flex-col gap-1">
-                <p className='text-sm text-gray-500'>Ngày đi</p>
-                <input
-                  required
-                  type='date'
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setDate(e.target.value)}
-                  className='p-2 border border-primary rounded-md'
-                />
-              </div>
-              <div className="flex flex-col gap-2 h-[68px] items-end justify-end">
-                <button type='submit' className='button !bg-yellow !text-white !border-none !h-[46px] !text-xl !w-[144px]'>Tìm kiếm</button>
-              </div>
-            </div>
-
+    <header className="sticky top-0 w-full z-20">
+      <div className="relative flex justify-between items-center min-h-[72px] px-6 bg-primary">
+        <Link className="min-h-72px aspect-video flex items-center" to='/'>
+          <div className="text-4xl py-4 text-white">
+            LOGO
           </div>
-        </form>
+        </Link>
+        <div className="flex items-center flex-wrap justify-end gap-3 max-lg:hidden">
+          <nav className="flex gap-5 text-white font-bold">
+            <Link to="/about" className="hover:text-white">Giới thiệu</Link>
+            <Link to="/my-ticket" className="hover:text-white">Đơn hàng của tôi</Link>
+            <Link to="#" className="hover:text-white">Trở thành đối tác</Link>
+          </nav>
+          {profile ?
+            <div className="text-white">
+              <button onClick={() => setOpen(!open)} className="button hover:!bg-white hover:text-primary !w-[133px]">
+                {profile?.name}
+              </button>
+              {open && (
+                <div className="absolute overflow-hidden right-0 mt-2 w-[180px] bg-white text-black rounded-md shadow z-50">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                    onClick={() => setOpen(false)}
+                  >
+                    Hồ sơ cá nhân
+                  </Link>
+                  <Link
+                    to="/history"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                    onClick={() => setOpen(false)}
+                  >
+                    Lịch sử đặt vé
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              )}
+
+            </div>
+            :
+            <div className="flex gap-3">
+              <Link to={'/login'} className="button hover:!bg-white hover:text-primary !w-[133px]">
+                Đăng nhập
+              </Link>
+              <Link to={'/register'} className="button hover:!bg-white hover:text-primary !w-[133px]">
+                Đăng ký
+              </Link>
+            </div>
+          }
+        </div>
+        <div className="lg:hidden text-white" onClick={() => setOpenMenu(!openMenu)}>
+          {openMenu ? <IconClose /> : <IconMenu />}
+          {openMenu &&
+            <div className="absolute flex flex-col gap-4 top-[72px] left-0 w-full h-screen bg-white py-4 text-white items-center">
+              <nav className="flex flex-col gap-4 text-primary text-center font-bold">
+                <Link to="/about">Giới thiệu</Link>
+                <Link to="/my-ticket">Đơn hàng của tôi</Link>
+                <Link to="#">Trở thành đối tác</Link>
+              </nav>
+              <Link to={'/login'} className="button hover:!bg-white hover:text-primary !w-[133px]">
+                Đăng nhập
+              </Link>
+              <Link to={'/register'} className="button hover:!bg-white hover:text-primary !w-[133px]">
+                Đăng ký
+              </Link>
+            </div>
+          }
+        </div>
       </div>
-    </div>
+    </header>
   )
 }

@@ -13,8 +13,16 @@ export const showInfo = (msg) => {
 };
 
 export const formatToMoney = (amount) => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount);
+  const price = amount * 1000;
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+};
+
+export const formatTime = (timeString) => {
+  const timeOnly = new Intl.DateTimeFormat('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Ho_Chi_Minh',
+  }).format(new Date(timeString));
+  return timeOnly
 };
