@@ -2,7 +2,7 @@ import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError, showSuccess } from "@/utils";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function AddAccountList() {
@@ -11,15 +11,20 @@ export default function AddAccountList() {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const navigate = useNavigate();
+  const yourToken = localStorage.getItem("bus-token");
 
   const onSubmit = (data) => {
     const payload = {
-      phoneNumber: data.phone,
+      ...data,
+      role: parseInt(data.role),
     };
-    fetch(`${baseURL}/customers/register`, {
+    fetch(`${baseURL}/api/User/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${yourToken}`,
+        "ngrok-skip-browser-warning": 69420,
       },
       body: JSON.stringify(payload),
     })
@@ -27,8 +32,9 @@ export default function AddAccountList() {
         const result = await res.json();
         if (res.status === 200) {
           showSuccess("Đăng ký thành công");
+          navigate("/admin/account");
         } else {
-          showError(result.message || "Đăng nhập thất bại");
+          showError(result.message || "Đăng ký thất bại");
         }
       })
       .catch(() => {
@@ -74,9 +80,9 @@ export default function AddAccountList() {
                   type="text"
                   placeholder="Nhập họ và tên..."
                   className={`border px-5 py-2 rounded-lg ${
-                    errors.fullname ? "border-red-500" : "border-gray"
+                    errors.name ? "border-red-500" : "border-gray"
                   }`}
-                  {...register("fullname", {
+                  {...register("name", {
                     required: "Vui lòng nhập họ tên",
                     minLength: {
                       value: 6,
@@ -85,9 +91,7 @@ export default function AddAccountList() {
                   })}
                 />
                 {errors.fullname && (
-                  <p className="text-red-500 text-xs">
-                    {errors.fullname.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.name.message}</p>
                 )}
               </div>
             </div>
@@ -101,7 +105,7 @@ export default function AddAccountList() {
                   className={`border px-5 py-2 w-full rounded-lg ${
                     errors.phone ? "border-red-500" : "border-gray"
                   }`}
-                  {...register("phone", {
+                  {...register("phoneNumber", {
                     required: "Vui lòng nhập số điện thoại",
                     minLength: {
                       value: 10,
@@ -117,8 +121,10 @@ export default function AddAccountList() {
                     },
                   })}
                 />
-                {errors.phone && (
-                  <p className="text-red-500 text-xs">{errors.phone.message}</p>
+                {errors.phoneNumber && (
+                  <p className="text-red-500 text-xs">
+                    {errors.phoneNumber.message}
+                  </p>
                 )}
               </div>
 
@@ -132,8 +138,9 @@ export default function AddAccountList() {
                     required: "Vui'hui chọn phân quyền",
                   })}
                 >
-                  <option value="admin">Nhân viên</option>
-                  <option value="customer">Khách hàng</option>
+                  <option value={1}>Admin</option>
+                  <option value={2}>Nhân viên</option>
+                  <option value={3}>Tài xế</option>
                 </select>
                 {errors.role && (
                   <p className="text-red-500 text-xs">{errors.role.message}</p>

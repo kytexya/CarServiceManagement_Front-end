@@ -1,5 +1,8 @@
+import { showError } from "@/utils";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function LoginAdminPage() {
   const {
@@ -9,7 +12,38 @@ export default function LoginAdminPage() {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("Dữ liệu:", data);
+    fetch(`${baseURL}/api/User/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          localStorage.setItem("bus-token", result.token);
+          localStorage.setItem("bus-profile", JSON.stringify(result.user));
+          if (result.user.role === 1) {
+            window.location.href = "/admin/account";
+            return;
+          }
+          if (result.user.role === 2) {
+            window.location.href = "/staff/account";
+            return;
+          }
+          if (result.user.role === 3) {
+            window.location.href = "/drive/account";
+            return;
+          }
+          window.location.href = "/";
+        } else {
+          showError(result.message || "Đăng nhập thất bại");
+        }
+      })
+      .catch(() => {
+        showError();
+      });
   };
 
   return (
@@ -23,8 +57,9 @@ export default function LoginAdminPage() {
             <input
               type="text"
               placeholder="Nhập tài khoản..."
-              className={`border px-5 py-2 rounded-lg ${errors.username ? "border-red-500" : "border-gray"
-                }`}
+              className={`border px-5 py-2 rounded-lg ${
+                errors.username ? "border-red-500" : "border-gray"
+              }`}
               {...register("username", {
                 required: "Vui lòng nhập tên tài khoản",
                 minLength: {
@@ -43,8 +78,9 @@ export default function LoginAdminPage() {
             <input
               type="password"
               placeholder="Enter your password"
-              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
-                }`}
+              className={`border px-5 py-2 rounded-lg ${
+                errors.password ? "border-red-500" : "border-gray"
+              }`}
               {...register("password", {
                 required: "Vui lòng nhập mật khẩu",
                 minLength: {
@@ -58,7 +94,10 @@ export default function LoginAdminPage() {
             )}
           </div>
 
-          <button type="submit" className="button !w-full primary rounded-lg mb-3">
+          <button
+            type="submit"
+            className="button !w-full primary rounded-lg mb-3"
+          >
             Đăng nhập
           </button>
           <Link to="/register" className="button">
