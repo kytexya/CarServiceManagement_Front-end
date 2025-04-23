@@ -6,7 +6,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light;
+  color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
 
   font-synthesis: none;
@@ -20,8 +20,7 @@
   padding: 0;
   box-sizing: border-box;
 }
-html,
-body {
+html, body {
   height: 100%;
   font-family: sans-serif;
   line-height: 1.5;
@@ -29,14 +28,14 @@ body {
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   margin: 0;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
   background: white;
-  color: #1c1c1c;
+  color: #1C1C1C;
 }
 
 h1 {
@@ -53,32 +52,32 @@ h1 {
   height: 36px;
   border-radius: 6px;
   color: rgb(13, 46, 89);
-  border: 1px solid #0077b6;
+  border: 1px solid #0077B6;
   background-color: white;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-.button:active {
+.button:active{
   transform: translateY(2px);
 }
 
-.button:hover {
-  background-color: #0077b6;
+.button:hover{
+  background-color: #0077B6;
   color: white;
 }
 
-.primary {
-  background-color: #0077b6;
-  color: white;
+.primary{
+  background-color: #0077B6;
+  color: white
 }
 
-a:hover {
+a:hover{
   color: #1890ff;
 }
 
-.button-ghost {
+.button-ghost{
   display: flex;
   gap: 4px;
   justify-content: center;
@@ -93,16 +92,16 @@ a:hover {
   font-weight: 600;
   cursor: pointer;
 }
-.button-ghost:hover {
+.button-ghost:hover{
   border: 1px solid rgb(224, 224, 224);
   color: rgb(13, 46, 89);
 }
 
-.status-box {
-  border-radius: 12px;
-  background-color: #ccffbd;
-  color: #1c1c1c;
-  padding: 8px 16px;
+.status-box{
+  border-radius: 4px;
+  padding: 4px 16px;
+  background-color: #CCFFBD;
+  color: #1C1C1C;
   font-size: 14px;
   font-weight: 600;
   min-width: 144px;
