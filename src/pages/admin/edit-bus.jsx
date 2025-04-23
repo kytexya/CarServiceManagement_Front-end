@@ -7,82 +7,60 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const columns = [
-    {
-        header: 'Id',
-        field: 'seatId',
-    },
-    {
-        header: 'Trạng thái',
-        field: 'isBooked',
-        className: 'status-box'
-    },
+  {
+    header: 'Id',
+    field: 'seatId',
+  },
+  {
+    header: 'Trạng thái',
+    field: 'isBooked',
+    className: 'status-box'
+  },
 ]
 
 export default function EditBusPage() {
-    const { id } = useParams();
-    const [detail, setDetail] = useState();
-    const [dataSeats, setDataSeats] = useState([]);
-    const yourToken = localStorage.getItem('bus-token');
-    const navigate = useNavigate();
-    const {
-        setValue,
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm();
+  const { id } = useParams();
+  const [detail, setDetail] = useState();
+  const [dataSeats, setDataSeats] = useState([]);
+  const yourToken = localStorage.getItem('bus-token');
+  const navigate = useNavigate();
+  const {
+    setValue,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-    useEffect(() => {
-        fetch(`${baseURL}/api/Buses/${id}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": 69420,
-                "Authorization": `Bearer ${yourToken}`,
-            },
-        })
-            .then(async (res) => {
-                const result = await res.json();
-                if (res.status === 200) {
-                    setDetail(result);
-                    setDataSeats(result.seats.map((item) => ({ ...item, isBooked: item.isBooked ? 'Đã đặt' : 'Chưa đặt' })));
-                    setValue('busId', result.busId);
-                    setValue('seatCount', result.seatCount);
-                    setValue('busType', result.busType);
-                } else {
-                    showError();
-                }
-            })
-            .catch(() => {
-                showError();
-            });
-    }, [])
+  useEffect(() => {
+    fetch(`${baseURL}/api/Buses/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": 69420,
+        "Authorization": `Bearer ${yourToken}`,
+      },
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        if (res.status === 200) {
+          setDetail(result);
+          setDataSeats(result.seats.map((item) => ({ ...item, isBooked: item.isBooked ? 'Đã đặt' : 'Chưa đặt' })));
+          setValue('busId', result.busId);
+          setValue('seatCount', result.seatCount);
+          setValue('busType', result.busType);
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }, [])
 
-    const onSubmit = (data) => {
-        const payload = {
-            ...data,
-            seatCount: parseInt(data.seatCount),
-        };
-        fetch(`${baseURL}/api/buses/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${yourToken}`,
-                "ngrok-skip-browser-warning": 69420,
-            },
-            body: JSON.stringify(payload),
-        })
-            .then(async (res) => {
-                // const result = await res.json();
-                if (res.status === 200) {
-                    showSuccess();
-                    navigate('/admin/bus');
-                } else {
-                    showError();
-                }
-            })
-            .catch(() => {
-                showError();
-            });
+  const onSubmit = (data) => {
+    const payload = {
+      ...data,
+      seatCount: parseInt(data.seatCount),
     };
     return (
         <div className='flex flex-row w-full'>
