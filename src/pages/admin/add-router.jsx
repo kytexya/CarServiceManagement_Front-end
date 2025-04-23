@@ -20,7 +20,7 @@ export default function AddRouterPage() {
       distance: parseInt(data.distance),
       estimatedDuration: parseInt(data.estimatedDuration),
     };
-    fetch(`${baseURL}/api/Router`, {
+    fetch(`${baseURL}/api/Route`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +31,7 @@ export default function AddRouterPage() {
     })
       .then(async (res) => {
         // const result = await res.json();
-        if (res.status === 200) {
+        if (res.status === 201) {
           showSuccess();
           navigate('/admin/router');
         } else {

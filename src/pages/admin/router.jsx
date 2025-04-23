@@ -1,6 +1,6 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import CustomTable from '@/components/common/table';
-import { showError } from '@/utils';
+import { showError, showSuccess } from '@/utils';
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -86,7 +86,7 @@ export default function RouterListPage() {
               <button
                 onClick={() => {
                   if (confirm(`Xoá ${row.routeName}?`)) {
-                    fetch(`${baseURL}/api/Router/${row.routeId}`, {
+                    fetch(`${baseURL}/api/Route/${row.routeId}`, {
                       method: "DELETE",
                       headers: {
                         "Content-Type": "application/json",
@@ -97,6 +97,7 @@ export default function RouterListPage() {
                       .then(async (res) => {
                         const result = await res.json();
                         if (res.status === 200) {
+                          showSuccess();
                           callApi();
                         } else {
                           showError();

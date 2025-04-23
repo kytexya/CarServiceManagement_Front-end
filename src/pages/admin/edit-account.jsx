@@ -60,12 +60,12 @@ export default function EditAccountList() {
       body: JSON.stringify(payload),
     })
       .then(async (res) => {
-        const result = await res.json();
         if (res.status === 200) {
           showSuccess("Lưu dữ liệu thành công");
           navigate("/admin/account");
         } else {
-          showError(result.message);
+          const result = await res.json();
+          showError(result?.message);
         }
       })
       .catch(() => {
