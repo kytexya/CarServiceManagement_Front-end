@@ -26,7 +26,6 @@ const dataTemp = [
   { Id: 3, BusType: 'Xe giường nằm', SeatCount: 42, IsDelete: false },
   { Id: 4, BusType: 'Xe ghế ngồi', SeatCount: 32, IsDelete: false },
 ]
-
 export default function BusListPage() {
   const [dataList, setDataList] = useState([]);
   const navigate = useNavigate();
@@ -58,6 +57,7 @@ export default function BusListPage() {
         showError();
       });
   }
+
 
   return (
     <div className='flex flex-row w-full'>
@@ -93,6 +93,42 @@ export default function BusListPage() {
               >
                 Sửa
               </button>
+
+    return (
+        <div className='flex flex-row w-full'>
+            <SidebarAdmin />
+            <div className='flex flex-col w-full'>
+                <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
+                    <h1 className='text-2xl font-bold'>Danh sách xe</h1>
+                </div>
+                <div className="flex justify-between items-center px-4 h-[64px]">
+                    <input
+                        type="search"
+                        name="keyword"
+                        placeholder="Nhập từ khoá tìm kiếm..."
+                        className="w-[300px] border border-slate-600 rounded-lg py-2 px-4"
+                    />
+                    <Link to='/admin/bus/add'>
+                        <button className="inline-flex items-center justify-center px-4 h-10 font-sans font-semibold tracking-wide text-white bg-success rounded-lg">
+                            Thêm xe mới
+                        </button>
+                    </Link>
+                </div>
+                <CustomTable
+                    columns={columns}
+                    data={dataList}
+                    renderActions={(row) => (
+                        <div className="flex gap-2 justify-center">
+                            <button
+                                onClick={() => navigate(`/admin/bus/edit/${row.busId}`)}
+                                className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                                Sửa
+                            </button>
+                        </div>
+                    )}
+                />
+
             </div>
           )}
         />
