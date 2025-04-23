@@ -1,54 +1,55 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import CustomTable from "@/components/common/table";
-import { formatToMoney } from "@/utils";
+import { formatDateTime, formatToMoney, showError } from '@/utils';
+import axios from 'axios';
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+
+
+
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const columns = [
-  { header: "Tên tuyến đường", field: "RouterName" },
-  { header: "Tên khách hàng", field: "CustomerName" },
-  { header: "Mã vé", field: "TicketId" },
-  { header: "Mã ghế", field: "SeatId" },
-  { header: "Giá vé", field: "Price" },
-  { header: "Giờ khởi tạo", field: "CreatedAt" },
-  { header: "Trạng thái", field: "Status" },
-];
-
-const dataTemp = [
-  {
-    Id: 1,
-    RouterName: "Hà Nội - Đà Nẵng",
-    CustomerName: "Hoàng Minh",
-    TicketId: "Tài xế Minh",
-    SeatId: "S101",
-    Price: 300000,
-    CreatedAt: "10:00",
-    Status: 1,
-  },
-  {
-    Id: 2,
-    RouterName: "Đà Nẵng - Hà Nội",
-    CustomerName: "Hoàng Nam",
-    SeatId: "S102",
-    TicketId: "Tài xế Hoà",
-    Price: 120000,
-    CreatedAt: "12:00",
-    Status: 2,
-  },
+  { header: 'Tên tuyến đường', field: 'routerName' },
+  { header: 'Tên khách hàng', field: 'customerName' },
+  { header: 'Mã Ghế', field: 'seatId' },
+  { header: 'Giá vé', field: 'price' },
+  { header: 'Khởi tạo', field: 'createdAt' },
+  { header: 'Trạng thái', field: 'status', className: 'status-box' },
 ];
 
 export default function TicketListPage() {
   const [dataList, setDataList] = useState([]);
-  const navigate = useNavigate();
+  const yourToken = localStorage.getItem('bus-token');
 
   useEffect(() => {
-    const convertedData = dataTemp.map((item) => ({
-      ...item,
-      Price: formatToMoney(item.Price),
-      Status: item.Status === 2 ? "Đã lên xe" : "Chưa lên xe",
-    }));
-    setDataList(convertedData);
+    callApi();
   }, []);
+  function callApi() {
+    axios.get(`${baseURL}/api/Ticket`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`
+      }
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          const result = res.data;
+          setDataList(result.map((item) => ({
+            ...item,
+            createdAt: formatDateTime(item.createdAt),
+            price: formatToMoney(item.price),
+          })));
+        } else {
+          showError();
+        }
+      })
+      .catch((error) => {
+        console.error('Axios error:', error);
+        showError();
+      });
+  }
 
   return (
     <div className="flex flex-row w-full">
@@ -73,7 +74,7 @@ export default function TicketListPage() {
           renderActions={(row) => (
             <div className="flex gap-2 justify-center">
               <button
-                onClick={() => alert(row.Id)}
+                onClick={() => alert(row.ticketId)}
                 className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Xác nhận lên xe
