@@ -3,74 +3,78 @@ import SidebarStaff from "@/components/common/sidebar-staff";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 moment.locale("vi-VN");
 const localizer = momentLocalizer(moment);
 
 const convertToDate = (dateStr) => {
-  const [day, month, year] = dateStr.split("/");
+  const [year, month, day] = dateStr.split("-");
   return new Date(year, month - 1, day);
 };
 
-const events = [
-  {
-    id: 1,
-    title: "Morning Meeting",
-    start: "15/04/2025",
-    end: "15/04/2025",
-  },
-  {
-    id: 2,
-    title: "Project Deadline",
-    start: "16/04/2025",
-    end: "16/04/2025",
-  },
-  {
-    id: 3,
-    title: "Team Lunch",
-    start: "17/04/2025",
-    end: "17/04/2025",
-  },
-  {
-    id: 4,
-    title: "Conference Call",
-    start: "18/04/2025",
-    end: "18/04/2025",
-  },
-  {
-    id: 5,
-    title: "Weekend Event",
-    start: "19/04/2025",
-    end: "19/04/2025",
-  },
-  {
-    id: 6,
-    title: "Weekend Event",
-    start: "20/04/2025",
-    end: "20/04/2025",
-  },
-];
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function StaffCalendarPage() {
   const [data, setData] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const navigate = useNavigate();
+
+  const fetchData = (date) => {
+    const yourToken = localStorage.getItem("bus-token");
+    axios
+      .get(`${baseURL}/api/Trip/calendar?month=${date}`, {
+        headers: {
+          Authorization: `Bearer ${yourToken}`,
+          "ngrok-skip-browser-warning": 69420,
+        },
+      })
+      .then((res) => res.data)
+      .then((data) => {
+        const formattedData = data.map((event) => ({
+          ...event,
+          start: convertToDate(event.start),
+          end: convertToDate(event.end),
+        }));
+        setData(formattedData);
+      })
+      .catch((err) => {
+        console.log(err);
+        setData([]);
+      });
+  };
 
   useEffect(() => {
-    if (!events) return;
-
-    const formattedData = events.map((event) => ({
-      ...event,
-      start: convertToDate(event.start),
-      end: convertToDate(event.end),
-    }));
-
-    setData(formattedData);
+    const now = new Date();
+    const formattedDate = `${now.getMonth() + 1}/${now.getFullYear()}`;
+    fetchData(formattedDate);
   }, []);
 
   const handleDateNavigate = (date) => {
     setCurrentDate(date);
+    const formattedDate = `${date.getMonth() + 1}/${date.getFullYear()}`;
+    fetchData(formattedDate);
   };
+  const eventPropGetter = (event) => {
+    var style = {
+      borderRadius: "8px",
+      opacity: 0.8,
+      color: "black",
+      border: "0px",
+      display: "block",
+    };
 
+    if (event?.hasDriver) {
+      style.backgroundColor = "#36c956";
+    } else {
+      style.backgroundColor = "#c96736";
+    }
+
+    return {
+      style: style,
+    };
+  };
   return (
     <div className="flex flex-col h-full w-full">
       <DriveHeader />
@@ -88,8 +92,9 @@ export default function StaffCalendarPage() {
             date={currentDate}
             onNavigate={handleDateNavigate}
             onSelectEvent={(event) => {
-              console.log("Selected event:", event);
+              navigate(`/staff/trip/${event.id}`);
             }}
+            eventPropGetter={eventPropGetter}
           />
         </div>
       </div>
