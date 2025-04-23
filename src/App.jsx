@@ -1,4 +1,5 @@
 import "./index.css";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import Layout from "@/components/common/layout";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LoginPage from "@/pages/client/login";
@@ -35,7 +36,8 @@ import HistoryTicket from "@/pages/client/history";
 import EditProfilePage from "./pages/client/edit-profile";
 import DriveTripPage from "@/pages/admin/drive-trip";
 import DriveTripDetailPage from "./pages/admin/drive-trip-detail";
-import StaffTripPage from '@/pages/admin/staff-trip';
+import StaffTripPage from "@/pages/staff/staff-trip";
+import StaffCalendarPage from "./pages/staff/staff-trip-calendar";
 function App() {
   return (
     <BrowserRouter>
@@ -54,10 +56,11 @@ function App() {
         </Route>
         <Route path="/drive" element={<AdminLayout />}>
           <Route path="trip" element={<DriveTripPage />} />
-          <Route path="trip/:id" element={<DriveTripDetailPage />} /> 
+          <Route path="trip/:id" element={<DriveTripDetailPage />} />
         </Route>
         <Route path="/staff" element={<AdminLayout />}>
           <Route path="trip" element={<StaffTripPage />} />
+          <Route path="trip-calendar" element={<StaffCalendarPage />} />
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
