@@ -1,14 +1,7 @@
-<<<<<<< HEAD
-import { formatToMoney, showError } from "@/utils";
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom";
-=======
 import { formatToMoney, showError } from '@/utils';
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
->>>>>>> fd857470d9b4ae59521bdad5f2fda5de3d61fb44
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const dataTrip = {
@@ -29,12 +22,8 @@ export default function OrderPage() {
   const trip = new URLSearchParams(location.search).get("trip");
   const [profile, setProfile] = useState();
 
-<<<<<<< HEAD
-  const [tripDetail, setTripDetail] = useState(dataTrip);
-=======
 
   const [tripDetail, setTripDetail] = useState(dataTrip)
->>>>>>> fd857470d9b4ae59521bdad5f2fda5de3d61fb44
   const {
     register,
     handleSubmit,
@@ -78,20 +67,10 @@ export default function OrderPage() {
 
   return (
     <div className="px-8 md:px-10 w-full max-w-[1200px] mx-auto py-10 my-20">
-<<<<<<< HEAD
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex max-md:flex-col w-full gap-6"
-      >
-        <div className="flex flex-col w-2/3 gap-2 border shadow-md rounded-md p-4">
-          <p className="text-xl font-bold ">Thông tin liên hệ</p>
-          <div className="flex flex-col gap-2">
-=======
       <form onSubmit={handleSubmit(onSubmit)} className="flex max-md:flex-col w-full gap-6">
         <div className="flex flex-col md:w-2/3 gap-2 border shadow-md rounded-md p-4">
           <p className='text-xl font-bold '>Thông tin liên hệ</p>
           <div className='flex flex-col gap-2'>
->>>>>>> fd857470d9b4ae59521bdad5f2fda5de3d61fb44
             <div className="flex flex-col gap-1">
               <label className="text-sm">Tên người đi</label>
               <input
@@ -173,13 +152,8 @@ export default function OrderPage() {
               <p className="text-lg">{formatToMoney(tripDetail?.Price ?? 0)}</p>
             </div>
             <div className="flex flex-row justify-between">
-<<<<<<< HEAD
-              <p className="font-bold text-lg">Số lượng ghế:</p>
-              <p className="text-lg">{seatsList?.length ?? 1}</p>
-=======
               <p className='font-semibold text-lg'>Số lượng ghế:</p>
               <p className='text-lg'>{seatsList?.length ?? 1}</p>
->>>>>>> fd857470d9b4ae59521bdad5f2fda5de3d61fb44
             </div>
             <hr />
             <div className="flex flex-row justify-between">
