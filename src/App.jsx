@@ -39,6 +39,9 @@ import DriveTripDetailPage from '@/pages/admin/drive-trip-detail';
 import StaffTripPage from '@/pages/admin/staff-trip';
 import StaffTicketPage from './pages/staff/staff-ticket';
 import StaffCalendarPage from './pages/staff/staff-trip-calendar';
+import StaffAccountListPage from './pages/staff/account';
+import StaffAddAccountList from './pages/staff/add-account';
+import StaffEditAccountList from './pages/staff/edit-account';
 
 function App() {
   return (
@@ -65,6 +68,9 @@ function App() {
           <Route path="trip" element={<StaffTripPage />} />
           <Route path="ticket" element={<StaffTicketPage />} />
           <Route path="trip-calendar" element={<StaffCalendarPage />} />
+          <Route path="account" element={<StaffAccountListPage />} />
+          <Route path="account/add" element={<StaffAddAccountList />} />
+          <Route path="account/edit/:id" element={<StaffEditAccountList />} />
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
