@@ -13,12 +13,14 @@ export default function EditRouterPage() {
 
   const {
     register,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
   useEffect(() => {
-    fetch(`${baseURL}/api/Router/${id}`, {
+    if (id){
+    fetch(`${baseURL}/api/Route/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -27,8 +29,8 @@ export default function EditRouterPage() {
       },
     })
       .then(async (res) => {
-        const result = await res.json();
         if (res.status === 200) {
+          const result = await res.json();
           setData(result);
           setValue('routeId', result.routeId);
           setValue('routeName', result.routeName);
@@ -38,10 +40,8 @@ export default function EditRouterPage() {
           showError();
         }
       })
-      .catch(() => {
-        showError();
-      });
-  }, [])
+    }
+  }, [id])
 
   const onSubmit = (data) => {
     const payload = {
@@ -49,7 +49,7 @@ export default function EditRouterPage() {
       distance: parseInt(data.distance),
       estimatedDuration: parseInt(data.estimatedDuration),
     };
-    fetch(`${baseURL}/api/Router/${id}`, {
+    fetch(`${baseURL}/api/Route?id=${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

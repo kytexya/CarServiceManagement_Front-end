@@ -1,6 +1,5 @@
 import { formatToMoney, showError } from '@/utils';
 import React, { useEffect, useState } from 'react'
-import React, { useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -23,6 +22,7 @@ export default function OrderPage() {
   const trip = new URLSearchParams(location.search).get('trip');
   const [profile, setProfile] = useState();
 
+
   const [tripDetail, setTripDetail] = useState(dataTrip)
   const {
     register,
@@ -30,6 +30,7 @@ export default function OrderPage() {
     setValue,
     formState: { errors },
   } = useForm();
+
 
   useEffect(() => {
     const profile = localStorage.getItem("bus-profile");
@@ -67,7 +68,7 @@ export default function OrderPage() {
   return (
     <div className="px-8 md:px-10 w-full max-w-[1200px] mx-auto py-10 my-20">
       <form onSubmit={handleSubmit(onSubmit)} className="flex max-md:flex-col w-full gap-6">
-        <div className="flex flex-col w-2/3 gap-2 border shadow-md rounded-md p-4">
+        <div className="flex flex-col md:w-2/3 gap-2 border shadow-md rounded-md p-4">
           <p className='text-xl font-bold '>Thông tin liên hệ</p>
           <div className='flex flex-col gap-2'>
             <div className="flex flex-col gap-1">
@@ -145,7 +146,7 @@ export default function OrderPage() {
               <p className='text-lg'>{formatToMoney(tripDetail?.Price ?? 0)}</p>
             </div>
             <div className="flex flex-row justify-between">
-              <p className='font-bold text-lg'>Số lượng ghế:</p>
+              <p className='font-semibold text-lg'>Số lượng ghế:</p>
               <p className='text-lg'>{seatsList?.length ?? 1}</p>
             </div>
             <hr />

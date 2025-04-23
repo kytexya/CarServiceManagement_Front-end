@@ -1,7 +1,7 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import TabsSelector from "@/components/common/tab";
 import CustomTable from "@/components/common/table";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
