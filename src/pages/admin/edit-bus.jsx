@@ -4,21 +4,7 @@ import { showError, showSuccess } from '@/utils';
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
-
-const detailData = {
-    busId: 'S27287222',
-    busType: 'Xe khách lớn',
-    totalSeats: 20,
-    bookedSeats: 10,
-    seats: [
-        {
-            seatId: "S1022",
-            isBooked: true,
-        }
-    ]
-}
 
 const columns = [
     {
@@ -98,7 +84,6 @@ export default function EditBusPage() {
                 showError();
             });
     };
-
     return (
         <div className='flex flex-row w-full'>
             <SidebarAdmin />
@@ -124,8 +109,8 @@ export default function EditBusPage() {
                                         },
                                     })}
                                 />
-                                {errors.BusType && (
-                                    <p className="text-red-500 text-xs">{errors.BusType.message}</p>
+                                {errors.busType && (
+                                    <p className="text-red-500 text-xs">{errors.busType.message}</p>
                                 )}
                             </div>
                             <div className="flex flex-col gap-2 mb-4 w-full">
@@ -137,7 +122,7 @@ export default function EditBusPage() {
                                     disabled
                                     className={`border px-5 py-2 rounded-lg ${errors.seatCount ? "border-red-500" : "border-gray"
                                         }`}
-                                    {...register("SeatCount", {
+                                    {...register("seatCount", {
                                         required: "Vui lòng nhập dữ liệu",
                                         pattern: {
                                             value: /^[0-9]+$/,

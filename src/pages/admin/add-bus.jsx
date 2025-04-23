@@ -11,7 +11,8 @@ export default function AddBusPage() {
         handleSubmit,
         formState: { errors },
     } = useForm();
-
+    const yourToken = localStorage.getItem('bus-token');
+    const navigate = useNavigate();
     const onSubmit = (data) => {
         fetch(`${baseURL}/api/buses`, {
             method: "POST",
@@ -35,7 +36,6 @@ export default function AddBusPage() {
                 showError();
             });
     };
-
     return (
         <div className='flex flex-row w-full'>
             <SidebarAdmin />
