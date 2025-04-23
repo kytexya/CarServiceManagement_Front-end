@@ -1,21 +1,22 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import CustomTable from '@/components/common/table';
+import { showError } from '@/utils';
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 const columns = [
     {
+        header: 'Biển số xe',
+        field: 'busId',
+    },
+    {
         header: 'Loại xe',
-        field: 'BusType',
+        field: 'busType',
     },
     {
         header: 'Số ghế',
-        field: 'SeatCount'
-    },
-    {
-        header: 'Trạng thái',
-        field: 'IsDelete',
-        className: 'status-box'
+        field: 'seatCount'
     },
 ]
 
@@ -30,13 +31,33 @@ export default function BusListPage() {
     const [dataList, setDataList] = useState([]);
     const navigate = useNavigate();
 
+    const yourToken = localStorage.getItem('bus-token');
+
     useEffect(() => {
-        const convertedData = dataTemp.map((item) => ({
-            ...item,
-            IsDelete: item.IsDelete ? 'Không hoạt động' : 'Đang hoạt động',
-        }));
-        setDataList(convertedData);
+        callApi();
     }, [])
+
+    function callApi() {
+        fetch(`${baseURL}/api/Buses`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": 69420,
+                "Authorization": `Bearer ${yourToken}`,
+            },
+        })
+            .then(async (res) => {
+                const result = await res.json();
+                if (res.status === 200) {
+                    setDataList(result);
+                } else {
+                    showError();
+                }
+            })
+            .catch(() => {
+                showError();
+            });
+    }
 
     return (
         <div className='flex flex-row w-full'>
@@ -67,7 +88,7 @@ export default function BusListPage() {
                     renderActions={(row) => (
                         <div className="flex gap-2 justify-center">
                             <button
-                                onClick={() => navigate(`/admin/bus/edit/${row.Id}`)}
+                                onClick={() => navigate(`/admin/bus/edit/${row.busId}`)}
                                 className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                             >
                                 Sửa

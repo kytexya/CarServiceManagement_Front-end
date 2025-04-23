@@ -3,6 +3,7 @@ import CustomTable from '@/components/common/table';
 import { showError, showSuccess } from '@/utils';
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -26,42 +27,69 @@ const columns = [
     },
     {
         header: 'Trạng thái',
-        field: 'isBooked'
+        field: 'isBooked',
+        className: 'status-box'
     },
 ]
 
 export default function EditBusPage() {
+    const { id } = useParams();
     const [detail, setDetail] = useState();
+    const [dataSeats, setDataSeats] = useState([]);
+    const yourToken = localStorage.getItem('bus-token');
+    const navigate = useNavigate();
     const {
+        setValue,
         register,
         handleSubmit,
         formState: { errors },
     } = useForm();
 
     useEffect(() => {
-        if (!detailData) return;
-        const data = {
-            busId: detailData.busId,
-            busType: detailData.busType,
-            totalSeats: detailData.totalSeats,
-            bookedSeats: detailData.bookedSeats,
-            seats: detailData.seats.map(seat => ({ ...seat, isBooked: seat.isBooked ? 'Đã đặt' : 'Chưa đặt vé' }))
-        }
-        setDetail(data);
-    }, [detailData])
-
-    const onSubmit = (data) => {
-        fetch(`${baseURL}/bus`, {
-            method: "POST",
+        fetch(`${baseURL}/api/Buses/${id}`, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": 69420,
+                "Authorization": `Bearer ${yourToken}`,
             },
-            body: JSON.stringify(data),
+        })
+            .then(async (res) => {
+                const result = await res.json();
+                if (res.status === 200) {
+                    setDetail(result);
+                    setDataSeats(result.seats.map((item) => ({ ...item, isBooked: item.isBooked ? 'Đã đặt' : 'Chưa đặt' })));
+                    setValue('busId', result.busId);
+                    setValue('seatCount', result.seatCount);
+                    setValue('busType', result.busType);
+                } else {
+                    showError();
+                }
+            })
+            .catch(() => {
+                showError();
+            });
+    }, [])
+
+    const onSubmit = (data) => {
+        const payload = {
+            ...data,
+            seatCount: parseInt(data.seatCount),
+        };
+        fetch(`${baseURL}/api/buses/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${yourToken}`,
+                "ngrok-skip-browser-warning": 69420,
+            },
+            body: JSON.stringify(payload),
         })
             .then(async (res) => {
                 // const result = await res.json();
                 if (res.status === 200) {
                     showSuccess();
+                    navigate('/admin/bus');
                 } else {
                     showError();
                 }
@@ -86,9 +114,9 @@ export default function EditBusPage() {
                                 <input
                                     type="text"
                                     defaultValue={detail?.busType}
-                                    className={`border px-5 py-2 rounded-lg ${errors.BusType ? "border-red-500" : "border-gray"
+                                    className={`border px-5 py-2 rounded-lg ${errors.busType ? "border-red-500" : "border-gray"
                                         }`}
-                                    {...register("BusType", {
+                                    {...register("busType", {
                                         required: "Vui lòng nhập dữ liệu",
                                         minLength: {
                                             value: 6,
@@ -105,9 +133,9 @@ export default function EditBusPage() {
                                 <input
                                     type="number"
                                     inputMode="numeric"
-                                    defaultValue={detail?.totalSeats}
+                                    defaultValue={detail?.seatCount}
                                     disabled
-                                    className={`border px-5 py-2 rounded-lg ${errors.SeatCount ? "border-red-500" : "border-gray"
+                                    className={`border px-5 py-2 rounded-lg ${errors.seatCount ? "border-red-500" : "border-gray"
                                         }`}
                                     {...register("SeatCount", {
                                         required: "Vui lòng nhập dữ liệu",
@@ -117,8 +145,8 @@ export default function EditBusPage() {
                                         },
                                     })}
                                 />
-                                {errors.SeatCount && (
-                                    <p className="text-red-500 text-xs">{errors.SeatCount.message}</p>
+                                {errors.seatCount && (
+                                    <p className="text-red-500 text-xs">{errors.seatCount.message}</p>
                                 )}
                             </div>
                         </div>
@@ -126,10 +154,10 @@ export default function EditBusPage() {
                             <h2 className="text-sm mb-2">Danh sách ghế</h2>
                             <CustomTable
                                 columns={columns}
-                                data={detail?.seats ?? []}
+                                data={dataSeats ?? []}
                             />
                         </div>
-                        <div className="flex gap-4 justify-end">
+                        <div className="flex gap-4 justify-end mt-4">
                             <Link
                                 to="/admin/bus"
                                 className="button float-right !w-[145px]"

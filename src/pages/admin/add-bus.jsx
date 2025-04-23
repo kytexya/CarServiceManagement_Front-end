@@ -2,7 +2,7 @@ import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError, showSuccess } from '@/utils';
 import React from 'react'
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function AddBusPage() {
@@ -13,10 +13,12 @@ export default function AddBusPage() {
     } = useForm();
 
     const onSubmit = (data) => {
-        fetch(`${baseURL}/bus`, {
+        fetch(`${baseURL}/api/buses`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${yourToken}`,
+                "ngrok-skip-browser-warning": 69420,
             },
             body: JSON.stringify(data),
         })
@@ -24,6 +26,7 @@ export default function AddBusPage() {
                 // const result = await res.json();
                 if (res.status === 200) {
                     showSuccess();
+                    navigate('/admin/bus');
                 } else {
                     showError();
                 }
