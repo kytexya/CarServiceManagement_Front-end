@@ -26,3 +26,20 @@ export const formatTime = (timeString) => {
   }).format(new Date(timeString));
   return timeOnly
 };
+export const formatDateTime = (timeString) => {
+  const date = new Date(timeString);
+  if (isNaN(date.getTime())) {
+    console.log("❌ Ngày không hợp lệ");
+  } else {
+    const formatter = new Intl.DateTimeFormat('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    return formatter.format(date);
+  }
+}
