@@ -36,7 +36,7 @@ import HistoryTicket from '@/pages/client/history';
 import EditProfilePage from './pages/client/edit-profile';
 import DriveTripPage from '@/pages/admin/drive-trip';
 import DriveTripDetailPage from '@/pages/admin/drive-trip-detail';
-import StaffTripPage from '@/pages/admin/staff-trip';
+import StaffTripPage from '@/pages/staff/staff-trip';
 import StaffTicketPage from './pages/staff/staff-ticket';
 import StaffCalendarPage from './pages/staff/staff-trip-calendar';
 
