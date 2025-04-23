@@ -43,6 +43,7 @@ import StaffAccountListPage from "./pages/staff/account";
 import StaffAddAccountList from "./pages/staff/add-account";
 import StaffEditAccountList from "./pages/staff/edit-account";
 import StaffTransactionListPage from "./pages/staff/transaction";
+import StaffEditTripPage from './pages/staff/edit-trip';
 function App() {
   return (
     <BrowserRouter>
@@ -66,6 +67,7 @@ function App() {
 
         <Route path="/staff" element={<AdminLayout />}>
           <Route path="trip" element={<StaffTripPage />} />
+          <Route path="trip/:id" element={<StaffEditTripPage />} />
           <Route path="ticket" element={<StaffTicketPage />} />
           <Route path="trip-calendar" element={<StaffCalendarPage />} />
           <Route path="account" element={<StaffAccountListPage />} />
