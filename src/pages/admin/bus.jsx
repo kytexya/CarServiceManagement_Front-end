@@ -26,7 +26,6 @@ const dataTemp = [
     { Id: 3, BusType: 'Xe giường nằm', SeatCount: 42, IsDelete: false },
     { Id: 4, BusType: 'Xe ghế ngồi', SeatCount: 32, IsDelete: false },
 ]
-
 export default function BusListPage() {
     const [dataList, setDataList] = useState([]);
     const navigate = useNavigate();
@@ -63,11 +62,9 @@ export default function BusListPage() {
         <div className='flex flex-row w-full'>
             <SidebarAdmin />
             <div className='flex flex-col w-full'>
-
                 <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-                    <h1 className='text-2xl font-bold'>  xe</h1>
+                    <h1 className='text-2xl font-bold'>Danh sách xe</h1>
                 </div>
-
                 <div className="flex justify-between items-center px-4 h-[64px]">
                     <input
                         type="search"
@@ -81,7 +78,6 @@ export default function BusListPage() {
                         </button>
                     </Link>
                 </div>
-
                 <CustomTable
                     columns={columns}
                     data={dataList}
@@ -92,12 +88,6 @@ export default function BusListPage() {
                                 className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                             >
                                 Sửa
-                            </button>
-                            <button
-                                onClick={() => alert(`Xoá ${row.Id}`)}
-                                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                            >
-                                Xoá
                             </button>
                         </div>
                     )}
