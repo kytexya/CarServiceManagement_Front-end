@@ -1,43 +1,45 @@
-import "./index.css";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import Layout from "@/components/common/layout";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import LoginPage from "@/pages/client/login";
-import RegisterPage from "@/pages/client/register";
-import Homepage from "@/components/common/homepage";
-import LoginAdminPage from "@/pages/client/login-admin";
-import { ToastContainer } from "react-toastify";
-import AccountListPage from "@/pages/admin/account";
-import AddAccountList from "@/pages/admin/add-account";
-import EditAccountList from "@/pages/admin/edit-account";
-import ProfilePage from "@/pages/client/profile";
-import AdminLayout from "@/components/common/admin-layout";
-import LocationListPage from "@/pages/admin/location";
-import AddLocationPage from "@/pages/admin/add-location";
-import EditLocationPage from "@/pages/admin/edit-location";
-import RouterListPage from "@/pages/admin/router";
-import AddRouterPage from "./pages/admin/add-router";
-import EditRouterPage from "./pages/admin/edit-router";
-import ReportPage from "@/pages/admin/report";
-import TransactionListPage from "@/pages/admin/transaction";
-import TicketListPage from "@/pages/admin/ticket";
-import TripListPage from "@/pages/admin/trip";
-import AddTripPage from "@/pages/admin/add-trip";
-import EditTripPage from "@/pages/admin/edit-trip";
-import BusListPage from "@/pages/admin/bus";
-import AddBusPage from "@/pages/admin/add-bus";
-import EditBusPage from "@/pages/admin/edit-bus";
-import PromotionListPage from "@/pages/admin/promotion";
-import AddPromotionPage from "@/pages/admin/add-promotion";
-import EditPromotionPage from "./pages/admin/edit-promotion";
-import SearchTripPage from "@/pages/client/search-trip";
-import OrderPage from "@/pages/client/order";
-import HistoryTicket from "@/pages/client/history";
-import EditProfilePage from "./pages/client/edit-profile";
-import DriveTripPage from "@/pages/admin/drive-trip";
-import DriveTripDetailPage from "./pages/admin/drive-trip-detail";
-import StaffTripPage from "@/pages/staff/staff-trip";
-import StaffCalendarPage from "./pages/staff/staff-trip-calendar";
+import './index.css';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import Layout from '@/components/common/layout';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import LoginPage from '@/pages/client/login';
+import RegisterPage from '@/pages/client/register';
+import Homepage from '@/components/common/homepage';
+import LoginAdminPage from '@/pages/client/login-admin';
+import ProfilePage from '@/pages/client/profile';
+import { ToastContainer } from 'react-toastify';
+import AccountListPage from '@/pages/admin/account';
+import AddAccountList from '@/pages/admin/add-account';
+import EditAccountList from '@/pages/admin/edit-account';
+import AdminLayout from '@/components/common/admin-layout';
+import LocationListPage from '@/pages/admin/location';
+import AddLocationPage from '@/pages/admin/add-location';
+import EditLocationPage from '@/pages/admin/edit-location';
+import RouterListPage from '@/pages/admin/router';
+import AddRouterPage from './pages/admin/add-router';
+import EditRouterPage from './pages/admin/edit-router';
+import BusListPage from '@/pages/admin/bus';
+import AddBusPage from '@/pages/admin/add-bus';
+import EditBusPage from '@/pages/admin/edit-bus';
+import TripListPage from '@/pages/admin/trip';
+import AddTripPage from '@/pages/admin/add-trip';
+import EditTripPage from '@/pages/admin/edit-trip';
+import ReportPage from '@/pages/admin/report';
+import TransactionListPage from '@/pages/admin/transaction';
+import TicketListPage from '@/pages/admin/ticket';
+import PromotionListPage from '@/pages/admin/promotion';
+import AddPromotionPage from '@/pages/admin/add-promotion';
+import EditPromotionPage from './pages/admin/edit-promotion';
+import SearchTripPage from '@/pages/client/search-trip';
+import OrderPage from '@/pages/client/order';
+import HistoryTicket from '@/pages/client/history';
+import EditProfilePage from './pages/client/edit-profile';
+import DriveTripPage from '@/pages/admin/drive-trip';
+import DriveTripDetailPage from '@/pages/admin/drive-trip-detail';
+import StaffTripPage from '@/pages/admin/staff-trip';
+import StaffTicketPage from './pages/staff/staff-ticket';
+import StaffCalendarPage from './pages/staff/staff-trip-calendar';
+
 function App() {
   return (
     <BrowserRouter>
@@ -58,8 +60,10 @@ function App() {
           <Route path="trip" element={<DriveTripPage />} />
           <Route path="trip/:id" element={<DriveTripDetailPage />} />
         </Route>
+
         <Route path="/staff" element={<AdminLayout />}>
           <Route path="trip" element={<StaffTripPage />} />
+          <Route path="ticket" element={<StaffTicketPage />} />
           <Route path="trip-calendar" element={<StaffCalendarPage />} />
         </Route>
 
@@ -73,18 +77,18 @@ function App() {
           <Route path="router" element={<RouterListPage />} />
           <Route path="router/add" element={<AddRouterPage />} />
           <Route path="router/edit/:id" element={<EditRouterPage />} />
-          <Route path="report" element={<ReportPage />} />
           <Route path="bus" element={<BusListPage />} />
           <Route path="bus/add" element={<AddBusPage />} />
           <Route path="bus/edit/:id" element={<EditBusPage />} />
-          <Route path="transaction" element={<TransactionListPage />} />
-          <Route path="ticket" element={<TicketListPage />} />
           <Route path="trip" element={<TripListPage />} />
           <Route path="trip/add" element={<AddTripPage />} />
           <Route path="trip/edit/:id" element={<EditTripPage />} />
           <Route path="promotion" element={<PromotionListPage />} />
           <Route path="promotion/add" element={<AddPromotionPage />} />
           <Route path="promotion/edit/:id" element={<EditPromotionPage />} />
+          <Route path="report" element={<ReportPage />} />
+          <Route path="transaction" element={<TransactionListPage />} />
+          <Route path="ticket" element={<TicketListPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
