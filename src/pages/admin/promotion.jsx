@@ -1,46 +1,75 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import CustomTable from '@/components/common/table';
-import { formatToMoney } from '@/utils';
+import { showError, showSuccess } from '@/utils';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 
-const columns = [
-  { header: 'Mã khuyến mãi', field: 'PromotionCode' },
-  { header: 'Giảm giá', field: 'DiscountRate' },
-  { header: 'Mức giá', field: 'MinTicketsRequired' },
-  { header: 'Trạng thái', field: 'Status', className: "status-box" },
-]
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
-const dataTemp = [
-  {
-    Id: 1,
-    PromotionCode: 'KM221212',
-    DiscountRate: 20,
-    MinTicketsRequired: 200000,
-    Status: true,
-  },
-  {
-    Id: 2,
-    PromotionCode: "KM111222",
-    DiscountRate: 15,
-    MinTicketsRequired: 400000,
-    Status: false,
-  },
+const columns = [
+  { header: 'Mức khuyễn mãi', field: 'rankName' },
+  { header: 'Giảm giá', field: 'discountRate' },
+  { header: 'Số lần đặt vé', field: 'minTicketsRequired' },
+  { header: 'Mô tả', field: 'description' },
 ]
 
 export default function PromotionListPage() {
   const [dataList, setDataList] = useState([]);
   const navigate = useNavigate();
+  const yourToken = localStorage.getItem('bus-token');
 
   useEffect(() => {
-    const convertedData = dataTemp.map((item) => ({
-      ...item,
-      Status: item.Status ? 'Áp dụng' : 'Không áp dụng',
-      DiscountRate: `${item.DiscountRate}%`,
-      MinTicketsRequired: formatToMoney(item.MinTicketsRequired),
-    }));
-    setDataList(convertedData);
+    callApi();
   }, [])
+  function callApi() {
+    axios.get(`${baseURL}/api/Membership`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`
+      }
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          const result = res.data;
+          setDataList(result.map((item) => ({
+            ...item,
+            isDelete: item.isDelete ? 'Không hoạt động' : 'Đang hoạt động',
+          })));
+        } else {
+          showError();
+        }
+      })
+      .catch((error) => {
+        console.error('Axios error:', error);
+        showError();
+      });
+  }
+
+  function handleDisable(name, id) {
+    if (confirm(`Vô hiệu hoá ${name}?`)) {
+      axios.delete(`${baseURL}/api/Membership/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 69420,
+          'Authorization': `Bearer ${yourToken}`,
+        }
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            showSuccess();
+          } else {
+            showError();
+          }
+          callApi();
+        })
+        .catch(() => {
+          showError();
+          callApi();
+        });
+    }
+  }
 
   return (
     <div className='flex flex-row w-full'>
@@ -48,7 +77,7 @@ export default function PromotionListPage() {
       <div className='flex flex-col w-full'>
 
         <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-          <h1 className='text-2xl font-bold'>Danh sách khuyễn mãi</h1>
+          <h1 className='text-2xl font-bold'>Danh sách khuyến mãi</h1>
         </div>
 
         <div className="flex justify-between items-center px-4 h-[64px]">
@@ -71,13 +100,13 @@ export default function PromotionListPage() {
           renderActions={(row) => (
             <div className="flex gap-2 justify-center">
               <button
-                onClick={() => navigate(`/admin/promotion/edit/${row.Id}`)}
+                onClick={() => navigate(`/admin/promotion/edit/${row.membershipId}`)}
                 className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Sửa
               </button>
               <button
-                onClick={() => alert(`Xoá ${row.Id}`)}
+                onClick={() => handleDisable(row.rankName, row.membershipId)}
                 className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Xoá
