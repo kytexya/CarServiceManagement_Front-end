@@ -84,11 +84,11 @@ export default function RouterListPage() {
           } else {
             showError();
           }
-          callApi();
+          callApi({ keyword, sort, page });
         })
         .catch(() => {
           showError();
-          callApi();
+          callApi({ keyword, sort, page });
         });
     }
   }

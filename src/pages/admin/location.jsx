@@ -90,11 +90,11 @@ export default function LocationListPage() {
           } else {
             showError();
           }
-          callApi();
+          callApi({ keyword, sort, page });
         })
         .catch(() => {
           showError();
-          callApi();
+          callApi({ keyword, sort, page });
         });
     }
   }
