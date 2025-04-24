@@ -1,32 +1,32 @@
-import SidebarAdmin from "@/components/common/sidebar-admin";
-import CustomTable from "@/components/common/table";
-import { showError, showSuccess } from "@/utils";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import ReactPaginate from "react-paginate";
-import { Link, useNavigate } from "react-router-dom";
+import SidebarAdmin from '@/components/common/sidebar-admin';
+import CustomTable from '@/components/common/table';
+import { showError, showSuccess } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import ReactPaginate from 'react-paginate';
+import { Link, useNavigate } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const columns = [
   {
-    header: "Mã địa điểm",
-    field: "locationId",
+    header: 'Mã địa điểm',
+    field: 'locationId'
   },
   {
-    header: "Tên địa điểm",
-    field: "locationName",
+    header: 'Tên địa điểm',
+    field: 'locationName',
   },
   {
-    header: "Trạng thái",
-    field: "status",
-    className: "status-box",
+    header: 'Trạng thái',
+    field: 'status',
+    className: 'status-box'
   },
-];
+]
 
 export default function LocationListPage() {
   const [dataList, setDataList] = useState([]);
   const navigate = useNavigate();
-  const yourToken = localStorage.getItem("bus-token");
+  const yourToken = localStorage.getItem('bus-token');
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("");
   const [page, setPage] = useState(1);
@@ -42,29 +42,26 @@ export default function LocationListPage() {
   }, [keyword, sort, page]);
 
   function callApi({ keyword = "", sort = "", page = 1, limit = 10 }) {
-    axios
-      .get(`${baseURL}/api/Location`, {
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": 69420,
-          Authorization: `Bearer ${yourToken}`,
-        },
-        params: {
-          Keyword: keyword,
-          SortBy: sort,
-          Page: page,
-          PageSize: limit,
-        },
-      })
+    axios.get(`${baseURL}/api/Location`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`
+      },
+      params: {
+        Keyword: keyword,
+        SortBy: sort,
+        Page: page,
+        PageSize: limit,
+      },
+    })
       .then((res) => {
         if (res.status === 200) {
           const listData = res.data?.data || [];
-          setDataList(
-            listData.map((item) => ({
-              ...item,
-              status: item.isDelete ? "Không hoạt động" : "Đang hoạt động",
-            }))
-          );
+          setDataList(listData.map((item) => ({
+            ...item,
+            status: item.isDelete ? 'Không hoạt động' : 'Đang hoạt động',
+          })));
           if (res.data?.pagination) {
             setPagination(res.data.pagination);
           }
@@ -73,21 +70,20 @@ export default function LocationListPage() {
         }
       })
       .catch((error) => {
-        console.error("Axios error:", error);
+        console.error('Axios error:', error);
         showError();
       });
   }
 
   function handleDisable(locationName, locationId) {
     if (confirm(`Vô hiệu hoá ${locationName}?`)) {
-      axios
-        .delete(`${baseURL}/api/Location/${locationId}`, {
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": 69420,
-            Authorization: `Bearer ${yourToken}`,
-          },
-        })
+      axios.delete(`${baseURL}/api/Location/${locationId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 69420,
+          'Authorization': `Bearer ${yourToken}`,
+        }
+      })
         .then((res) => {
           if (res.status === 200) {
             showSuccess();
@@ -104,11 +100,12 @@ export default function LocationListPage() {
   }
 
   return (
-    <div className="flex flex-row w-full">
+    <div className='flex flex-row w-full'>
       <SidebarAdmin />
-      <div className="flex flex-col w-full">
+      <div className='flex flex-col w-full'>
+
         <div className="flex justify-between items-center px-4 shadow-lg">
-          <h1 className="text-2xl font-bold">Danh sách địa điểm</h1>
+          <h1 className='text-2xl font-bold'>Danh sách địa điểm</h1>
         </div>
 
         <div className="flex justify-between flex-wrap items-center px-4 gap-4 min-h-[64px]">
@@ -129,7 +126,7 @@ export default function LocationListPage() {
               <option value="date_desc">Theo ngày tạo giảm dần</option>
             </select>
           </div>
-          <Link to="/admin/location/add">
+          <Link to='/admin/location/add'>
             <button className="inline-flex items-center justify-center px-4 h-10 font-sans font-semibold tracking-wide text-white bg-success rounded-lg">
               Thêm địa điểm
             </button>
@@ -140,30 +137,25 @@ export default function LocationListPage() {
           columns={columns}
           data={dataList}
           renderActions={(row) => (
-            <div className="flex justify-center">
-              {row.isDelete ? (
-                <button
-                  disabled={row.isDelete}
-                  onClick={() =>
-                    handleDisable(row.locationName, row.locationId)
-                  }
-                  className="button !bg-red-500 !text-white"
-                >
-                  Vô hiệu hoá
-                </button>
-              ) : (
-                <button
-                  onClick={() =>
-                    navigate(`/admin/location/edit/${row.locationId}`)
-                  }
-                  className="button !w-[105px] !bg-blue-500 !text-white"
-                >
-                  Cập nhật
-                </button>
-              )}
+            <div className='flex gap-2 justify-center'>
+              <button
+                disabled={row.isDelete}
+                onClick={() => navigate(`/admin/location/edit/${row.locationId}`)}
+                className="button !w-[105px] !bg-blue-500 !text-white"
+              >
+                Cập nhật
+              </button>
+              <button
+                disabled={row.isDelete}
+                onClick={() => handleDisable(row.locationName, row.locationId)}
+                className="button !bg-red-500 !text-white"
+              >
+                Vô hiệu hoá
+              </button>
             </div>
           )}
         />
+
         <div className="mt-4">
           <ReactPaginate
             pageCount={pagination.totalPages}
@@ -184,5 +176,5 @@ export default function LocationListPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

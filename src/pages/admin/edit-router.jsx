@@ -121,7 +121,7 @@ export default function EditRouterPage() {
             <div className="flex gap-10 w-full">
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">
-                  Thời gian ước tính(giờ)
+                Thời gian ước tính(giờ)
                 </label>
                 <input
                   type="number"
