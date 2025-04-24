@@ -1,51 +1,59 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import CustomTable from "@/components/common/table";
-import { formatToMoney } from "@/utils";
+import { formatDateTime, formatToMoney, showError } from "@/utils";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-const columns = [
-  { header: "Mã giao dịch", field: "Id" },
-  { header: "Mã vé", field: "TicketId" },
-  { header: "Ngày tạo", field: "CreatedAt" },
-  { header: "Trạng thái", field: "Status", className: "status-box" },
-  { header: "Giá tiền", field: "Amount" },
-];
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
-const dataTemp = [
+const columns = [
+  { header: "Mã giao dịch", field: "transactionId" },
+  { header: "Mã khách hàng", field: "customerId" },
+  { header: "Tên khách hàng", field: "customerId" },
+  { header: "Ngày tạo", field: "createdAt" },
+  { header: "Giá tiền", field: "amount" },
   {
-    Id: 1,
-    TicketId: "123456",
-    CreatedAt: "2024-01-01",
-    Status: true,
-    Amount: 100000,
-  },
-  {
-    Id: 2,
-    TicketId: "123451",
-    CreatedAt: "2024-01-01",
-    Status: true,
-    Amount: 320000,
-  },
-  {
-    Id: 1,
-    TicketId: "123423",
-    CreatedAt: "2024-01-01",
-    Status: true,
-    Amount: 430000,
+    header: "Trạng thái",
+    field: "paymentStatus",
+    className: "status-box",
   },
 ];
 
 export default function TransactionListPage() {
   const [dataList, setDataList] = useState([]);
+  const yourToken = localStorage.getItem("bus-token");
 
   useEffect(() => {
-    const convertedData = dataTemp.map((item) => ({
-      ...item,
-      Status: item.Status ? "Hoàn thành" : "Lỗi giao dịch",
-      Amount: formatToMoney(item.Amount),
-    }));
-    setDataList(convertedData);
+    callApi();
   }, []);
+
+  function callApi() {
+    axios
+      .get(`${baseURL}/api/Transaction`, {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": 69420,
+          Authorization: `Bearer ${yourToken}`,
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          const result = res.data;
+          setDataList(
+            result.map((item) => ({
+              ...item,
+              createdAt: formatDateTime(item.createdAt),
+              amount: formatToMoney(item.amount),
+            }))
+          );
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }
 
   return (
     <div className="flex flex-row w-full">
