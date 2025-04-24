@@ -1,52 +1,50 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import CustomTable from '@/components/common/table';
+import { showError } from '@/utils';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const columns = [
-  { header: 'Tên tuyến đường', field: 'RouterName' },
-  { header: 'Tên loại xe', field: 'BusName' },
-  { header: 'Tên tài xế', field: 'DriverName' },
-  { header: 'Giờ khởi hành', field: 'DepartureTime' },
-  { header: 'Ngày khởi hành', field: 'Date' },
-  { header: 'Giá vé', field: 'Price' },
-  { header: 'Trạng thái', field: 'Status' },
-]
-
-const dataTemp = [
-  {
-    Id: 1,
-    RouterName: 'Hà Nội - Đà Nẵng',
-    BusName: 'Xe giường nằm 2 tầng',
-    DriverName: 'Tài xế Minh',
-    Price: '300,000',
-    Status: 1,
-    DepartureTime: '10:00',
-    Date: '2024-01-01'
-  },
-  {
-    Id: 2,
-    RouterName: 'Đà Nẵng - Hà Nội',
-    BusName: 'Xe trung chuyển',
-    DriverName: 'Tài xế Hoà',
-    Price: '120,000',
-    Status: 2,
-    DepartureTime: '12:00',
-    Date: '2024-01-01'
-  },
+  { header: 'Mã chuyến đi', field: 'tripId' },
+  { header: 'Tên tuyến đường', field: 'routeName' },
+  { header: 'Biển số', field: 'busId' },
+  { header: 'Tên loại xe', field: 'busType' },
+  { header: 'Giờ khởi hành', field: 'departureTime' },
+  { header: 'Ngày khởi hành', field: 'date' },
+  { header: 'Giá vé', field: 'price' },
+  { header: 'Trạng thái', field: 'status' },
 ]
 
 export default function TripListPage() {
   const [dataList, setDataList] = useState([]);
   const navigate = useNavigate();
+  const yourToken = localStorage.getItem('bus-token');
 
   useEffect(() => {
-    const convertedData = dataTemp.map((item) => ({
-      ...item,
-      Status: item.Status === 1 ? 'Đã khởi hành' : 'Chưa khởi hành',
-    }));
-    setDataList(convertedData);
+    callApi();
   }, [])
+
+  function callApi() {
+    axios.get(`${baseURL}/api/Trip`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`,
+      }
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setDataList(res.data);
+        } else {
+          showError();
+        }
+      })
+      .catch(() => {
+        showError();
+      });
+  }
 
   return (
     <div className='flex flex-row w-full'>
@@ -77,16 +75,10 @@ export default function TripListPage() {
           renderActions={(row) => (
             <div className="flex gap-2 justify-center">
               <button
-                onClick={() => navigate(`/admin/trip/edit/${row.Id}`)}
+                onClick={() => navigate(`/admin/trip/edit/${row.tripId}`)}
                 className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Sửa
-              </button>
-              <button
-                onClick={() => alert(`Xoá ${row.Id}`)}
-                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Xoá
               </button>
             </div>
           )}

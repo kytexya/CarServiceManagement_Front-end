@@ -13,8 +13,7 @@ export const showInfo = (msg) => {
 };
 
 export const formatToMoney = (amount) => {
-  const price = amount * 1000;
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
 
 export const formatTime = (timeString) => {
@@ -26,6 +25,7 @@ export const formatTime = (timeString) => {
   }).format(new Date(timeString));
   return timeOnly
 };
+
 export const formatDateTime = (timeString) => {
   const date = new Date(timeString);
   if (isNaN(date.getTime())) {
@@ -42,4 +42,16 @@ export const formatDateTime = (timeString) => {
 
     return formatter.format(date);
   }
+}
+export function convertDateFormat(dateString) {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime()) || date.getFullYear() < 1000) {
+    return 'Invalid date';
+  }
+
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
 }
