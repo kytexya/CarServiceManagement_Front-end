@@ -1,9 +1,9 @@
-import SidebarAdmin from '@/components/common/sidebar-admin';
-import { showError, showSuccess } from '@/utils';
-import axios from 'axios';
-import React from 'react'
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import SidebarAdmin from "@/components/common/sidebar-admin";
+import { showError, showSuccess } from "@/utils";
+import axios from "axios";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function AddLocationPage() {
@@ -13,35 +13,36 @@ export default function AddLocationPage() {
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
-  const yourToken = localStorage.getItem('bus-token');
+  const yourToken = localStorage.getItem("bus-token");
 
   const onSubmit = (data) => {
-    axios.post(`${baseURL}/api/Location`, data, {
-      headers: {
-        'Authorization': `Bearer ${yourToken}`,
-        'ngrok-skip-browser-warning': 69420,
-        'Content-Type': 'application/json',
-      }
-    })
+    axios
+      .post(`${baseURL}/api/Location`, data, {
+        headers: {
+          Authorization: `Bearer ${yourToken}`,
+          "ngrok-skip-browser-warning": 69420,
+          "Content-Type": "application/json",
+        },
+      })
       .then((res) => {
-        if (res.status === 201) {
+        if (res?.status === 200) {
           showSuccess();
-          navigate('/admin/location');
+          navigate("/admin/location");
         } else {
           showError();
         }
       })
-      .catch(() => {
-        showError();
+      .catch((e) => {
+        showError(e.response?.data?.message);
       });
   };
 
   return (
-    <div className='flex flex-row w-full'>
+    <div className="flex flex-row w-full">
       <SidebarAdmin />
-      <div className='flex flex-col w-full'>
+      <div className="flex flex-col w-full">
         <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-          <h1 className='text-2xl font-bold'>Tạo địa điểm</h1>
+          <h1 className="text-2xl font-bold">Tạo địa điểm</h1>
         </div>
         <div className="bg-white rounded-xl border border-gray-300 p-4 mt-10 mx-10">
           <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
@@ -50,8 +51,9 @@ export default function AddLocationPage() {
                 <label className="text-sm">Tên địa điểm</label>
                 <input
                   type="text"
-                  className={`border px-5 py-2 rounded-lg ${errors.locationName ? "border-red-500" : "border-gray"
-                    }`}
+                  className={`border px-5 py-2 rounded-lg ${
+                    errors.locationName ? "border-red-500" : "border-gray"
+                  }`}
                   {...register("locationName", {
                     required: "Vui lòng nhập dữ liệu",
                     minLength: {
@@ -61,7 +63,9 @@ export default function AddLocationPage() {
                   })}
                 />
                 {errors.locationName && (
-                  <p className="text-red-500 text-xs">{errors.locationName.message}</p>
+                  <p className="text-red-500 text-xs">
+                    {errors.locationName.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -83,5 +87,5 @@ export default function AddLocationPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
