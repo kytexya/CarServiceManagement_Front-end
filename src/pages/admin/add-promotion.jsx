@@ -30,7 +30,7 @@ export default function AddPromotionPage() {
         },
       })
       .then((res) => {
-        if (res.status === 201) {
+        if (res.status === 200) {
           showSuccess();
           navigate("/admin/promotion");
         } else {
