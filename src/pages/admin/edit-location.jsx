@@ -1,16 +1,16 @@
-import SidebarAdmin from '@/components/common/sidebar-admin';
-import { showError, showSuccess } from '@/utils';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import SidebarAdmin from "@/components/common/sidebar-admin";
+import { showError, showSuccess } from "@/utils";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate, useParams } from "react-router-dom";
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function EditLocationPage() {
   const { id } = useParams();
-  const [data, setData] = useState()
+  const [data, setData] = useState();
   const navigate = useNavigate();
-  const yourToken = localStorage.getItem('bus-token');
+  const yourToken = localStorage.getItem("bus-token");
 
   const {
     setValue,
@@ -20,28 +20,28 @@ export default function EditLocationPage() {
   } = useForm();
 
   useEffect(() => {
-    axios.get(`${baseURL}/api/Location/${id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 69420,
-        'Authorization': `Bearer ${yourToken}`,
-      }
-    })
+    axios
+      .get(`${baseURL}/api/Location/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": 69420,
+          Authorization: `Bearer ${yourToken}`,
+        },
+      })
       .then((res) => {
         const result = res.data;
         if (res.status === 200) {
           setData(result);
-          setValue('locationId', result.locationId);
-          setValue('locationName', result.locationName);
+          setValue("locationId", result.locationId);
+          setValue("locationName", result.locationName);
         } else {
-          showError();
+          showError(result?.message);
         }
       })
-      .catch(() => {
-        showError();
+      .catch((e) => {
+        showError(e.response?.data?.message);
       });
   }, []);
-
 
   const onSubmit = (data) => {
     fetch(`${baseURL}/api/Location/${id}`, {
@@ -49,16 +49,16 @@ export default function EditLocationPage() {
       headers: {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": 69420,
-        "Authorization": `Bearer ${yourToken}`,
+        Authorization: `Bearer ${yourToken}`,
       },
       body: JSON.stringify(data),
     })
       .then(async (res) => {
         if (res.status === 200) {
           showSuccess();
-          navigate('/admin/location');
+          navigate("/admin/location");
         } else {
-          showError();
+          showError(res?.message);
         }
       })
       .catch(() => {
@@ -67,11 +67,11 @@ export default function EditLocationPage() {
   };
 
   return (
-    <div className='flex flex-row w-full'>
+    <div className="flex flex-row w-full">
       <SidebarAdmin />
-      <div className='flex flex-col w-full'>
+      <div className="flex flex-col w-full">
         <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-          <h1 className='text-2xl font-bold'>Sửa địa điểm</h1>
+          <h1 className="text-2xl font-bold">Cập nhật địa điểm</h1>
         </div>
         <div className="bg-white rounded-xl border border-gray-300 p-4 mt-10 mx-10">
           <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
@@ -80,19 +80,22 @@ export default function EditLocationPage() {
                 <label className="text-sm">Tên địa điểm</label>
                 <input
                   type="text"
-                  className={`border px-5 py-2 rounded-lg ${errors.locationName ? "border-red-500" : "border-gray"
-                    }`}
+                  className={`border px-5 py-2 rounded-lg ${
+                    errors.locationName ? "border-red-500" : "border-gray"
+                  }`}
                   defaultValue={data?.locationName}
                   {...register("locationName", {
                     required: "Vui lòng nhập dữ liệu",
                     minLength: {
-                      value: 6,
-                      message: "Cần nhập từ 6 ký tự trở lên",
+                      value: 4,
+                      message: "Cần nhập từ 4 ký tự trở lên",
                     },
                   })}
                 />
                 {errors.locationName && (
-                  <p className="text-red-500 text-xs">{errors.locationName.message}</p>
+                  <p className="text-red-500 text-xs">
+                    {errors.locationName.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -105,6 +108,7 @@ export default function EditLocationPage() {
               </Link>
               <button
                 type="submit"
+                disabled={data?.isDelete}
                 className="button primary float-right !w-[145px]"
               >
                 Lưu thông tin
@@ -114,5 +118,5 @@ export default function EditLocationPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
