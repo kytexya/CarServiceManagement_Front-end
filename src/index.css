@@ -107,4 +107,7 @@ a:hover{
   min-width: 144px;
   max-width: 200px;
   align-items: center;
+  }
+input, select {
+  background-color: #fff;
 }
