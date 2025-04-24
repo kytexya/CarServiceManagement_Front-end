@@ -1,5 +1,6 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError, showSuccess } from '@/utils';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -12,35 +13,35 @@ export default function EditRouterPage() {
   const yourToken = localStorage.getItem('bus-token');
 
   const {
-    register,
     setValue,
+    register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
   useEffect(() => {
-    if (id){
-    fetch(`${baseURL}/api/Route/${id}`, {
-      method: "GET",
+    axios.get(`${baseURL}/api/Route/${id}`, {
       headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": 69420,
-        "Authorization": `Bearer ${yourToken}`,
-      },
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`,
+      }
     })
-      .then(async (res) => {
+      .then((res) => {
+        const result = res.data;
         if (res.status === 200) {
-          const result = await res.json();
           setData(result);
           setValue('routeId', result.routeId);
           setValue('routeName', result.routeName);
           setValue('distance', result.distance);
           setValue('estimatedDuration', result.estimatedDuration);
         } else {
-          showError();
+          showError(result?.message);
         }
       })
-    }
+      .catch((e) => {
+        showError(e.response?.data?.message);
+      });
   }, [id])
 
   const onSubmit = (data) => {
@@ -49,26 +50,21 @@ export default function EditRouterPage() {
       distance: parseInt(data.distance),
       estimatedDuration: parseInt(data.estimatedDuration),
     };
-    fetch(`${baseURL}/api/Route?id=${id}`, {
-      method: "PUT",
+    axios.put(`${baseURL}/api/Route/${id}`, payload, {
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${yourToken}`,
-        "ngrok-skip-browser-warning": 69420,
-      },
-      body: JSON.stringify(payload),
+        'Authorization': `Bearer ${yourToken}`,
+        'ngrok-skip-browser-warning': 69420,
+        'Content-Type': 'application/json',
+      }
     })
-      .then(async (res) => {
-        // const result = await res.json();
-        if (res.status === 200) {
+      .then((res) => {
+        if (res?.status === 200) {
           showSuccess();
           navigate('/admin/router');
-        } else {
-          showError();
         }
       })
-      .catch(() => {
-        showError();
+      .catch((e) => {
+        showError(e.response?.data?.message);
       });
   };
 
@@ -92,8 +88,8 @@ export default function EditRouterPage() {
                   {...register("routeName", {
                     required: "Vui lòng nhập dữ liệu",
                     minLength: {
-                      value: 6,
-                      message: "Cần nhập từ 6 ký tự trở lên",
+                      value: 4,
+                      message: "Cần nhập từ 4 ký tự trở lên",
                     },
                   })}
                 />
@@ -125,7 +121,7 @@ export default function EditRouterPage() {
             <div className="flex gap-10 w-full">
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">
-                  Thời gian ước tính
+                  Thời gian ước tính(giờ)
                 </label>
                 <input
                   type="number"

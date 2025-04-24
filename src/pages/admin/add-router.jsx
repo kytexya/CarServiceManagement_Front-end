@@ -1,5 +1,6 @@
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError, showSuccess } from '@/utils';
+import axios from 'axios';
 import React from 'react'
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -20,26 +21,21 @@ export default function AddRouterPage() {
       distance: parseInt(data.distance),
       estimatedDuration: parseInt(data.estimatedDuration),
     };
-    fetch(`${baseURL}/api/Route`, {
-      method: "POST",
+    axios.post(`${baseURL}/api/Route`, payload, {
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${yourToken}`,
-        "ngrok-skip-browser-warning": 69420,
-      },
-      body: JSON.stringify(payload),
+        'Authorization': `Bearer ${yourToken}`,
+        'ngrok-skip-browser-warning': 69420,
+        'Content-Type': 'application/json',
+      }
     })
-      .then(async (res) => {
-        // const result = await res.json();
-        if (res.status === 201) {
+      .then((res) => {
+        if (res?.status === 200) {
           showSuccess();
           navigate('/admin/router');
-        } else {
-          showError();
         }
       })
-      .catch(() => {
-        showError();
+      .catch((e) => {
+        showError(e.response?.data?.message);
       });
   };
 
@@ -62,8 +58,8 @@ export default function AddRouterPage() {
                   {...register("routeName", {
                     required: "Vui lòng nhập dữ liệu",
                     minLength: {
-                      value: 6,
-                      message: "Cần nhập từ 6 ký tự trở lên",
+                      value: 4,
+                      message: "Cần nhập từ 4 ký tự trở lên",
                     },
                   })}
                 />
@@ -94,7 +90,7 @@ export default function AddRouterPage() {
             <div className="flex gap-10 w-full">
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">
-                  Thời gian ước tính
+                  Thời gian ước tính(giờ)
                 </label>
                 <input
                   type="number"
@@ -107,7 +103,7 @@ export default function AddRouterPage() {
                       value: /^[0-9]+$/,
                       message: "Chỉ được nhập số",
                     },
-                  })}estimatedDuration
+                  })}
                 />
                 {errors.estimatedDuration && (
                   <p className="text-red-500 text-xs">{errors.estimatedDuration.message}</p>
