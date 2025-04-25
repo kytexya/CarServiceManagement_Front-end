@@ -32,8 +32,7 @@ export default function Header() {
         <div className="flex items-center flex-wrap justify-end gap-3 max-lg:hidden">
           <nav className="flex gap-5 text-white font-bold">
             <Link to="/about" className="hover:text-white">Giới thiệu</Link>
-            <Link to="/my-ticket" className="hover:text-white">Đơn hàng của tôi</Link>
-            <Link to="#" className="hover:text-white">Trở thành đối tác</Link>
+            <Link to="/history" className="hover:text-white">Vé của tôi</Link>
           </nav>
           {profile ?
             <div className="text-white">

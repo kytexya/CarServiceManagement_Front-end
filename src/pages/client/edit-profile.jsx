@@ -1,7 +1,9 @@
-import { showError } from "@/utils";
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import Loading from '@/components/common/loading';
+import { showError, showSuccess } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function EditProfilePage() {
@@ -11,45 +13,74 @@ export default function EditProfilePage() {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const [profile, setProfile] = useState(false);
+  const [profile, setProfile] = useState();
+  const [customerId, setCustomerId] = useState();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const profile = localStorage.getItem("bus-profile");
     if (profile) {
       const parsedProfile = JSON.parse(profile);
-      setValue("name", parsedProfile.name);
-      setValue("phoneNumber", parsedProfile.phoneNumber);
-      setProfile(parsedProfile);
+      setCustomerId(parsedProfile.customerId);
     }
   }, []);
 
-  const onSubmit = (data) => {
-    fetch(`${baseURL}/customers/register`, {
-      method: "POST",
+  useEffect(() => {
+    if (!customerId) {
+      return;
+    }
+    setLoading(true);
+    axios.get(`${baseURL}/api/Customer/${customerId}`, {
       headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+      }
     })
-      .then(async (res) => {
-        const result = await res.json();
+      .then((res) => {
+        const result = res.data;
         if (res.status === 200) {
-        } else {
-          showError();
+          setProfile(result);
+          setValue('name', result.name);
+          setValue('phoneNumber', result.phoneNumber);
+        }
+        setLoading(false);
+      })
+      .catch((e) => {
+        setLoading(false);
+        showError(e.response?.data?.message);
+      });
+  }, [customerId]);
+
+  const onSubmit = (data) => {
+    const payload = {
+      phoneNumber: data.phoneNumber,
+      name: data.name,
+    };
+    axios.put(`${baseURL}/api/Customer/${profile.customerId}`, payload, {
+      headers: {
+        'ngrok-skip-browser-warning': 69420,
+        'Content-Type': 'application/json',
+      }
+    })
+      .then((res) => {
+        if (res?.status === 200) {
+          showSuccess();
+          navigate('/profile');
         }
       })
-      .catch(() => {
-        showError();
+      .catch((e) => {
+        showError(e.response?.data?.message);
       });
   };
 
+  if (loading) return <Loading />;
+
   return (
     <div className="px-8 md:px-6 md:w-[600px] mx-auto py-6 my-20 bg-white rounded-xl border border-gray-300">
-      <div className="flex flex-col w-full">
+      <div className='flex flex-col w-full'>
         <div className="flex justify-between items-center h-[60px]">
-          <h1 className="text-2xl font-bold text-center w-full">
-            Cập nhật thông tin
-          </h1>
+          <h1 className='text-2xl font-bold text-center w-full'>Cập nhật thông tin</h1>
         </div>
         <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex gap-10 w-full">
@@ -59,9 +90,8 @@ export default function EditProfilePage() {
                 type="text"
                 defaultValue={profile?.name}
                 placeholder="Nhập họ và tên..."
-                className={`border px-5 py-2 rounded-lg ${
-                  errors.name ? "border-red-500" : "border-gray"
-                }`}
+                className={`border px-5 py-2 rounded-lg ${errors.name ? "border-red-500" : "border-gray"
+                  }`}
                 {...register("name", {
                   required: "Vui lòng nhập họ tên",
                   minLength: {
@@ -77,7 +107,9 @@ export default function EditProfilePage() {
           </div>
           <div className="flex gap-10 w-full">
             <div className="flex flex-col gap-2 mb-4 w-full">
-              <label className="text-sm">Số điện thoại</label>
+              <label className="text-sm">
+                Số điện thoại
+              </label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -99,5 +131,5 @@ export default function EditProfilePage() {
         </form>
       </div>
     </div>
-  );
+  )
 }
