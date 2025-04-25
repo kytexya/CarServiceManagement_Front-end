@@ -15,7 +15,7 @@ export default function LoginPage() {
     const payload = {
       phoneNumber: data.phone,
     };
-    fetch(`${baseURL}/customers/login`, {
+    fetch(`${baseURL}/api/Customer/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export default function LoginPage() {
         const result = await res.json();
         if (res.status === 200) {
           localStorage.setItem("bus-profile", JSON.stringify(result));
-          // window.location.href = "/";
+          window.location.href = "/";
         } else {
           showError(result.message || "Đăng nhập thất bại");
         }

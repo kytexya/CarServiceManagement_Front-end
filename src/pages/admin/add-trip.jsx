@@ -141,10 +141,15 @@ export default function AddTripPage() {
 
   const onSubmit = (data) => {
     const payload = {
-      ...data,
+      routeId: data.routeId,
+      busId: data.busId,
+      driverId: data.driverId,
+      departureTime: data.departureTime,
       date: convertDateFormat(data.date),
+      direction: data.direction,
       price: parseInt(data.price),
       status: 'Đang hoạt động',
+      locationRoutes: data.locationRoutes
     }
     axios.post(`${baseURL}/api/Trip`, payload, {
       headers: {
@@ -179,9 +184,9 @@ export default function AddTripPage() {
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">Tuyến đường</label>
                 <select
-                  className={`border px-5 py-2 rounded-lg ${errors.routerId ? "border-red-500" : "border-gray"
+                  className={`border px-5 py-2 rounded-lg ${errors.routeId ? "border-red-500" : "border-gray"
                     }`}
-                  {...register("routerId", {
+                  {...register("routeId", {
                     required: "Vui lòng chọn dữ liệu",
                   })}
                 >
@@ -190,8 +195,8 @@ export default function AddTripPage() {
                     <option value={item.value}>{item.label}</option>
                   ))}
                 </select>
-                {errors.routerId && (
-                  <p className="text-red-500 text-xs">{errors.routerId.message}</p>
+                {errors.routeId && (
+                  <p className="text-red-500 text-xs">{errors.routeId.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
