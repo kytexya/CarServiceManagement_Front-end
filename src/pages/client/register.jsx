@@ -17,7 +17,7 @@ export default function RegisterPage() {
       phoneNumber: data.phone,
       name: data.fullname,
     };
-    fetch(`${baseURL}/customers/register`, {
+    fetch(`${baseURL}/api/Customer/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
