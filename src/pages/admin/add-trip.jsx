@@ -41,11 +41,15 @@ export default function AddTripPage() {
         'ngrok-skip-browser-warning': 69420,
         'Authorization': `Bearer ${yourToken}`
       },
+      params: {
+        Page: 1,
+        PageSize: -1,
+      },
     })
       .then((res) => {
         if (res.status === 200) {
-          const result = res.data;
-          setRouterList(result.map((item) => ({
+          const result = res?.data?.data?.filter((item) => item.isDelete === false);
+          setRouterList(result?.map((item) => ({
             value: item.routeId,
             label: item.routeName
           })));
@@ -68,8 +72,8 @@ export default function AddTripPage() {
     })
       .then((res) => {
         if (res.status === 200) {
-          const result = res.data;
-          const data = result.filter((item) => item.role === 3);
+          const result = res?.data?.data;
+          const data = result?.filter((item) => item.role === 3);
           setDriveList(data.map((item) => ({
             value: item.userId,
             label: item.name
@@ -94,8 +98,8 @@ export default function AddTripPage() {
     })
       .then((res) => {
         if (res.status === 200) {
-          const result = res.data;
-          setBusList(result?.data?.map((item) => ({
+          const result = res?.data?.data?.filter((item) => item.isDelete === false);
+          setBusList(result?.map((item) => ({
             value: item.busId,
             label: item.busType
           })));
@@ -120,7 +124,7 @@ export default function AddTripPage() {
     })
       .then((res) => {
         if (res.status === 200) {
-          const result = res.data;
+          const result = res?.data?.data;
           setLocation(result.map((item) => ({
             value: item.locationId,
             label: item.locationName
@@ -150,7 +154,7 @@ export default function AddTripPage() {
       }
     })
       .then((res) => {
-        if (res.status === 201) {
+        if (res.status === 200) {
           showSuccess();
           navigate('/admin/trip');
         } else {
@@ -200,7 +204,7 @@ export default function AddTripPage() {
                   })}
                 >
                   <option></option>
-                  {busList.length > 0 && busList?.map((item) => (
+                  {busList?.length > 0 && busList?.map((item) => (
                     <option value={item.value}>{item.label}</option>
                   ))}
                 </select>
