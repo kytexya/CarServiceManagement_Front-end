@@ -12,40 +12,10 @@ import {
     Legend,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import { showError } from '@/utils';
+import axios from 'axios';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
-
-
-const generateRevenueChartData = (type = 'day') => {
-    let labels = [];
-    let data = [];
-
-    if (type === 'month') {
-        labels = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
-        data = labels.map(() => faker.number.int({ min: 200000, max: 1000000 }));
-    } else if (type === 'year') {
-        const currentYear = new Date().getFullYear();
-        labels = Array.from({ length: 5 }, (_, i) => `Năm ${currentYear - 4 + i}`);
-        data = labels.map(() => faker.number.int({ min: 500000, max: 2000000 }));
-    } else {
-        labels = Array.from({ length: 30 }, (_, i) => `Ngày ${i + 1}`);
-        data = labels.map(() => faker.number.int({ min: 100000, max: 1000000 }));
-    }
-
-    return {
-        labels,
-        datasets: [
-            {
-                label: 'Doanh thu',
-                data,
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3,
-            },
-        ],
-    };
-};
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const optionsRevenue = {
     responsive: true,
@@ -94,17 +64,14 @@ const optionsOrder = {
 };
 
 export default function ReportPage() {
-    const [filterType, setFilterType] = useState('day')
     const [revenue, setDataRevenue] = useState({
         labels: [],
         datasets: [],
     });
     const [order, setOrder] = useState();
-
-    useEffect(() => {
-        const chartData = generateRevenueChartData(filterType);
-        setDataRevenue(chartData);
-    }, [filterType]);
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [year, setYear] = useState(new Date().getFullYear());
+    const yourToken = localStorage.getItem('bus-token');
 
     useEffect(() => {
         const bookingStats = [
@@ -129,6 +96,63 @@ export default function ReportPage() {
         setOrder(chartData)
     }, [])
 
+    useEffect(() => {
+        callApi(year, month);
+    }, [year, month]);
+
+    function callApi(year, month) {
+        axios.get(`${baseURL}/api/Transaction/revenue-by-month`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 69420,
+                'Authorization': `Bearer ${yourToken}`
+            },
+            params: {
+                year,
+                month,
+            },
+        })
+            .then((res) => {
+                if (res.status === 200) {
+                    const listData = res?.data || [];
+                    const labels = listData.map((item) => `Ngày ${item.day}`);
+                    const data = listData.map((item) => item.amount);
+                    const chartData = {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Doanh thu',
+                                data,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.3,
+                            },
+                        ],
+                    };
+                    setDataRevenue(chartData);
+                } else {
+                    showError();
+                }
+            })
+            .catch((error) => {
+                console.error('Axios error:', error);
+                showError();
+            });
+    }
+
+    const handleMonthChange = (e) => {
+        const newMonth = parseInt(e.target.value);
+        setMonth(newMonth);
+    };
+
+    const handleYearChange = (e) => {
+        const newYear = parseInt(e.target.value);
+        setYear(newYear);
+    };
+
+
     return (
         <div className="flex flex-row w-[calc(100vw - 230px)] overflow-y-scroll">
             <SidebarAdmin />
@@ -136,11 +160,26 @@ export default function ReportPage() {
                 <div className="flex flex-col gap-4">
                     <div className="flex justify-between">
                         <h2 className="text-2xl font-bold mb-4">Thống kê doanh thu</h2>
-                        <select className="border px-5 py-2 rounded-lg" onChange={(e) => setFilterType(e.target.value)}>
-                            <option value="day">Theo ngày</option>
-                            <option value="month">Theo tháng</option>
-                            <option value="year">Theo năm</option>
-                        </select>
+
+                        <div className="flex gap-4">
+                            <select value={month} onChange={handleMonthChange} className="border px-3 py-2 rounded">
+                                {[...Array(12)].map((_, index) => (
+                                    <option key={index + 1} value={index + 1}>
+                                        Tháng {index + 1}
+                                    </option>
+                                ))}
+                            </select>
+                            <select value={year} onChange={handleYearChange} className="border px-3 py-2 rounded">
+                                {[...Array(10)].map((_, index) => {
+                                    const y = new Date().getFullYear() - 5 + index;
+                                    return (
+                                        <option key={y} value={y}>
+                                            Năm {y}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
                     </div>
 
                     <div className="bg-white p-4 shadow rounded-lg">
