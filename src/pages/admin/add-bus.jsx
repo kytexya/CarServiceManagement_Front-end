@@ -96,8 +96,8 @@ export default function AddBusPage() {
                     }`}
                   {...register("model", {
                     minLength: {
-                      value: 6,
-                      message: "Cần nhập từ 6 ký tự trở lên",
+                      value: 3,
+                      message: "Cần nhập từ 3 ký tự trở lên",
                     },
                   })}
                 />
@@ -145,6 +145,21 @@ export default function AddBusPage() {
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
+                <label className="text-sm">Biển số</label>
+                <input
+                  type="text"
+                  className={`border px-5 py-2 rounded-lg ${errors.busId ? "border-red-500" : "border-gray"
+                    }`}
+                  {...register("busId", {
+                    minLength: {
+                      value: 6,
+                      message: "Cần nhập từ 6 ký tự trở lên",
+                    },
+                  })}
+                />
+                {errors.busId && (
+                  <p className="text-red-500 text-xs">{errors.busId.message}</p>
+                )}
               </div>
             </div>
 
