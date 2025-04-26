@@ -1,10 +1,10 @@
-import Loading from "@/components/common/loading";
-import SidebarAdmin from "@/components/common/sidebar-admin";
-import { convertDateFormat, showError, showSuccess } from "@/utils";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import Loading from '@/components/common/loading';
+import SidebarAdmin from '@/components/common/sidebar-admin';
+import { convertDateFormat, showError, showSuccess } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { useFieldArray, useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function AddTripPage() {
@@ -17,139 +17,125 @@ export default function AddTripPage() {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "locationRoutes",
+    name: "locationRoutes"
   });
 
   const navigate = useNavigate();
-  const yourToken = localStorage.getItem("bus-token");
+  const yourToken = localStorage.getItem('bus-token');
   const [routerList, setRouterList] = useState([]);
   const [driveList, setDriveList] = useState([]);
   const [busList, setBusList] = useState([]);
   const [locationList, setLocation] = useState([]);
+
 
   useEffect(() => {
     fetchRouter();
     fetchDrive();
     fetchBus();
     fetchLocation();
-  }, []);
+  }, [])
 
   function fetchRouter() {
-    axios
-      .get(`${baseURL}/api/Route`, {
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": 69420,
-          Authorization: `Bearer ${yourToken}`,
-        },
-        params: {
-          Page: 1,
-          PageSize: -1,
-        },
-      })
+    axios.get(`${baseURL}/api/Route`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`
+      },
+      params: {
+        Page: 1,
+        PageSize: -1,
+      },
+    })
       .then((res) => {
         if (res.status === 200) {
-          const result = res?.data?.data?.filter(
-            (item) => item.isDelete === false
-          );
-          setRouterList(
-            result?.map((item) => ({
-              value: item.routeId,
-              label: item.routeName,
-            }))
-          );
+          const result = res?.data?.data?.filter((item) => item.isDelete === false);
+          setRouterList(result?.map((item) => ({
+            value: item.routeId,
+            label: item.routeName
+          })));
         } else {
           showError();
         }
       })
       .catch((error) => {
-        console.error("Axios error:", error);
+        console.error('Axios error:', error);
         showError();
       });
   }
   function fetchDrive() {
-    axios
-      .get(`${baseURL}/api/User`, {
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": 69420,
-          Authorization: `Bearer ${yourToken}`,
-        },
-      })
+    axios.get(`${baseURL}/api/User`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`
+      },
+    })
       .then((res) => {
         if (res.status === 200) {
           const result = res?.data?.data;
           const data = result?.filter((item) => item.role === 3);
-          setDriveList(
-            data.map((item) => ({
-              value: item.userId,
-              label: item.name,
-            }))
-          );
+          setDriveList(data.map((item) => ({
+            value: item.userId,
+            label: item.name
+          })));
         } else {
           showError();
         }
       })
       .catch((error) => {
-        console.error("Axios error:", error);
+        console.error('Axios error:', error);
         showError();
       });
   }
 
   function fetchBus() {
-    axios
-      .get(`${baseURL}/api/buses`, {
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": 69420,
-          Authorization: `Bearer ${yourToken}`,
-        },
-      })
+    axios.get(`${baseURL}/api/buses`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`
+      },
+    })
       .then((res) => {
         if (res.status === 200) {
-          const result = res?.data?.data?.filter(
-            (item) => item.isDelete === false
-          );
-          setBusList(
-            result?.map((item) => ({
-              value: item.busId,
-              label: item.busType,
-            }))
-          );
+          const result = res?.data?.data?.filter((item) => item.isDelete === false);
+          setBusList(result?.map((item) => ({
+            value: item.busId,
+            label: item.busType
+          })));
         } else {
           showError();
         }
       })
       .catch((error) => {
-        console.error("Axios error:", error);
+        console.error('Axios error:', error);
         showError();
       });
+
   }
 
   function fetchLocation() {
-    axios
-      .get(`${baseURL}/api/Location`, {
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": 69420,
-          Authorization: `Bearer ${yourToken}`,
-        },
-      })
+    axios.get(`${baseURL}/api/Location`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 69420,
+        'Authorization': `Bearer ${yourToken}`
+      }
+    })
       .then((res) => {
         if (res.status === 200) {
           const result = res?.data?.data;
-          setLocation(
-            result.map((item) => ({
-              value: item.locationId,
-              label: item.locationName,
-            }))
-          );
+          setLocation(result.map((item) => ({
+            value: item.locationId,
+            label: item.locationName
+          })));
         } else {
           showError();
         }
       })
       .catch((error) => {
-        console.error("Axios error:", error);
+        console.error('Axios error:', error);
         showError();
       });
   }
@@ -163,45 +149,39 @@ export default function AddTripPage() {
       date: convertDateFormat(data.date),
       direction: data.direction,
       price: parseInt(data.price),
-      status: "Đang hoạt động",
-      locationRoutes: data.locationRoutes,
-    };
-    axios
-      .post(`${baseURL}/api/Trip`, payload, {
-        headers: {
-          Authorization: `Bearer ${yourToken}`,
-          "ngrok-skip-browser-warning": 69420,
-          "Content-Type": "application/json",
-        },
-      })
+      status: 'Đang hoạt động',
+      locationRoutes: data.locationRoutes
+    }
+    axios.post(`${baseURL}/api/Trip`, payload, {
+      headers: {
+        'Authorization': `Bearer ${yourToken}`,
+        'ngrok-skip-browser-warning': 69420,
+        'Content-Type': 'application/json',
+      }
+    })
       .then((res) => {
         if (res.status === 200) {
           showSuccess();
-          navigate("/admin/trip");
-        } else {
-          showError();
+          navigate('/admin/trip');
         }
       })
-      .catch(() => {
-        showError();
+      .catch((e) => {
+        showError(e?.response?.data?.message);
       });
   };
 
-  if (
-    routerList.length === 0 ||
-    driveList.length === 0 ||
-    busList.length === 0 ||
-    locationList.length === 0
-  ) {
-    return <Loading />;
+  if (routerList.length === 0 || driveList.length === 0 || busList.length === 0 || locationList.length === 0) {
+    return (
+      <Loading />
+    )
   }
 
   return (
-    <div className="flex flex-row w-full">
+    <div className='flex flex-row w-full'>
       <SidebarAdmin />
-      <div className="flex flex-col w-full">
+      <div className='flex flex-col w-full'>
         <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-          <h1 className="text-2xl font-bold">Tạo chuyến đi</h1>
+          <h1 className='text-2xl font-bold'>Tạo chuyến đi</h1>
         </div>
         <div className="bg-white rounded-xl border border-gray-300 p-4 mt-10 mx-10">
           <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
@@ -209,40 +189,34 @@ export default function AddTripPage() {
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">Tuyến đường</label>
                 <select
-                  className={`border px-5 py-2 rounded-lg ${
-                    errors.routeId ? "border-red-500" : "border-gray"
-                  }`}
+                  className={`border px-5 py-2 rounded-lg ${errors.routeId ? "border-red-500" : "border-gray"
+                    }`}
                   {...register("routeId", {
                     required: "Vui lòng chọn dữ liệu",
                   })}
                 >
                   <option></option>
-                  {routerList.length > 0 &&
-                    routerList?.map((item) => (
-                      <option value={item.value}>{item.label}</option>
-                    ))}
+                  {routerList.length > 0 && routerList?.map((item) => (
+                    <option value={item.value}>{item.label}</option>
+                  ))}
                 </select>
                 {errors.routeId && (
-                  <p className="text-red-500 text-xs">
-                    {errors.routeId.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.routeId.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">Xe</label>
                 <select
-                  className={`border px-5 py-2 rounded-lg ${
-                    errors.busId ? "border-red-500" : "border-gray"
-                  }`}
+                  className={`border px-5 py-2 rounded-lg ${errors.busId ? "border-red-500" : "border-gray"
+                    }`}
                   {...register("busId", {
                     required: "Vui lòng chọn dữ liệu",
                   })}
                 >
                   <option></option>
-                  {busList?.length > 0 &&
-                    busList?.map((item) => (
-                      <option value={item.value}>{item.label}</option>
-                    ))}
+                  {busList?.length > 0 && busList?.map((item) => (
+                    <option value={item.value}>{item.label}</option>
+                  ))}
                 </select>
                 {errors.busId && (
                   <p className="text-red-500 text-xs">{errors.busId.message}</p>
@@ -254,23 +228,19 @@ export default function AddTripPage() {
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">Tài xế</label>
                 <select
-                  className={`border px-5 py-2 rounded-lg ${
-                    errors.driverId ? "border-red-500" : "border-gray"
-                  }`}
+                  className={`border px-5 py-2 rounded-lg ${errors.driverId ? "border-red-500" : "border-gray"
+                    }`}
                   {...register("driverId", {
                     required: "Vui lòng chọn dữ liệu",
                   })}
                 >
                   <option></option>
-                  {driveList.length > 0 &&
-                    driveList?.map((item) => (
-                      <option value={item.value}>{item.label}</option>
-                    ))}
+                  {driveList.length > 0 && driveList?.map((item) => (
+                    <option value={item.value}>{item.label}</option>
+                  ))}
                 </select>
                 {errors.driverId && (
-                  <p className="text-red-500 text-xs">
-                    {errors.driverId.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.driverId.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
@@ -278,9 +248,8 @@ export default function AddTripPage() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  className={`border px-5 py-2 rounded-lg ${
-                    errors.price ? "border-red-500" : "border-gray"
-                  }`}
+                  className={`border px-5 py-2 rounded-lg ${errors.price ? "border-red-500" : "border-gray"
+                    }`}
                   {...register("price", {
                     required: "Vui lòng chọn dữ liệu",
                     pattern: {
@@ -300,26 +269,22 @@ export default function AddTripPage() {
                 <label className="text-sm">Giờ khởi hành</label>
                 <input
                   type="time"
-                  className={`border px-5 py-2 rounded-lg ${
-                    errors.departureTime ? "border-red-500" : "border-gray"
-                  }`}
+                  className={`border px-5 py-2 rounded-lg ${errors.departureTime ? "border-red-500" : "border-gray"
+                    }`}
                   {...register("departureTime", {
                     required: "Vui lòng chọn dữ liệu",
                   })}
                 />
                 {errors.departureTime && (
-                  <p className="text-red-500 text-xs">
-                    {errors.departureTime.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.departureTime.message}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">Ngày khởi hành</label>
                 <input
                   type="date"
-                  className={`border px-5 py-2 rounded-lg ${
-                    errors.date ? "border-red-500" : "border-gray"
-                  }`}
+                  className={`border px-5 py-2 rounded-lg ${errors.date ? "border-red-500" : "border-gray"
+                    }`}
                   {...register("date", {
                     required: "Vui lòng chọn dữ liệu",
                   })}
@@ -334,18 +299,15 @@ export default function AddTripPage() {
               <div className="flex flex-col gap-2 mb-4 w-full">
                 <label className="text-sm">Mô tả</label>
                 <input
-                  type="text"
-                  className={`border px-5 py-2 rounded-lg ${
-                    errors.direction ? "border-red-500" : "border-gray"
-                  }`}
+                  type='text'
+                  className={`border px-5 py-2 rounded-lg ${errors.direction ? "border-red-500" : "border-gray"
+                    }`}
                   {...register("direction", {
                     required: "Vui lòng chọn dữ liệu",
                   })}
                 />
                 {errors.direction && (
-                  <p className="text-red-500 text-xs">
-                    {errors.direction.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.direction.message}</p>
                 )}
               </div>
             </div>
@@ -356,9 +318,7 @@ export default function AddTripPage() {
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex items-center gap-4 mb-2">
                     <select
-                      {...register(`locationRoutes.${index}.locationId`, {
-                        required: true,
-                      })}
+                      {...register(`locationRoutes.${index}.locationId`, { required: true })}
                       className="border p-2 rounded"
                     >
                       <option value="">-- Chọn điểm dừng --</option>
@@ -373,39 +333,32 @@ export default function AddTripPage() {
                       type="number"
                       placeholder="Phút nghỉ"
                       min={0}
-                      {...register(
-                        `locationRoutes.${index}.stopDurationMinutes`,
-                        {
-                          valueAsNumber: true,
-                          required: true,
-                        }
-                      )}
+                      {...register(`locationRoutes.${index}.stopDurationMinutes`, {
+                        valueAsNumber: true,
+                        required: true
+                      })}
                       className="border p-2 w-32 rounded"
                     />
 
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="text-red-500"
-                    >
-                      Xoá
-                    </button>
+                    <button type="button" onClick={() => remove(index)} className="text-red-500">Xoá</button>
                   </div>
                 ))}
 
                 <button
                   type="button"
-                  onClick={() =>
-                    append({ locationId: "", stopDurationMinutes: 0 })
-                  }
+                  onClick={() => append({ locationId: "", stopDurationMinutes: 0 })}
                   className="button mt-2 !bg-success !text-white px-4 py-2 rounded"
                 >
                   + Thêm điểm dừng
                 </button>
               </div>
+
             </div>
             <div className="flex gap-4 justify-end">
-              <Link to="/admin/trip" className="button float-right !w-[145px]">
+              <Link
+                to="/admin/trip"
+                className="button float-right !w-[145px]"
+              >
                 Quay lại
               </Link>
               <button
@@ -419,5 +372,5 @@ export default function AddTripPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
