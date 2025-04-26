@@ -95,8 +95,9 @@ export default function DriveTripPage() {
         renderActions={(row) => (
           <div className="flex gap-2 justify-center">
             <button
+              disabled={row.status === "Hoàn Thành"}
               onClick={() => handleCompleteTrip(row.routeName, row.tripId)}
-              className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="button px-2 py-1 !bg-blue-500 !text-white rounded hover:bg-blue-600"
             >
               Hoàn thành
             </button>
