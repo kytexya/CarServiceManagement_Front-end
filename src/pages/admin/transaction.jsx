@@ -22,7 +22,7 @@ export default function TransactionListPage() {
   const [dataList, setDataList] = useState([]);
   const yourToken = localStorage.getItem('bus-token');
   const [keyword, setKeyword] = useState("");
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState(""); 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
     currentPage: 1,
