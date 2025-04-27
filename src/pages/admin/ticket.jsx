@@ -1,21 +1,22 @@
-import SidebarAdmin from "@/components/common/sidebar-admin";
-import CustomTable from "@/components/common/table";
-import { formatDateTime, formatToMoney, showError, showSuccess } from "@/utils";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import ReactPaginate from "react-paginate";
+import SidebarAdmin from '@/components/common/sidebar-admin';
+import CustomTable from '@/components/common/table';
+import { formatDateTime, formatToMoney, showError, showSuccess } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import ReactPaginate from 'react-paginate';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const columns = [
-  { header: "Mã vé", field: "tripId" },
-  { header: "Tên tuyến đường", field: "routeName" },
-  { header: "Tên khách hàng", field: "customerName" },
-  { header: "Mã Ghế", field: "seatId" },
-  { header: "Giá vé", field: "price" },
-  { header: "Khởi tạo", field: "createdAt" },
-  { header: "Trạng thái", field: "status", className: "status-box" },
-];
+  { header: 'Mã vé', field: 'ticketId' },
+  { header: 'Mã chuyến đi', field: 'tripId' },
+  { header: 'Tên tuyến đường', field: 'routeName' },
+  { header: 'Tên khách hàng', field: 'customerName' },
+  { header: 'Mã Ghế', field: 'seatId' },
+  { header: 'Giá vé', field: 'price' },
+  { header: 'Khởi tạo', field: 'createdAt' },
+  { header: 'Trạng thái', field: 'status', className: 'status-box' },
+]
 
 export default function TicketListPage() {
   const [dataList, setDataList] = useState([]);
@@ -75,14 +76,13 @@ export default function TicketListPage() {
   function handleConfirmBoarding(name, id) {
     {
       if (confirm(`Xâc nhận hành khách ${name} đã lên xe?`)) {
-        axios
-          .put(`${baseURL}/api/Staff/ticket/confirm-boarding/${id}`, {
-            headers: {
-              "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": 69420,
-              Authorization: `Bearer ${yourToken}`,
-            },
-          })
+        axios.put(`${baseURL}/api/Staff/ticket/confirm-boarding/${id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 69420,
+            'Authorization': `Bearer ${yourToken}`,
+          }
+        })
           .then((res) => {
             if (res.status === 200) {
               showSuccess();
@@ -131,12 +131,11 @@ export default function TicketListPage() {
           renderActions={(row) => (
             <div className="flex gap-2 justify-center">
               <button
-                onClick={() =>
-                  handleConfirmBoarding(row.customerName, row.ticketId)
-                }
-                className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                disabled={row.status === "Boarded"}
+                onClick={() => handleConfirmBoarding(row.customerName, row.ticketId)}
+                className="button !bg-blue-500 !text-white"
               >
-                Xác nhận lên xe
+                Đã lên xe
               </button>
             </div>
           )}
