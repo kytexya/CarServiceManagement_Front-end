@@ -14,6 +14,7 @@ export default function LoginPage() {
   const onSubmit = (data) => {
     const payload = {
       phoneNumber: data.phone,
+      password: data.password,
     };
     fetch(`${baseURL}/api/Customer/login`, {
       method: "POST",
@@ -39,7 +40,12 @@ export default function LoginPage() {
   return (
     <div className="flex items-center">
       <div className="px-8 md:px-10 md:w-1/2 max-w-[680px] w-full mx-auto py-10">
-        <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản</p>
+        <div className="flex justify-between w-full">
+          <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản</p>
+          <Link to="/login-manager" className="button mb-4 !bg-warning !border-none !text-white">
+            Đăng nhập quản lý
+          </Link>
+        </div>
         <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2 mb-6">
             <label className="text-sm">Số điện thoại</label>
@@ -67,6 +73,25 @@ export default function LoginPage() {
             />
             {errors.phone && (
               <p className="text-red-500 text-xs">{errors.phone.message}</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <label className="text-sm">Mật khẩu</label>
+            <input
+              type='password'
+              placeholder="Nhập mật khẩu"
+              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
+                }`}
+              {...register("password", {
+                required: "Vui lòng nhập mật khẩu",
+                minLength: {
+                  value: 6,
+                  message: "Mật khẩu cần ít nhất 6 số",
+                },
+              })}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-xs">{errors.password.message}</p>
             )}
           </div>
           <button

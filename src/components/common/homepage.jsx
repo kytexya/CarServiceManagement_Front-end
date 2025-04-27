@@ -1,12 +1,47 @@
-import { convertDateFormat } from "@/utils";
-import React, { useState } from "react";
+import { convertDateFormat, showError } from "@/utils";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Homepage() {
   const [from, setFrom] = useState();
   const [date, setDate] = useState(new Date());
   const navigate = useNavigate();
+  const [locationList, setLocationList] = useState([]);
 
+  useEffect(() => {
+    callApi();
+  }, []);
+
+  function callApi() {
+    axios
+      .get(`${baseURL}/api/Location`, {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": 69420,
+        },
+        params: {
+          Page: 1,
+          PageSize: -1,
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          const listData = res.data?.data || [];
+          const locationList = listData.filter((item) => !item.isDelete);
+          setLocationList(
+            locationList.map((item) => ({
+              value: item.locationName,
+              label: item.locationName,
+            }))
+          );
+        }
+      })
+      .catch((error) => {
+        showError(error?.response?.data?.message);
+      });
+  }
   function handleSearch(e) {
     e.preventDefault();
     if (!from || !date) return;
@@ -29,26 +64,25 @@ export default function Homepage() {
       ></img>
       <div className="mx-auto max-w-fit rounded-xl bg-white z-20 relative mt-60">
         <form onSubmit={handleSearch}>
-          <div className="flex flex-wrap gap-4 px-4 py-2 h-full justify-between">
+          <div className="flex flex-wrap gap-6 px-4 py-2 h-full justify-between">
             <div className="flex flex-col gap-1">
-              <p className="text-sm text-gray-500">Nơi xuất phát</p>
-              <input
-                className="p-2 h-[44px] border border-primary rounded-md w-[330px]"
-                placeholder="Nhập tên chuyến đi hoặc điểm dừng..."
-                list="citySuggestions"
-                onChange={(e) => setFrom(e.target.value)}
+              <p className="text-sm text-gray-500">Điểm xuất phát/ Điểm đến</p>
+              <select
                 required
-              />
-              <datalist id="citySuggestions">
-                <option value="Da Lat" />
-                <option value="Sài Gòn" />
-                <option value="HCM" />
-                <option value="Hà Nội" />
-                <option value="Đà Nẵng" />
-              </datalist>
+                onChange={(e) => setFrom(e.target.value)}
+                className="p-2 h-[44px] border w-[200px] border-primary rounded-md"
+              >
+                <option value="">-- Chọn địa điểm --</option>
+                {locationList.length > 0 &&
+                  locationList?.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+              </select>
             </div>
 
-            <div className="flex flex-row gap-3">
+            <div className="flex flex-row gap-6">
               <div className="flex flex-col gap-1">
                 <p className="text-sm text-gray-500">Ngày đi</p>
                 <input

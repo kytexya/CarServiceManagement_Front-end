@@ -1,4 +1,5 @@
 import { showError, showSuccess } from "@/utils";
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -13,28 +14,29 @@ export default function RegisterPage() {
 
   const navigate = useNavigate();
   const onSubmit = (data) => {
+    if (data.password !== data.passwordConfirm) {
+      showError("Mật khẩu xác nhận không khớp.");
+      return;
+    }
     const payload = {
       phoneNumber: data.phone,
       name: data.fullname,
+      password: data.password,
     };
-    fetch(`${baseURL}/api/Customer/register`, {
-      method: "POST",
+    axios.post(`${baseURL}/api/Customer/register`, payload, {
       headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+        'ngrok-skip-browser-warning': 69420,
+        'Content-Type': 'application/json',
+      }
     })
-      .then(async (res) => {
-        const result = await res.json();
-        if (res.status === 200) {
-          showSuccess("Đăng ký thành công");
-          navigate('/login')
-        } else {
-          showError(result.message || "Đăng ký thất bại");
+      .then((res) => {
+        if (res?.status === 200) {
+          showSuccess();
+          navigate('/login');
         }
       })
-      .catch(() => {
-        showError();
+      .catch((e) => {
+        showError(e?.response?.data?.message);
       });
   };
 
@@ -89,6 +91,44 @@ export default function RegisterPage() {
             />
             {errors.phone && (
               <p className="text-red-500 text-xs">{errors.phone.message}</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <label className="text-sm">Mật khẩu</label>
+            <input
+              type='password'
+              placeholder="Nhập Mật khẩu"
+              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
+                }`}
+              {...register("password", {
+                required: "Vui lòng nhập mật khẩu",
+                minLength: {
+                  value: 6,
+                  message: "Mật khẩu cần ít nhất 6 số",
+                },
+              })}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-xs">{errors.password.message}</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <label className="text-sm">Mật khẩu xác nhận</label>
+            <input
+              type='password'
+              placeholder="Nhập mật khẩu xác nhận"
+              className={`border px-5 py-2 rounded-lg ${errors.passwordConfirm ? "border-red-500" : "border-gray"
+                }`}
+              {...register("passwordConfirm", {
+                required: "Vui lòng nhập mật khẩu xác nhận",
+                minLength: {
+                  value: 6,
+                  message: "Mật khẩu cần ít nhất 6 số",
+                },
+              })}
+            />
+            {errors.passwordConfirm && (
+              <p className="text-red-500 text-xs">{errors.passwordConfirm.message}</p>
             )}
           </div>
           <button type="submit" className="button primary w-full mb-3">

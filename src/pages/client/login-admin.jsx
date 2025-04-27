@@ -28,10 +28,10 @@ export default function LoginAdminPage() {
             window.location.href = "/admin/account";
             return;
           } if (result.user.role === 2) {
-            window.location.href = "/staff/account";
+            window.location.href = "/staff/trip";
             return;
           } if (result.user.role === 3) {
-            window.location.href = "/drive/account";
+            window.location.href = "/drive/trip";
             return;
           }
           window.location.href = "/";
@@ -47,8 +47,12 @@ export default function LoginAdminPage() {
   return (
     <div className="flex items-center">
       <div className="px-8 md:px-10 md:w-1/2 max-w-[680px] w-full mx-auto py-10">
-        <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản quản lý</p>
-
+        <div className="flex justify-between w-full">
+          <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản quản lý</p>
+          <Link to="/login" className="button mb-4 !bg-warning !border-none !text-white">
+            <p className="">Đăng nhập người dùng</p>
+          </Link>
+        </div>
         <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2 mb-4">
             <label className="text-sm">Tên tài khoản</label>

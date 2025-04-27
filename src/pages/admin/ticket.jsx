@@ -20,7 +20,7 @@ const columns = [
 
 export default function TicketListPage() {
   const [dataList, setDataList] = useState([]);
-  const yourToken = localStorage.getItem('bus-token');
+  const yourToken = localStorage.getItem("bus-token");
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("date_desc");
   const [page, setPage] = useState(1);
@@ -36,27 +36,30 @@ export default function TicketListPage() {
   }, [keyword, sort, page]);
 
   function callApi({ keyword = "", sort = "", page = 1, limit = 10 }) {
-    axios.get(`${baseURL}/api/Ticket`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 69420,
-        'Authorization': `Bearer ${yourToken}`
-      },
-      params: {
-        Keyword: keyword,
-        SortBy: sort,
-        Page: page,
-        PageSize: limit,
-      },
-    })
+    axios
+      .get(`${baseURL}/api/Ticket`, {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": 69420,
+          Authorization: `Bearer ${yourToken}`,
+        },
+        params: {
+          Keyword: keyword,
+          SortBy: sort,
+          Page: page,
+          PageSize: limit,
+        },
+      })
       .then((res) => {
         if (res.status === 200) {
           const listData = res.data?.data || [];
-          setDataList(listData.map((item) => ({
-            ...item,
-            createdAt: formatDateTime(item.createdAt),
-            price: formatToMoney(item.price),
-          })));
+          setDataList(
+            listData.map((item) => ({
+              ...item,
+              createdAt: formatDateTime(item.createdAt),
+              price: formatToMoney(item.price),
+            }))
+          );
           if (res.data?.pagination) {
             setPagination(res.data.pagination);
           }
@@ -65,7 +68,7 @@ export default function TicketListPage() {
         }
       })
       .catch((error) => {
-        console.error('Axios error:', error);
+        console.error("Axios error:", error);
         showError();
       });
   }
@@ -95,12 +98,11 @@ export default function TicketListPage() {
   }
 
   return (
-    <div className='flex flex-row w-full'>
+    <div className="flex flex-row w-full">
       <SidebarAdmin />
-      <div className='flex flex-col w-full'>
-
+      <div className="flex flex-col w-full">
         <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-          <h1 className='text-2xl font-bold'>Danh sách vé</h1>
+          <h1 className="text-2xl font-bold">Danh sách vé</h1>
         </div>
 
         <div className="flex justify-between items-center px-4 h-[64px]">
@@ -111,7 +113,8 @@ export default function TicketListPage() {
               placeholder="Nhập từ khoá tìm kiếm..."
               className="w-[300px] border border-primary rounded-lg py-2 px-4"
               onChange={(e) => setKeyword(e.target.value)}
-            /> <select
+            />{" "}
+            <select
               className="border border-primary rounded-lg py-2 px-4"
               onChange={(e) => setSort(e.target.value)}
             >
@@ -156,6 +159,6 @@ export default function TicketListPage() {
           />
         </div>
       </div>
-    </div >
-  )
+    </div>
+  );
 }

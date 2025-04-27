@@ -63,7 +63,7 @@ export default function SearchTripPage() {
   }
 
   return (
-    <div className="px-8 md:px-10 md:w-2/3 mx-auto py-10">
+    <div className="px-8 md:px-10 md:w-2/3 mx-auto py-10 my-20">
       <div className="flex flex-row w-full gap-6">
         <div className="w-[260px] flex flex-col border h-full sticky top-24 rounded-lg p-4">
           <h3 className="font-semibold text-xl mb-2">Sắp xếp</h3>
@@ -86,7 +86,7 @@ export default function SearchTripPage() {
             ))}
           </div>
         </div>
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full min-h-[30vh]">
           <h1 className="text-2xl font-bold">
             Kết quả: {dataList?.length ?? 0}
           </h1>
@@ -187,7 +187,7 @@ function TripBox({ data }) {
                       {item?.locationName}:
                     </p>
                     <p className="text-xs text-gray-600 font-semibold">
-                      {(item?.stopDuration && item?.stopDuration.slice(0, 5)) ||
+                      {(item?.stopDuration && item?.stopDuration.slice(-5)) ||
                         "0 phút"}
                     </p>
                   </div>
