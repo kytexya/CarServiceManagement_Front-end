@@ -90,8 +90,8 @@ export default function StaffTransactionListPage() {
                   className="border border-primary rounded-lg py-2 px-4"
                   onChange={(e) => setSort(e.target.value)}
                 >
-                  <option value="date_asc">Theo ngày cũ nhất</option>
                   <option value="date_desc">Theo ngày tạo giảm dần</option>
+                  <option value="date_asc">Theo ngày cũ nhất</option>
                   <option value="price_desc">Theo giá giảm dần</option>
                 </select>
               </div>
