@@ -1,16 +1,16 @@
-import SidebarAdmin from '@/components/common/sidebar-admin';
-import { showError, showSuccess } from '@/utils';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import SidebarAdmin from "@/components/common/sidebar-admin";
+import { showError, showSuccess } from "@/utils";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate, useParams } from "react-router-dom";
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 export default function EditRouterPage() {
   const { id } = useParams();
-  const [data, setData] = useState()
+  const [data, setData] = useState();
   const navigate = useNavigate();
-  const yourToken = localStorage.getItem('bus-token');
+  const yourToken = localStorage.getItem("bus-token");
 
   const {
     setValue,
@@ -20,21 +20,22 @@ export default function EditRouterPage() {
   } = useForm();
 
   useEffect(() => {
-    axios.get(`${baseURL}/api/Route/${id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 69420,
-        'Authorization': `Bearer ${yourToken}`,
-      }
-    })
+    axios
+      .get(`${baseURL}/api/Route/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": 69420,
+          Authorization: `Bearer ${yourToken}`,
+        },
+      })
       .then((res) => {
         const result = res.data;
         if (res.status === 200) {
           setData(result);
-          setValue('routeId', result.routeId);
-          setValue('routeName', result.routeName);
-          setValue('distance', result.distance);
-          setValue('estimatedDuration', result.estimatedDuration);
+          setValue("routeId", result.routeId);
+          setValue("routeName", result.routeName);
+          setValue("distance", result.distance);
+          setValue("estimatedDuration", result.estimatedDuration);
         } else {
           showError(result?.message);
         }
@@ -42,7 +43,7 @@ export default function EditRouterPage() {
       .catch((e) => {
         showError(e.response?.data?.message);
       });
-  }, [id])
+  }, [id]);
 
   const onSubmit = (data) => {
     const payload = {
@@ -50,17 +51,18 @@ export default function EditRouterPage() {
       distance: parseInt(data.distance),
       estimatedDuration: parseInt(data.estimatedDuration),
     };
-    axios.put(`${baseURL}/api/Route/${id}`, payload, {
-      headers: {
-        'Authorization': `Bearer ${yourToken}`,
-        'ngrok-skip-browser-warning': 69420,
-        'Content-Type': 'application/json',
-      }
-    })
+    axios
+      .put(`${baseURL}/api/Route/${id}`, payload, {
+        headers: {
+          Authorization: `Bearer ${yourToken}`,
+          "ngrok-skip-browser-warning": 69420,
+          "Content-Type": "application/json",
+        },
+      })
       .then((res) => {
         if (res?.status === 200) {
           showSuccess();
-          navigate('/admin/router');
+          navigate("/admin/router");
         }
       })
       .catch((e) => {
@@ -69,11 +71,11 @@ export default function EditRouterPage() {
   };
 
   return (
-    <div className='flex flex-row w-full'>
+    <div className="flex flex-row w-full">
       <SidebarAdmin />
-      <div className='flex flex-col w-full'>
+      <div className="flex flex-col w-full">
         <div className="flex justify-between items-center h-[60px] px-4 shadow-lg">
-          <h1 className='text-2xl font-bold'>Sửa tuyến đường</h1>
+          <h1 className="text-2xl font-bold">Sửa tuyến đường</h1>
         </div>
         <div className="bg-white rounded-xl border border-gray-300 p-4 mt-10 mx-10">
           <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
@@ -83,8 +85,10 @@ export default function EditRouterPage() {
                 <input
                   type="text"
                   defaultValue={data?.routeName}
-                  className={`border px-5 py-2 rounded-lg ${errors.routeName ? "border-red-500" : "border-gray"
-                    }`}
+                  className={`border px-5 py-2 rounded-lg ${
+                    errors.routeName ? "border-red-500" : "border-gray"
+                  }`}
+                  disabled
                   {...register("routeName", {
                     required: "Vui lòng nhập dữ liệu",
                     minLength: {
@@ -94,7 +98,9 @@ export default function EditRouterPage() {
                   })}
                 />
                 {errors.routeName && (
-                  <p className="text-red-500 text-xs">{errors.routeName.message}</p>
+                  <p className="text-red-500 text-xs">
+                    {errors.routeName.message}
+                  </p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full">
@@ -103,8 +109,9 @@ export default function EditRouterPage() {
                   type="number"
                   inputMode="numeric"
                   defaultValue={data?.distance}
-                  className={`border px-5 py-2 rounded-lg ${errors.distance ? "border-red-500" : "border-gray"
-                    }`}
+                  className={`border px-5 py-2 rounded-lg ${
+                    errors.distance ? "border-red-500" : "border-gray"
+                  }`}
                   {...register("distance", {
                     required: "Vui lòng nhập dữ liệu",
                     pattern: {
@@ -114,21 +121,22 @@ export default function EditRouterPage() {
                   })}
                 />
                 {errors.distance && (
-                  <p className="text-red-500 text-xs">{errors.distance.message}</p>
+                  <p className="text-red-500 text-xs">
+                    {errors.distance.message}
+                  </p>
                 )}
               </div>
             </div>
             <div className="flex gap-10 w-full">
               <div className="flex flex-col gap-2 mb-4 w-full">
-                <label className="text-sm">
-                Thời gian ước tính(giờ)
-                </label>
+                <label className="text-sm">Thời gian ước tính(giờ)</label>
                 <input
                   type="number"
                   inputMode="numeric"
                   defaultValue={data?.estimatedDuration}
-                  className={`border px-5 py-2 rounded-lg ${errors.estimatedDuration ? "border-red-500" : "border-gray"
-                    }`}
+                  className={`border px-5 py-2 rounded-lg ${
+                    errors.estimatedDuration ? "border-red-500" : "border-gray"
+                  }`}
                   {...register("estimatedDuration", {
                     required: "Vui lòng nhập dữ liệu",
                     pattern: {
@@ -138,7 +146,9 @@ export default function EditRouterPage() {
                   })}
                 />
                 {errors.estimatedDuration && (
-                  <p className="text-red-500 text-xs">{errors.estimatedDuration.message}</p>
+                  <p className="text-red-500 text-xs">
+                    {errors.estimatedDuration.message}
+                  </p>
                 )}
               </div>
               <div className="flex flex-col gap-2 mb-4 w-full"></div>
@@ -161,5 +171,5 @@ export default function EditRouterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
