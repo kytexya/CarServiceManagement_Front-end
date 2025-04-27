@@ -10,7 +10,9 @@ const columns = [
   { header: "Mã ghế", field: "seatId" },
   { header: "Giá gốc", field: "originalPrice" },
   { header: "Giá khuyến mãi", field: "price" },
-  { header: "Giờ khởi tạo", field: "createdAt" },
+  { header: "Giờ xuất phát", field: "departureTime" },
+  { header: "Ngày xuất phát", field: "date" },
+  { header: "Khởi tạo", field: "createdAt" },
   { header: "Trạng thái", field: "status", className: "status-box" },
 ];
 
