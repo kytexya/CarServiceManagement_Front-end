@@ -14,6 +14,7 @@ export default function LoginPage() {
   const onSubmit = (data) => {
     const payload = {
       phoneNumber: data.phone,
+      password: data.password,
     };
     fetch(`${baseURL}/api/Customer/login`, {
       method: "POST",
@@ -67,6 +68,25 @@ export default function LoginPage() {
             />
             {errors.phone && (
               <p className="text-red-500 text-xs">{errors.phone.message}</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <label className="text-sm">Mật khẩu</label>
+            <input
+              type='password'
+              placeholder="Nhập mật khẩu"
+              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
+                }`}
+              {...register("password", {
+                required: "Vui lòng nhập mật khẩu",
+                minLength: {
+                  value: 6,
+                  message: "Mật khẩu cần ít nhất 6 số",
+                },
+              })}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-xs">{errors.password.message}</p>
             )}
           </div>
           <button
