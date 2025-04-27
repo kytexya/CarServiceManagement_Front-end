@@ -27,11 +27,13 @@ export default function LoginAdminPage() {
           if (result.user.role === 1) {
             window.location.href = "/admin/account";
             return;
-          } if (result.user.role === 2) {
-            window.location.href = "/staff/account";
+          }
+          if (result.user.role === 2) {
+            window.location.href = "/staff/trip";
             return;
-          } if (result.user.role === 3) {
-            window.location.href = "/drive/account";
+          }
+          if (result.user.role === 3) {
+            window.location.href = "/drive/trip";
             return;
           }
           window.location.href = "/";
@@ -55,8 +57,9 @@ export default function LoginAdminPage() {
             <input
               type="text"
               placeholder="Nhập tài khoản..."
-              className={`border px-5 py-2 rounded-lg ${errors.username ? "border-red-500" : "border-gray"
-                }`}
+              className={`border px-5 py-2 rounded-lg ${
+                errors.username ? "border-red-500" : "border-gray"
+              }`}
               {...register("username", {
                 required: "Vui lòng nhập tên tài khoản",
                 minLength: {
@@ -75,8 +78,9 @@ export default function LoginAdminPage() {
             <input
               type="password"
               placeholder="Enter your password"
-              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
-                }`}
+              className={`border px-5 py-2 rounded-lg ${
+                errors.password ? "border-red-500" : "border-gray"
+              }`}
               {...register("password", {
                 required: "Vui lòng nhập mật khẩu",
                 minLength: {
@@ -90,7 +94,10 @@ export default function LoginAdminPage() {
             )}
           </div>
 
-          <button type="submit" className="button !w-full primary rounded-lg mb-3">
+          <button
+            type="submit"
+            className="button !w-full primary rounded-lg mb-3"
+          >
             Đăng nhập
           </button>
           <Link to="/register" className="button">
