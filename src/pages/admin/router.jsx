@@ -74,7 +74,7 @@ export default function RouterListPage() {
   function handleDisable(name, id) {
     if (confirm(`Vô hiệu hoá ${name}?`)) {
       axios
-        .delete(`${baseURL}/api/Router/${id}`, {
+        .delete(`${baseURL}/api/Route/${id}`, {
           headers: {
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": 69420,
