@@ -27,12 +27,10 @@ export default function LoginAdminPage() {
           if (result.user.role === 1) {
             window.location.href = "/admin/account";
             return;
-          }
-          if (result.user.role === 2) {
+          } if (result.user.role === 2) {
             window.location.href = "/staff/trip";
             return;
-          }
-          if (result.user.role === 3) {
+          } if (result.user.role === 3) {
             window.location.href = "/drive/trip";
             return;
           }
@@ -49,17 +47,20 @@ export default function LoginAdminPage() {
   return (
     <div className="flex items-center">
       <div className="px-8 md:px-10 md:w-1/2 max-w-[680px] w-full mx-auto py-10">
-        <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản quản lý</p>
-
+        <div className="flex justify-between w-full">
+          <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản quản lý</p>
+          <Link to="/login" className="button mb-4 !bg-warning !border-none !text-white">
+            <p className="">Đăng nhập người dùng</p>
+          </Link>
+        </div>
         <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2 mb-4">
             <label className="text-sm">Tên tài khoản</label>
             <input
               type="text"
               placeholder="Nhập tài khoản..."
-              className={`border px-5 py-2 rounded-lg ${
-                errors.username ? "border-red-500" : "border-gray"
-              }`}
+              className={`border px-5 py-2 rounded-lg ${errors.username ? "border-red-500" : "border-gray"
+                }`}
               {...register("username", {
                 required: "Vui lòng nhập tên tài khoản",
                 minLength: {
@@ -78,9 +79,8 @@ export default function LoginAdminPage() {
             <input
               type="password"
               placeholder="Enter your password"
-              className={`border px-5 py-2 rounded-lg ${
-                errors.password ? "border-red-500" : "border-gray"
-              }`}
+              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
+                }`}
               {...register("password", {
                 required: "Vui lòng nhập mật khẩu",
                 minLength: {
@@ -94,10 +94,7 @@ export default function LoginAdminPage() {
             )}
           </div>
 
-          <button
-            type="submit"
-            className="button !w-full primary rounded-lg mb-3"
-          >
+          <button type="submit" className="button !w-full primary rounded-lg mb-3">
             Đăng nhập
           </button>
           <Link to="/register" className="button">
