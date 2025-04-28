@@ -1,6 +1,6 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import CustomTable from "@/components/common/table";
-import { showError } from "@/utils";
+import { formatToMoney, showError } from "@/utils";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
@@ -54,7 +54,11 @@ export default function TripListPage() {
       })
       .then((res) => {
         if (res.status === 200) {
-          setDataList(res.data?.data || []);
+          const data = res?.data?.data || [];
+          setDataList(data.map(item => ({
+            ...item,
+            price: formatToMoney(item.price)
+          })));
           if (res.data?.pagination) {
             setPagination(res.data.pagination);
           }
