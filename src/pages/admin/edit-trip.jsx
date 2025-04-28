@@ -79,7 +79,7 @@ export default function EditTripPage() {
       },
       params: {
         Page: 1,
-        PageSize: -1,
+        PageSize: 10000,
       },
     })
       .then((res) => {
@@ -101,6 +101,10 @@ export default function EditTripPage() {
         'Content-Type': 'application/json',
         'ngrok-skip-browser-warning': 69420,
         'Authorization': `Bearer ${yourToken}`
+      },
+      params: {
+        Page: 1,
+        PageSize: 10000,
       },
     })
       .then((res) => {
@@ -128,6 +132,10 @@ export default function EditTripPage() {
         'ngrok-skip-browser-warning': 69420,
         'Authorization': `Bearer ${yourToken}`
       },
+      params: {
+        Page: 1,
+        PageSize: 10000,
+      },
     })
       .then((res) => {
         if (res.status === 200) {
@@ -153,7 +161,11 @@ export default function EditTripPage() {
         'Content-Type': 'application/json',
         'ngrok-skip-browser-warning': 69420,
         'Authorization': `Bearer ${yourToken}`
-      }
+      },
+      params: {
+        Page: 1,
+        PageSize: 10000,
+      },
     })
       .then((res) => {
         if (res.status === 200) {
