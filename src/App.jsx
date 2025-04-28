@@ -47,6 +47,7 @@ import StaffTransactionListPage from './pages/staff/transaction';
 import StaffEditTripPage from './pages/staff/edit-trip';
 import { useEffect, useState } from 'react';
 import NotfoundPage from './components/common/notfound';
+import PaymentSuccessPage from './pages/client/payment';
 
 function App() {
   const [role, setRole] = useState(0);
@@ -73,6 +74,7 @@ function App() {
           <Route path="/order" element={<OrderPage />} />
           <Route path="/history" element={<HistoryTicket />} />
           <Route path="/edit-profile" element={<EditProfilePage />} />
+          <Route path="/api/payment/vnpay-callback" element={<PaymentSuccessPage />} />
           <Route path="/*" element={<NotfoundPage />} />
         </Route>
 
