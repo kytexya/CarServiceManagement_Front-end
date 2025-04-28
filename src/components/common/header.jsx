@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import IconMenu from "@/components/icons/IconMenu";
 import { useEffect, useState } from "react";
 import IconClose from "../icons/IconClose";
-
+import Logo from '@/assets/images/logo.png';
 export default function Header() {
   const [openMenu, setOpenMenu] = useState(false)
   const [profile, setProfile] = useState(false);
@@ -26,7 +26,7 @@ export default function Header() {
       <div className="relative flex justify-between items-center min-h-[72px] px-6 bg-primary">
         <Link className="min-h-72px aspect-video flex items-center" to='/'>
           <div className="text-4xl py-4 text-white">
-            LOGO
+            <img src={Logo} alt="logo" className="w-14 h-14 object-cover" />
           </div>
         </Link>
         <div className="flex items-center flex-wrap justify-end gap-3 max-lg:hidden">
