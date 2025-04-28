@@ -97,9 +97,9 @@ export default function LoginAdminPage() {
           <button type="submit" className="button !w-full primary rounded-lg mb-3">
             Đăng nhập
           </button>
-          <Link to="/register" className="button">
+          {/* <Link to="/register" className="button">
             Đăng ký
-          </Link>
+          </Link> */}
         </form>
       </div>
     </div>
