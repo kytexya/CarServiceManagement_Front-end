@@ -70,6 +70,10 @@ export default function AddTripPage() {
         'ngrok-skip-browser-warning': 69420,
         'Authorization': `Bearer ${yourToken}`
       },
+      params: {
+        Page: 1,
+        PageSize: 10000,
+      },
     })
       .then((res) => {
         if (res.status === 200) {
@@ -96,6 +100,10 @@ export default function AddTripPage() {
         'ngrok-skip-browser-warning': 69420,
         'Authorization': `Bearer ${yourToken}`
       },
+      params: {
+        Page: 1,
+        PageSize: 10000,
+      },
     })
       .then((res) => {
         if (res.status === 200) {
@@ -121,7 +129,11 @@ export default function AddTripPage() {
         'Content-Type': 'application/json',
         'ngrok-skip-browser-warning': 69420,
         'Authorization': `Bearer ${yourToken}`
-      }
+      },
+      params: {
+        Page: 1,
+        PageSize: 10000,
+      },
     })
       .then((res) => {
         if (res.status === 200) {
