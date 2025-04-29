@@ -10,7 +10,7 @@ moment.locale("vi-VN");
 const localizer = momentLocalizer(moment);
 
 const convertToDate = (dateStr) => {
-  const [year, month, day] = dateStr.split("-");
+  const [day, month, year] = dateStr.split("-");
   return new Date(year, month - 1, day);
 };
 
@@ -44,16 +44,16 @@ export default function StaffCalendarPage() {
         setData([]);
       });
   };
-
   useEffect(() => {
     const now = new Date();
-    const formattedDate = `${now.getMonth() + 1}/${now.getFullYear()}`;
+    // const formattedDate = `${now.getMonth() + 1}/${now.getFullYear()}`;
+    const formattedDate = `${now.getMonth() + 1}`;
     fetchData(formattedDate);
   }, []);
-
   const handleDateNavigate = (date) => {
     setCurrentDate(date);
-    const formattedDate = `${date.getMonth() + 1}/${date.getFullYear()}`;
+    // const formattedDate = `${date.getMonth() + 1}/${date.getFullYear()}`;
+    const formattedDate = `${date.getMonth() + 1}`;
     fetchData(formattedDate);
   };
   const eventPropGetter = (event) => {
