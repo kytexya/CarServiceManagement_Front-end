@@ -63,6 +63,10 @@ export default function OrderPage() {
   }, []);
 
   const onSubmit = () => {
+    if (profile?.customerId === undefined) {
+      showError('Vui lòng sử dụng tài khoản người dùng.');
+      return;
+    }
     setLoading(true);
     const payload = {
       customerId: profile.customerId,
