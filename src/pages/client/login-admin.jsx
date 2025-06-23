@@ -50,7 +50,7 @@ export default function LoginAdminPage() {
         <div className="flex justify-between w-full">
           <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản quản lý</p>
           <Link to="/login" className="button mb-4 !bg-warning !border-none !text-white">
-            <p className="">Đăng nhập người dùng</p>
+            <p className="">Đăng nhập nhân viên</p>
           </Link>
         </div>
         <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>

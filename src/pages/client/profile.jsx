@@ -1,93 +1,79 @@
-import Loading from '@/components/common/loading';
-import { showError } from '@/utils';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form';
+import React from 'react';
 import { Link } from 'react-router-dom';
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCar, FaHistory } from 'react-icons/fa';
+
+// Mock data for demonstration
+const mockCustomer = {
+    name: "Trần Văn Khách",
+    email: "tvkhach@example.com",
+    phoneNumber: "0909123456",
+    address: "456 Đường XYZ, Quận 2, TP. HCM",
+    vehicles: [
+        { id: 1, name: "Toyota Camry 2021", license: "51F-555.55" },
+        { id: 2, name: "Ford Ranger 2022", license: "60C-123.45" },
+    ]
+};
+
+const ProfileInfoRow = ({ icon, label, value }) => (
+    <div className="flex items-center border-b py-4">
+        <div className="w-8 text-primary">{icon}</div>
+        <div className="w-1/3 text-gray-600 font-semibold">{label}</div>
+        <div className="w-2/3 text-gray-800">{value}</div>
+    </div>
+);
 
 export default function ProfilePage() {
-  const {
-    setValue,
-  } = useForm();
-  const [profile, setProfile] = useState();
-  const [customerId, setCustomerId] = useState();
-  const [loading, setLoading] = useState(false);
+    return (
+        <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="p-8">
+                    <div className="flex flex-col md:flex-row items-center gap-8">
+                        <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-4xl font-bold">
+                            {mockCustomer.name.charAt(0)}
+                        </div>
+                        <div>
+                            <h1 className='text-3xl font-bold'>{mockCustomer.name}</h1>
+                            <p className="text-gray-500">{mockCustomer.email}</p>
+                        </div>
+                        <div className="md:ml-auto">
+                            <Link
+                                to="/edit-profile"
+                                className="button primary"
+                            >
+                                Chỉnh Sửa
+                            </Link>
+                        </div>
+                    </div>
+                </div>
 
-  useEffect(() => {
-    const profile = localStorage.getItem("bus-profile");
-    if (profile) {
-      const parsedProfile = JSON.parse(profile);
-      setCustomerId(parsedProfile.customerId);
-    }
-  }, []);
+                <div className="px-8 pb-8">
+                    <h2 className="text-xl font-bold mb-4 text-gray-800">Thông Tin Cá Nhân</h2>
+                    <div className="flex flex-col">
+                        <ProfileInfoRow icon={<FaUser />} label="Họ và Tên" value={mockCustomer.name} />
+                        <ProfileInfoRow icon={<FaEnvelope />} label="Email" value={mockCustomer.email} />
+                        <ProfileInfoRow icon={<FaPhone />} label="Số điện thoại" value={mockCustomer.phoneNumber} />
+                        <ProfileInfoRow icon={<FaMapMarkerAlt />} label="Địa chỉ" value={mockCustomer.address} />
+                    </div>
 
-  useEffect(() => {
-    if (!customerId) {
-      return;
-    }
-    setLoading(true);
-    axios.get(`${baseURL}/api/Customer/${customerId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 69420,
-      }
-    })
-      .then((res) => {
-        const result = res.data;
-        if (res.status === 200) {
-          setProfile(result);
-          setValue('name', result.name);
-          setValue('phoneNumber', result.phoneNumber);
-        }
-        setLoading(false);
-      })
-      .catch((e) => {
-        setLoading(false);
-        showError(e.response?.data?.message);
-      });
-  }, [customerId]);
-
-  if (loading) return <Loading />;
-
-  return (
-    <div className="px-8 md:px-6 md:w-[560px] mx-auto py-6 my-20 bg-white rounded-xl border border-gray-300">
-      <div className='flex flex-col w-full'>
-        <div className="flex justify-between items-center h-[60px]">
-          <h1 className='text-2xl font-bold text-center w-full'>Thông tin tài khoản</h1>
+                    <h2 className="text-xl font-bold mt-10 mb-4 text-gray-800">Thông Tin Xe & Dịch Vụ</h2>
+                    <div className="flex flex-col">
+                        <ProfileInfoRow
+                            icon={<FaCar />}
+                            label="Số xe đã đăng ký"
+                            value={`${mockCustomer.vehicles.length} xe`}
+                        />
+                        <div className="flex items-center border-b py-4">
+                            <div className="w-8 text-primary"><FaHistory /></div>
+                            <div className="w-1/3 text-gray-600 font-semibold">Lịch sử dịch vụ</div>
+                            <div className="w-2/3">
+                                <Link to="/service-history" className="text-primary hover:underline">
+                                    Xem chi tiết
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <form className="text-sm mt-2">
-          <div className="flex flex-col gap-4 w-full">
-            <div className="flex flex-row justify-between w-full">
-              <label className="text-xl font-bold">Họ và tên:</label>
-              <p>{profile?.name}</p>
-            </div>
-            <div className="flex flex-row justify-between w-full">
-              <label className="text-xl font-bold">Số điện thoại:</label>
-              <p>{profile?.phoneNumber}</p>
-            </div>
-            <div className="flex flex-row justify-between w-full">
-              <label className="text-xl font-bold">Điểm thưởng:</label>
-              <p>{profile?.score ?? 0} (điểm)</p>
-            </div>
-            {profile?.rankName &&
-              <div className="flex flex-row justify-between items-center w-full">
-                <label className="text-xl font-bold">Thành viên:</label>
-                <div className='flex-center bg-warning rounded-md px-6 py-1 text-white'>{profile?.rankName}</div>
-              </div>
-            }
-          </div>
-
-          <div className="flex gap-4 justify-end mt-8">
-            <Link
-              to="/edit-profile"
-              className="button primary float-right !w-[145px]"
-            >
-              Sửa thông tin
-            </Link>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
+    );
 }

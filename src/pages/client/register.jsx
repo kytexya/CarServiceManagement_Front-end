@@ -1,145 +1,110 @@
-import { showError, showSuccess } from "@/utils";
-import axios from "axios";
+import { showError } from "@/utils";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+import { Link } from "react-router-dom";
+import React from "react";
 
 export default function RegisterPage() {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm();
 
-  const navigate = useNavigate();
   const onSubmit = (data) => {
-    if (data.password !== data.passwordConfirm) {
-      showError("Mật khẩu xác nhận không khớp.");
-      return;
-    }
-    const payload = {
-      phoneNumber: data.phone,
-      name: data.fullname,
-      password: data.password,
-    };
-    axios.post(`${baseURL}/api/Customer/register`, payload, {
-      headers: {
-        'ngrok-skip-browser-warning': 69420,
-        'Content-Type': 'application/json',
-      }
-    })
-      .then((res) => {
-        if (res?.status === 200) {
-          showSuccess();
-          navigate('/login');
-        }
-      })
-      .catch((e) => {
-        showError(e?.response?.data?.message);
-      });
+    // Password confirmation is handled by react-hook-form validation
+    console.log("Registration Data:", data);
+    showError("Chức năng đăng ký chưa được kết nối API.");
   };
 
   return (
-    <div className="flex items-center">
-      <div className="px-8 md:px-10 md:w-1/2 max-w-[680px] w-full mx-auto py-10">
-        <p className="font-bold text-2xl mb-4">Đăng ký tài khoản của bạn</p>
-
-        <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-2 mb-4">
-            <label className="text-sm">Họ và tên</label>
-            <input
-              type="text"
-              placeholder="Nhập họ và tên..."
-              className={`border px-5 py-2 rounded-lg ${errors.fullname ? "border-red-500" : "border-gray"
-                }`}
-              {...register("fullname", {
-                required: "Vui lòng nhập họ tên",
-                minLength: {
-                  value: 6,
-                  message: "Tên phải từ 6 ký tự trở lên",
-                },
-              })}
-            />
-            {errors.fullname && (
-              <p className="text-red-500 text-xs">{errors.fullname.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <label className="text-sm">Số điện thoại</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="Nhập số điện thoại"
-              className={`border px-5 py-2 rounded-lg ${errors.phone ? "border-red-500" : "border-gray"
-                }`}
-              {...register("phone", {
-                required: "Vui lòng nhập số điện thoại",
-                minLength: {
-                  value: 10,
-                  message: "Số điện thoại cần ít nhất 10 số",
-                },
-                maxLength: {
-                  value: 10,
-                  message: "Vui lòng nhập đúng định dạng số điện thoại",
-                },
-                pattern: {
-                  value: /^[0-9]+$/,
-                  message: "Chỉ được nhập chữ số",
-                },
-              })}
-            />
-            {errors.phone && (
-              <p className="text-red-500 text-xs">{errors.phone.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <label className="text-sm">Mật khẩu</label>
-            <input
-              type='password'
-              placeholder="Nhập Mật khẩu"
-              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
-                }`}
-              {...register("password", {
-                required: "Vui lòng nhập mật khẩu",
-                minLength: {
-                  value: 6,
-                  message: "Mật khẩu cần ít nhất 6 số",
-                },
-              })}
-            />
-            {errors.password && (
-              <p className="text-red-500 text-xs">{errors.password.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <label className="text-sm">Mật khẩu xác nhận</label>
-            <input
-              type='password'
-              placeholder="Nhập mật khẩu xác nhận"
-              className={`border px-5 py-2 rounded-lg ${errors.passwordConfirm ? "border-red-500" : "border-gray"
-                }`}
-              {...register("passwordConfirm", {
-                required: "Vui lòng nhập mật khẩu xác nhận",
-                minLength: {
-                  value: 6,
-                  message: "Mật khẩu cần ít nhất 6 số",
-                },
-              })}
-            />
-            {errors.passwordConfirm && (
-              <p className="text-red-500 text-xs">{errors.passwordConfirm.message}</p>
-            )}
-          </div>
-          <button type="submit" className="button primary w-full mb-3">
-            Đăng ký tài khoản
-          </button>
-          <p className="text-center">
-            Bạn đã có tài khoản?
-            <Link to="/login" className="ml-1 text-primary font-bold">
-              Đăng nhập
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8"
+         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487754180451-c456fccbd3d4?q=80&w=2070&auto=format&fit=crop')" }}>
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Tạo tài khoản mới
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Hoặc{" "}
+            <Link to="/login" className="font-medium text-primary hover:text-primary-dark">
+              đăng nhập vào tài khoản của bạn
             </Link>
           </p>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="rounded-md shadow-sm -space-y-px flex flex-col gap-4">
+            <div>
+              <label className="font-semibold text-sm">Họ và tên</label>
+              <input
+                type="text"
+                placeholder="Nhập họ và tên"
+                className={`input-field mt-1 ${errors.name ? "border-red-500" : "border-gray-300"}`}
+                {...register("name", { required: "Vui lòng nhập họ tên" })}
+              />
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+            </div>
+            <div>
+              <label className="font-semibold text-sm">Email</label>
+              <input
+                type="email"
+                placeholder="Nhập địa chỉ email"
+                className={`input-field mt-1 ${errors.email ? "border-red-500" : "border-gray-300"}`}
+                {...register("email", { 
+                  required: "Vui lòng nhập email",
+                  pattern: { value: /^\S+@\S+$/i, message: "Địa chỉ email không hợp lệ" } 
+                })}
+              />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            </div>
+            <div>
+              <label className="font-semibold text-sm">Số điện thoại</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="Nhập số điện thoại"
+                className={`input-field mt-1 ${errors.phoneNumber ? "border-red-500" : "border-gray-300"}`}
+                {...register("phoneNumber", {
+                  required: "Vui lòng nhập số điện thoại",
+                  pattern: { value: /^[0-9]{10}$/, message: "Số điện thoại phải có 10 chữ số" },
+                })}
+              />
+              {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
+            </div>
+            <div>
+              <label className="font-semibold text-sm">Mật khẩu</label>
+              <input
+                type="password"
+                placeholder="Nhập mật khẩu"
+                className={`input-field mt-1 ${errors.password ? "border-red-500" : "border-gray-300"}`}
+                {...register("password", {
+                  required: "Vui lòng nhập mật khẩu",
+                  minLength: { value: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" },
+                })}
+              />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+            </div>
+            <div>
+              <label className="font-semibold text-sm">Xác nhận mật khẩu</label>
+              <input
+                type="password"
+                placeholder="Nhập lại mật khẩu"
+                className={`input-field mt-1 ${errors.passwordConfirm ? "border-red-500" : "border-gray-300"}`}
+                {...register("passwordConfirm", {
+                  required: "Vui lòng xác nhận mật khẩu",
+                  validate: (value) => value === watch('password') || "Mật khẩu xác nhận không khớp",
+                })}
+              />
+              {errors.passwordConfirm && <p className="text-red-500 text-xs mt-1">{errors.passwordConfirm.message}</p>}
+            </div>
+          </div>
+
+          <div>
+            <button type="submit" className="button primary w-full">
+              Đăng ký
+            </button>
+          </div>
         </form>
       </div>
     </div>

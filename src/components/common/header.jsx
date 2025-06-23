@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import IconMenu from "@/components/icons/IconMenu";
 import { useEffect, useState } from "react";
 import IconClose from "../icons/IconClose";
-import Logo from '@/assets/images/logo.png';
+import Logo from '@/assets/images/logo-car.png';
 export default function Header() {
   const [openMenu, setOpenMenu] = useState(false)
   const [profile, setProfile] = useState(false);
@@ -31,8 +31,8 @@ export default function Header() {
         </Link>
         <div className="flex items-center flex-wrap justify-end gap-3 max-lg:hidden">
           <nav className="flex gap-5 text-white font-bold">
-            <Link to="/about" className="hover:text-white">Giới thiệu</Link>
-            <Link to="/history" className="hover:text-white">Vé của tôi</Link>
+            
+            
           </nav>
           {profile ?
             <div className="text-white">

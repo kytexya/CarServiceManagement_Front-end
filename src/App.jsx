@@ -1,4 +1,5 @@
 import './index.css';
+import 'react-toastify/dist/ReactToastify.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import Layout from '@/components/common/layout';
@@ -13,47 +14,49 @@ import AccountListPage from '@/pages/admin/account';
 import AddAccountList from '@/pages/admin/add-account';
 import EditAccountList from '@/pages/admin/edit-account';
 import AdminLayout from '@/components/common/admin-layout';
-import LocationListPage from '@/pages/admin/location';
-import AddLocationPage from '@/pages/admin/add-location';
-import EditLocationPage from '@/pages/admin/edit-location';
-import RouterListPage from '@/pages/admin/router';
-import AddRouterPage from './pages/admin/add-router';
-import EditRouterPage from './pages/admin/edit-router';
-import BusListPage from '@/pages/admin/bus';
-import AddBusPage from '@/pages/admin/add-bus';
-import EditBusPage from '@/pages/admin/edit-bus';
-import TripListPage from '@/pages/admin/trip';
-import AddTripPage from '@/pages/admin/add-trip';
-import EditTripPage from '@/pages/admin/edit-trip';
 import ReportPage from '@/pages/admin/report';
 import TransactionListPage from '@/pages/admin/transaction';
-import TicketListPage from '@/pages/admin/ticket';
 import PromotionListPage from '@/pages/admin/promotion';
 import AddPromotionPage from '@/pages/admin/add-promotion';
 import EditPromotionPage from './pages/admin/edit-promotion';
-import SearchTripPage from '@/pages/client/search-trip';
-import OrderPage from '@/pages/client/order';
-import HistoryTicket from '@/pages/client/history';
+
+// Renamed and new components for CarServ
+import ServiceRequestPage from '@/pages/client/service-request';
+import ServiceHistoryPage from '@/pages/client/service-history';
 import EditProfilePage from './pages/client/edit-profile';
-import DriveTripPage from '@/pages/admin/drive-trip';
-import DriveTripDetailPage from '@/pages/admin/drive-trip-detail';
-import StaffTripPage from '@/pages/staff/staff-trip';
-import StaffTicketPage from './pages/staff/staff-ticket';
-import StaffCalendarPage from './pages/staff/staff-trip-calendar';
-import StaffAccountListPage from './pages/staff/account';
-import StaffAddAccountList from './pages/staff/add-account';
-import StaffEditAccountList from './pages/staff/edit-account';
-import StaffTransactionListPage from './pages/staff/transaction';
-import StaffEditTripPage from './pages/staff/edit-trip';
+
+// Service Staff components from the new folder
+import StaffAccountListPage from './pages/service-staff/account';
+import StaffAddAccountList from './pages/service-staff/add-account';
+import StaffEditAccountList from './pages/service-staff/edit-account';
+import StaffTransactionListPage from './pages/service-staff/transaction';
+
+// New Inventory Manager Pages
+import InventoryPage from './pages/inventory-manager/inventory';
+import AddInventoryPage from './pages/inventory-manager/inventory/add';
+import EditInventoryPage from './pages/inventory-manager/inventory/edit';
+
+// New Admin Service Management Pages
+import ServiceManagementPage from './pages/admin/services';
+import AddServicePage from './pages/admin/services/add';
+import EditServicePage from './pages/admin/services/edit';
+
 import { useEffect, useState } from 'react';
 import NotfoundPage from './components/common/notfound';
 import PaymentSuccessPage from './pages/client/payment';
+
+// Placeholder for new pages
+const ServicesPage = () => <div className='text-center p-10 text-3xl'>Service Selection Page (To be implemented)</div>;
+const AppointmentBookingPage = () => <div className='text-center p-10 text-3xl'>Appointment Booking Page (To be implemented)</div>;
+const InventoryDashboard = () => <div className='text-center p-10 text-3xl'>Inventory Dashboard (To be implemented)</div>;
+
 
 function App() {
   const [role, setRole] = useState(0);
 
   useEffect(() => {
-    const profile = localStorage.getItem("bus-profile");
+    // Using a new key for the new application to avoid conflicts
+    const profile = localStorage.getItem("carserv-profile");
     if (profile) {
       const parsedProfile = JSON.parse(profile);
       setRole(parsedProfile.role);
@@ -64,78 +67,55 @@ function App() {
     <BrowserRouter>
       <ToastContainer />
       <Routes>
+        {/* Customer-facing routes */}
         <Route element={<Layout />}>
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/login-manager" element={<LoginAdminPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/trip" element={<SearchTripPage />} />
-          <Route path="/order" element={<OrderPage />} />
-          <Route path="/history" element={<HistoryTicket />} />
           <Route path="/edit-profile" element={<EditProfilePage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/book-appointment" element={<AppointmentBookingPage />} />
+          <Route path="/service-request" element={<ServiceRequestPage />} />
+          <Route path="/service-history" element={<ServiceHistoryPage />} />
           <Route path="/api/payment/vnpay-callback" element={<PaymentSuccessPage />} />
-          <Route path="/*" element={<NotfoundPage />} />
+          <Route path="*" element={<NotfoundPage />} />
         </Route>
 
-        {role === 3 &&
-          <Route path="/drive" element={<AdminLayout />}>
-            <Route path="trip" element={<DriveTripPage />} />
-            <Route path="trip/:id" element={<DriveTripDetailPage />} />
-          </Route>
-        }
+        {/* Service Staff routes */}
+        <Route path="/service-staff" element={<AdminLayout />}>
+          <Route path="account" element={<StaffAccountListPage />} />
+          <Route path="account/add" element={<StaffAddAccountList />} />
+          <Route path="account/edit/:id" element={<StaffEditAccountList />} />
+          <Route path="transaction" element={<StaffTransactionListPage />} />
+        </Route>
 
-        {role === 2 &&
-          <Route path="/staff" element={<AdminLayout />}>
-            <Route path="trip" element={<StaffTripPage />} />
-            <Route path="trip/:id" element={<StaffEditTripPage />} />
-            <Route path="ticket" element={<StaffTicketPage />} />
-            <Route path="trip-calendar" element={<StaffCalendarPage />} />
-            <Route path="account" element={<StaffAccountListPage />} />
-            <Route path="account/add" element={<StaffAddAccountList />} />
-            <Route path="account/edit/:id" element={<StaffEditAccountList />} />
-            <Route path="transaction" element={<StaffTransactionListPage />} />
-          </Route>
-        }
+        {/* Inventory Manager routes */}
+        <Route path="/inventory-manager" element={<AdminLayout />}>
+          <Route path="inventory" element={<InventoryPage />} />
+          <Route path="inventory/add" element={<AddInventoryPage />} />
+          <Route path="inventory/edit/:id" element={<EditInventoryPage />} />
+        </Route>
 
-        {role === 1 &&
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="account" element={<AccountListPage />} />
-            <Route path="account/add" element={<AddAccountList />} />
-            <Route path="account/edit/:id" element={<EditAccountList />} />
+        {/* Admin routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="account" element={<AccountListPage />} />
+          <Route path="account/add" element={<AddAccountList />} />
+          <Route path="account/edit/:id" element={<EditAccountList />} />
 
-            <Route path="location" element={<LocationListPage />} />
-            <Route path="location/add" element={<AddLocationPage />} />
-            <Route path="location/edit/:id" element={<EditLocationPage />} />
+          <Route path="promotion" element={<PromotionListPage />} />
+          <Route path="promotion/add" element={<AddPromotionPage />} />
+          <Route path="promotion/edit/:id" element={<EditPromotionPage />} />
 
-            <Route path="router" element={<RouterListPage />} />
-            <Route path="router/add" element={<AddRouterPage />} />
-            <Route path="router/edit/:id" element={<EditRouterPage />} />
+          <Route path="services" element={<ServiceManagementPage />} />
+          <Route path="services/add" element={<AddServicePage />} />
+          <Route path="services/edit/:id" element={<EditServicePage />} />
 
-
-            <Route path="bus" element={<BusListPage />} />
-            <Route path="bus/add" element={<AddBusPage />} />
-            <Route path="bus/edit/:id" element={<EditBusPage />} />
-
-            <Route path="trip" element={<TripListPage />} />
-            <Route path="trip/add" element={<AddTripPage />} />
-            <Route path="trip/edit/:id" element={<EditTripPage />} />
-
-            <Route path="promotion" element={<PromotionListPage />} />
-            <Route path="promotion/add" element={<AddPromotionPage />} />
-            <Route path="promotion/edit/:id" element={<EditPromotionPage />} />
-
-            <Route path="report" element={<ReportPage />} />
-
-            <Route path="transaction" element={<TransactionListPage />} />
-
-            <Route path="ticket" element={<TicketListPage />} />
-
-          </Route>
-        }
-
+          <Route path="report" element={<ReportPage />} />
+          <Route path="transaction" element={<TransactionListPage />} />
+        </Route>
       </Routes>
-
     </BrowserRouter>
   );
 }

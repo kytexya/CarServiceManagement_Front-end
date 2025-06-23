@@ -1,114 +1,70 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { formatToMoney, showError, showSuccess } from '@/utils';
-import Loading from '@/components/common/loading';
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { formatToMoney } from '@/utils';
+import { FaCheckCircle, FaTimesCircle, FaCreditCard, FaReceipt, FaTag } from 'react-icons/fa';
 
-export default function PaymentSuccessPage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(urlParams);
-    const vnp_Amount = params.vnp_Amount / 100;
-    const vnp_BankCode = params.vnp_BankCode;
-    const vnp_BankTranNo = params.vnp_BankTranNo;
-    const vnp_ResponseCode = params.vnp_ResponseCode;
-    const [customerId, setCustomerId] = useState();
-    const navigate = useNavigate();
+// Mock data for demonstration
+const mockTransaction = {
+    bankCode: "NCB",
+    bankTranNo: "VNP14282036",
+    transactionId: "SRV-1721722883",
+    amount: 750000,
+};
 
-    useEffect(() => {
-        const profile = localStorage.getItem("bus-profile");
-        if (profile) {
-            const parsedProfile = JSON.parse(profile);
-            setCustomerId(parsedProfile?.customerId);
-        }
-    }, []);
-
-    const vnp_TxnRef = params.vnp_TxnRef;
-    const [status, setStatus] = useState();
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (customerId && vnp_ResponseCode === '00') {
-            setLoading(true);
-            const payload = { customerId: customerId };
-            axios.post(`${baseURL}/api/Transaction`, payload, {
-                headers: {
-                    'ngrok-skip-browser-warning': 69420,
-                    'Content-Type': 'application/json',
-                }
-            })
-                .then((res) => {
-                    if (res?.status === 200) {
-                        showSuccess();
-                        setStatus('success');
-                        setLoading(false);
-                    }
-                })
-                .catch((e) => {
-                    setLoading(false);
-                    setStatus('fail');
-                    showError(e.response?.data?.message);
-                });
-        }
-    }, [customerId, vnp_ResponseCode]);
-
-    if (loading | status) {
-        <Loading />
-    }
+export default function PaymentConfirmationPage() {
+    // Demo-only state to toggle between success and failure views
+    const [isSuccess, setIsSuccess] = useState(true);
 
     return (
-        <div className="mx-auto max-w-md px-5 flex flex-col mt-32 gap-6 mb-20">
-            <div className="border rounded-2xl shadow-md p-8">
-                <div className="flex flex-col items-center gap-4">
-                    {status === 'success' && (
-                        <div className="flex flex-col items-center gap-4">
-
-                            <p className="text-success text-center font-bold">
-                                Thanh toán giao dịch thành công
-                            </p>
-                        </div>
-                    )}
-                    {status === 'fail' &&
-                        (
-                            <div className="flex flex-col items-center gap-4">
-                                <p className="text-danger text-center font-bold">
-                                    Thanh toán giao dịch thất bại
-                                </p>
-                            </div>
-                        )}
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4">
+            <div className="max-w-md w-full mx-auto">
+                {/* Demo-only controls */}
+                <div className="flex justify-center gap-4 mb-4">
+                    <button onClick={() => setIsSuccess(true)} className={`button ${isSuccess ? 'primary' : ''}`}>Xem Giao Diện Thành Công</button>
+                    <button onClick={() => setIsSuccess(false)} className={`button ${!isSuccess ? '!bg-red-500 text-white' : ''}`}>Xem Giao Diện Thất Bại</button>
                 </div>
 
-                <div className="my-6 border-t"></div>
-
-                <div className="flex flex-col gap-4 text-sm">
-                    <div className="flex justify-between">
-                        <span className="font-semibold">Ngân hàng:</span>
-                        <span>{vnp_BankCode}</span>
-                    </div>
-
-                    {vnp_BankTranNo && (
-                        <div className="flex justify-between">
-                            <span className="font-semibold">Mã chuyển khoản:</span>
-                            <span>{vnp_BankTranNo}</span>
+                <div className="bg-white rounded-2xl shadow-xl p-8">
+                    {isSuccess ? (
+                        <div className="flex flex-col items-center gap-4 text-center">
+                            <FaCheckCircle className="text-6xl text-green-500" />
+                            <h1 className="text-2xl font-bold text-gray-800">Thanh toán thành công!</h1>
+                            <p className="text-gray-600">Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của CarServ.</p>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-4 text-center">
+                            <FaTimesCircle className="text-6xl text-red-500" />
+                            <h1 className="text-2xl font-bold text-gray-800">Thanh toán thất bại</h1>
+                            <p className="text-gray-600">Đã có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại hoặc liên hệ hỗ trợ.</p>
                         </div>
                     )}
 
-                    <div className="flex justify-between">
-                        <span className="font-semibold">Mã giao dịch:</span>
-                        <span>{vnp_TxnRef}</span>
+                    <div className="my-6 border-t border-gray-200"></div>
+
+                    <div className="flex flex-col gap-4 text-sm">
+                        <div className="flex justify-between">
+                            <span className="font-semibold text-gray-500 flex items-center gap-2"><FaCreditCard /> Ngân hàng</span>
+                            <span className="font-mono">{mockTransaction.bankCode}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-semibold text-gray-500 flex items-center gap-2"><FaReceipt /> Mã GD Ngân hàng</span>
+                            <span className="font-mono">{isSuccess ? mockTransaction.bankTranNo : "N/A"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-semibold text-gray-500 flex items-center gap-2"><FaTag /> Mã đơn hàng</span>
+                            <span className="font-mono">{mockTransaction.transactionId}</span>
+                        </div>
+                        <div className="flex justify-between text-base font-bold">
+                            <span>TỔNG CỘNG</span>
+                            <span>{formatToMoney(mockTransaction.amount)}</span>
+                        </div>
                     </div>
 
-                    <div className="flex justify-between">
-                        <span className="font-semibold">Số tiền:</span>
-                        <span>{formatToMoney(vnp_Amount)}</span>
+                    <div className="mt-8">
+                        <Link to="/service-history" className="button primary w-full">
+                            Xem Lịch Sử Dịch Vụ
+                        </Link>
                     </div>
-
-                    <button
-                        onClick={() => navigate("/history")}
-                        className="button !bg-blue-500 !text-white"
-                    >
-                        Lịch sử đặt vé
-                    </button>
                 </div>
             </div>
         </div>
