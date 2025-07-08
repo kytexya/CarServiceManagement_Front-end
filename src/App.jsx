@@ -44,6 +44,7 @@ import EditServicePage from './pages/admin/services/edit';
 import { useEffect, useState } from 'react';
 import NotfoundPage from './components/common/notfound';
 import PaymentSuccessPage from './pages/client/payment';
+import LoginInventoryPage from './pages/client/login-inventory';
 
 // Placeholder for new pages
 const ServicesPage = () => <div className='text-center p-10 text-3xl'>Service Selection Page (To be implemented)</div>;
@@ -67,18 +68,18 @@ function App() {
     <BrowserRouter>
       <ToastContainer />
       <Routes>
-        {/* Customer-facing routes */}
+        {/* Login page as landing page, rendered outside Layout to remove header/footer */}
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/login-admin" element={<LoginAdminPage />} />
+        <Route path="/login-staff" element={<LoginPage />} />
+        <Route path="/login-inventory" element={<LoginInventoryPage />} />
+        {/* Admin, Staff, Manager routes giữ nguyên */}
+        {/* Customer-facing routes và các route liên quan đến customer đã bị xóa */}
         <Route element={<Layout />}>
-          <Route path="/" element={<Homepage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/login-manager" element={<LoginAdminPage />} />
-          <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/edit-profile" element={<EditProfilePage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/book-appointment" element={<AppointmentBookingPage />} />
-          <Route path="/service-request" element={<ServiceRequestPage />} />
-          <Route path="/service-history" element={<ServiceHistoryPage />} />
           <Route path="/api/payment/vnpay-callback" element={<PaymentSuccessPage />} />
           <Route path="*" element={<NotfoundPage />} />
         </Route>

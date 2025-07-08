@@ -45,22 +45,16 @@ export default function LoginAdminPage() {
   };
 
   return (
-    <div className="flex items-center">
-      <div className="px-8 md:px-10 md:w-1/2 max-w-[680px] w-full mx-auto py-10">
-        <div className="flex justify-between w-full">
-          <p className="font-bold text-2xl mb-4">Đăng nhập tài khoản quản lý</p>
-          <Link to="/login" className="button mb-4 !bg-warning !border-none !text-white">
-            <p className="">Đăng nhập nhân viên</p>
-          </Link>
-        </div>
-        <form className="text-sm" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-2 mb-4">
-            <label className="text-sm">Tên tài khoản</label>
+    <div className="w-screen h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white rounded-xl shadow-lg p-10 flex flex-col items-center w-full max-w-sm">
+        <p className="font-bold text-2xl mb-6">Đăng nhập tài khoản admin</p>
+        <form className="w-full text-base" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-2 mb-5">
+            <label className="text-sm font-medium">Tên tài khoản</label>
             <input
               type="text"
               placeholder="Nhập tài khoản..."
-              className={`border px-5 py-2 rounded-lg ${errors.username ? "border-red-500" : "border-gray"
-                }`}
+              className={`border px-5 py-2 rounded-lg ${errors.username ? "border-red-500" : "border-gray-300"}`}
               {...register("username", {
                 required: "Vui lòng nhập tên tài khoản",
                 minLength: {
@@ -74,13 +68,12 @@ export default function LoginAdminPage() {
             )}
           </div>
 
-          <div className="flex flex-col gap-2 mb-4">
-            <label className="text-sm">Mật khẩu</label>
+          <div className="flex flex-col gap-2 mb-6">
+            <label className="text-sm font-medium">Mật khẩu</label>
             <input
               type="password"
-              placeholder="Enter your password"
-              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray"
-                }`}
+              placeholder="Nhập mật khẩu..."
+              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray-300"}`}
               {...register("password", {
                 required: "Vui lòng nhập mật khẩu",
                 minLength: {
@@ -94,12 +87,9 @@ export default function LoginAdminPage() {
             )}
           </div>
 
-          <button type="submit" className="button !w-full primary rounded-lg mb-3">
+          <button type="submit" className="button !w-full primary rounded-lg mb-2 text-base font-semibold">
             Đăng nhập
           </button>
-          {/* <Link to="/register" className="button">
-            Đăng ký
-          </Link> */}
         </form>
       </div>
     </div>

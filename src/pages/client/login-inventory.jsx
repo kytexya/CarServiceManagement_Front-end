@@ -1,10 +1,9 @@
 import { showError, showSuccess } from "@/utils";
 import { useForm } from "react-hook-form";
-import LogoCar from '@/assets/images/logo-car.png';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
-export default function LoginPage() {
+export default function LoginInventoryPage() {
   const {
     register,
     handleSubmit,
@@ -16,7 +15,7 @@ export default function LoginPage() {
       username: data.username,
       password: data.password,
     };
-    fetch(`${baseURL}/api/Staff/login`, {
+    fetch(`${baseURL}/api/InventoryManager/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,8 +25,8 @@ export default function LoginPage() {
       .then(async (res) => {
         const result = await res.json();
         if (res.status === 200) {
-          localStorage.setItem("bus-profile", JSON.stringify(result));
-          window.location.href = "/";
+          localStorage.setItem("carserv-profile", JSON.stringify(result));
+          window.location.href = "/inventory-manager/inventory";
         } else {
           showError(result.message || "Đăng nhập thất bại");
         }
@@ -38,13 +37,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200 py-16 md:py-24">
-      <div className="bg-white rounded-2xl shadow-2xl p-10 flex flex-col items-center w-full max-w-sm border border-blue-100">
-        {/* Logo or icon */}
-        <div className="mb-6 flex flex-col items-center">
-          <img src={LogoCar} alt="Logo" className="w-16 h-16 mb-2 rounded-full shadow" />
-          <p className="font-bold text-2xl text-blue-700">Đăng nhập</p>
-        </div>
+    <div className="w-screen h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white rounded-xl shadow-lg p-10 flex flex-col items-center w-full max-w-sm">
+        <h1 className="font-bold text-2xl mb-6">Đăng nhập Manager</h1>
         <form className="w-full text-base" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2 mb-5">
             <label className="text-sm font-medium">Tên tài khoản</label>
@@ -84,15 +79,12 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 mb-2 text-base font-semibold shadow transition-colors duration-200"
+            className="button !w-full primary rounded-lg mb-2 text-base font-semibold"
           >
             Đăng nhập
           </button>
-          <a href="/register" className="w-full block mt-2 text-center text-blue-600 hover:underline text-sm">
-            Đăng ký tài khoản mới
-          </a>
         </form>
       </div>
     </div>
   );
-}
+} 
