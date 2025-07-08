@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import Logo from '@/assets/images/logo.png';
+import Logo from '@/assets/images/logo-car.png';
 
 export default function SidebarAdmin() {
   const location = useLocation();
@@ -12,10 +12,10 @@ export default function SidebarAdmin() {
 
   return (
     <div className='h-[100vh] min-w-[220px] sticky top-0 bg-primary drop-shadow-sm flex flex-col'>
-      <Link className="px-6 aspect-video flex items-center max-h-[64px]" to='/'>
-        <div className="text-4xl py-4 text-white flex items-center gap-2">
-          <img src={Logo} alt="logo" className="w-12 h-12 object-cover" />
-          <span className='text-2xl font-bold'>CarServ</span>
+      <Link className="px-6 aspect-video flex items-center max-h-[64px] justify-center" to='/'>
+        <div className="text-4xl py-4 text-white flex items-center gap-2 justify-center w-full">
+          <img src={Logo} alt="logo" className="w-20 h-20 object-cover" />
+          <span className='text-2xl font-bold'></span>
         </div>
       </Link>
       <div className='flex-grow'>
@@ -52,13 +52,6 @@ export default function SidebarAdmin() {
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('transaction') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
             Quản lý giao dịch
-          </div>
-        </Link>
-        <Link to='/admin/settings'>
-          <div
-            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('settings') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
-          >
-            Cài đặt
           </div>
         </Link>
       </div>
