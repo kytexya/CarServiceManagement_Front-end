@@ -7,7 +7,7 @@ export default function Header() {
       <Link to="/" className="flex items-center gap-2">
         <img src={Logo} alt="logo" className="w-10 h-10 object-cover rounded-full" />
         <span className="text-white text-xl font-bold">Car Service</span>
-      </Link>
+        </Link>
     </header>
   );
-} 
+}
