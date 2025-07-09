@@ -30,6 +30,7 @@ import StaffAccountListPage from './pages/service-staff/account';
 import StaffAddAccountList from './pages/service-staff/add-account';
 import StaffEditAccountList from './pages/service-staff/edit-account';
 import StaffTransactionListPage from './pages/service-staff/transaction';
+import StaffAppointmentCalendar from './pages/service-staff/appointment';
 
 // New Inventory Manager Pages
 import InventoryPage from './pages/inventory-manager/inventory';
@@ -90,6 +91,7 @@ function App() {
           <Route path="account/add" element={<StaffAddAccountList />} />
           <Route path="account/edit/:id" element={<StaffEditAccountList />} />
           <Route path="transaction" element={<StaffTransactionListPage />} />
+          <Route path="appointments" element={<StaffAppointmentCalendar />} />
         </Route>
 
         {/* Inventory Manager routes */}
