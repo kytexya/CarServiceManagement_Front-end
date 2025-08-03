@@ -7,7 +7,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import LoginPage from '@/pages/client/login';
 import RegisterPage from '@/pages/client/register';
 import Homepage from '@/components/common/homepage';
-import LoginAdminPage from '@/pages/client/login-admin';
 import ProfilePage from '@/pages/client/profile';
 import { ToastContainer } from 'react-toastify';
 import AccountListPage from '@/pages/admin/account';
@@ -36,6 +35,10 @@ import StaffAppointmentCalendar from './pages/service-staff/appointment';
 import InventoryPage from './pages/inventory-manager/inventory';
 import AddInventoryPage from './pages/inventory-manager/inventory/add';
 import EditInventoryPage from './pages/inventory-manager/inventory/edit';
+import DashboardPage from './pages/inventory-manager/dashboard';
+import ImportPage from './pages/inventory-manager/import';
+import ExportPage from './pages/inventory-manager/export';
+import HistoryPage from './pages/inventory-manager/history';
 
 // New Admin Service Management Pages
 import ServiceManagementPage from './pages/admin/services';
@@ -44,13 +47,10 @@ import EditServicePage from './pages/admin/services/edit';
 
 import { useEffect, useState } from 'react';
 import NotfoundPage from './components/common/notfound';
-import PaymentSuccessPage from './pages/client/payment';
-import LoginInventoryPage from './pages/client/login-inventory';
 
 // Placeholder for new pages
 const ServicesPage = () => <div className='text-center p-10 text-3xl'>Service Selection Page (To be implemented)</div>;
 const AppointmentBookingPage = () => <div className='text-center p-10 text-3xl'>Appointment Booking Page (To be implemented)</div>;
-const InventoryDashboard = () => <div className='text-center p-10 text-3xl'>Inventory Dashboard (To be implemented)</div>;
 
 
 function App() {
@@ -71,9 +71,6 @@ function App() {
       <Routes>
         {/* Login page as landing page, rendered outside Layout to remove header/footer */}
         <Route path="/" element={<LoginPage />} />
-        <Route path="/login-admin" element={<LoginAdminPage />} />
-        <Route path="/login-staff" element={<LoginPage />} />
-        <Route path="/login-inventory" element={<LoginInventoryPage />} />
         {/* Admin, Staff, Manager routes giữ nguyên */}
         {/* Customer-facing routes và các route liên quan đến customer đã bị xóa */}
         <Route element={<Layout />}>
@@ -81,7 +78,6 @@ function App() {
           <Route path="/edit-profile" element={<EditProfilePage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/book-appointment" element={<AppointmentBookingPage />} />
-          <Route path="/api/payment/vnpay-callback" element={<PaymentSuccessPage />} />
           <Route path="*" element={<NotfoundPage />} />
         </Route>
 
@@ -96,9 +92,13 @@ function App() {
 
         {/* Inventory Manager routes */}
         <Route path="/inventory-manager" element={<AdminLayout />}>
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="inventory/add" element={<AddInventoryPage />} />
           <Route path="inventory/edit/:id" element={<EditInventoryPage />} />
+          <Route path="import" element={<ImportPage />} />
+          <Route path="export" element={<ExportPage />} />
+          <Route path="history" element={<HistoryPage />} />
         </Route>
 
         {/* Admin routes */}
