@@ -62,7 +62,7 @@ export default function SidebarInventoryManager() {
           // Add logout logic here
           localStorage.removeItem('carserv-profile');
           localStorage.removeItem('carserv-token');
-          window.location.href = '/login-manager';
+          window.location.href = '/';
         }} className="button !bg-red-500 !text-white min-w-[104px]">
           Đăng xuất
         </button>

@@ -26,8 +26,18 @@ export default function LoginPage() {
       .then(async (res) => {
         const result = await res.json();
         if (res.status === 200) {
-          localStorage.setItem("bus-profile", JSON.stringify(result));
-          window.location.href = "/";
+          localStorage.setItem("carserv-profile", JSON.stringify(result));
+          // Redirect based on role
+          const role = result.role;
+          if (role === 1) {
+            window.location.href = "/admin";
+          } else if (role === 2) {
+            window.location.href = "/service-staff";
+          } else if (role === 3) {
+            window.location.href = "/inventory-manager";
+          } else {
+            window.location.href = "/";
+          }
         } else {
           showError(result.message || "Đăng nhập thất bại");
         }

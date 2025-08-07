@@ -9,15 +9,10 @@ import RegisterPage from '@/pages/client/register';
 import Homepage from '@/components/common/homepage';
 import ProfilePage from '@/pages/client/profile';
 import { ToastContainer } from 'react-toastify';
-import AccountListPage from '@/pages/admin/account';
-import AddAccountList from '@/pages/admin/add-account';
-import EditAccountList from '@/pages/admin/edit-account';
 import AdminLayout from '@/components/common/admin-layout';
+import ServiceStaffLayout from '@/components/common/service-staff-layout';
 import ReportPage from '@/pages/admin/report';
-import TransactionListPage from '@/pages/admin/transaction';
-import PromotionListPage from '@/pages/admin/promotion';
-import AddPromotionPage from '@/pages/admin/add-promotion';
-import EditPromotionPage from './pages/admin/edit-promotion';
+
 
 // Renamed and new components for CarServ
 import ServiceRequestPage from '@/pages/client/service-request';
@@ -25,11 +20,14 @@ import ServiceHistoryPage from '@/pages/client/service-history';
 import EditProfilePage from './pages/client/edit-profile';
 
 // Service Staff components from the new folder
-import StaffAccountListPage from './pages/service-staff/account';
-import StaffAddAccountList from './pages/service-staff/add-account';
-import StaffEditAccountList from './pages/service-staff/edit-account';
-import StaffTransactionListPage from './pages/service-staff/transaction';
-import StaffAppointmentCalendar from './pages/service-staff/appointment';
+import Dashboard from './pages/service-staff/dashboard';
+import ServiceOrders from './pages/service-staff/service-orders';
+import UpdateServiceHistory from './pages/service-staff/update-service-history';
+import UsedPartsManagement from './pages/service-staff/used-parts-management';
+import MySchedule from './pages/service-staff/my-schedule';
+import NotifyCustomer from './pages/service-staff/notify-customer';
+import VehicleRecords from './pages/service-staff/vehicle-records';
+import ProblemReporting from './pages/service-staff/problem-reporting';
 
 // New Inventory Manager Pages
 import InventoryPage from './pages/inventory-manager/inventory';
@@ -40,13 +38,19 @@ import ImportPage from './pages/inventory-manager/import';
 import ExportPage from './pages/inventory-manager/export';
 import HistoryPage from './pages/inventory-manager/history';
 
-// New Admin Service Management Pages
-import ServiceManagementPage from './pages/admin/services';
-import AddServicePage from './pages/admin/services/add';
-import EditServicePage from './pages/admin/services/edit';
+// New Admin Service Management Pages - Removed old service imports
+
+// New Admin Management Pages
+import ServiceManagementPage2 from './pages/admin/service-management';
+import ServiceOrdersPage from './pages/admin/service-orders';
+import ScheduleManagementPage from './pages/admin/schedule-management';
+import UserManagementPage from './pages/admin/user-management';
+import InventoryOverviewPage from './pages/admin/inventory-overview';
+import AddUserPage from './pages/admin/add-user';
 
 import { useEffect, useState } from 'react';
 import NotfoundPage from './components/common/notfound';
+import React from 'react';
 
 // Placeholder for new pages
 const ServicesPage = () => <div className='text-center p-10 text-3xl'>Service Selection Page (To be implemented)</div>;
@@ -71,8 +75,7 @@ function App() {
       <Routes>
         {/* Login page as landing page, rendered outside Layout to remove header/footer */}
         <Route path="/" element={<LoginPage />} />
-        {/* Admin, Staff, Manager routes giữ nguyên */}
-        {/* Customer-facing routes và các route liên quan đến customer đã bị xóa */}
+        
         <Route element={<Layout />}>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/edit-profile" element={<EditProfilePage />} />
@@ -82,12 +85,16 @@ function App() {
         </Route>
 
         {/* Service Staff routes */}
-        <Route path="/service-staff" element={<AdminLayout />}>
-          <Route path="account" element={<StaffAccountListPage />} />
-          <Route path="account/add" element={<StaffAddAccountList />} />
-          <Route path="account/edit/:id" element={<StaffEditAccountList />} />
-          <Route path="transaction" element={<StaffTransactionListPage />} />
-          <Route path="appointments" element={<StaffAppointmentCalendar />} />
+        <Route path="/service-staff" element={<ServiceStaffLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="service-orders" element={<ServiceOrders />} />
+          <Route path="update-service-history" element={<UpdateServiceHistory />} />
+          <Route path="used-parts-management" element={<UsedPartsManagement />} />
+          <Route path="my-schedule" element={<MySchedule />} />
+          <Route path="notify-customer" element={<NotifyCustomer />} />
+          <Route path="vehicle-records" element={<VehicleRecords />} />
+          <Route path="problem-reporting" element={<ProblemReporting />} />
         </Route>
 
         {/* Inventory Manager routes */}
@@ -103,20 +110,13 @@ function App() {
 
         {/* Admin routes */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route path="account" element={<AccountListPage />} />
-          <Route path="account/add" element={<AddAccountList />} />
-          <Route path="account/edit/:id" element={<EditAccountList />} />
-
-          <Route path="promotion" element={<PromotionListPage />} />
-          <Route path="promotion/add" element={<AddPromotionPage />} />
-          <Route path="promotion/edit/:id" element={<EditPromotionPage />} />
-
-          <Route path="services" element={<ServiceManagementPage />} />
-          <Route path="services/add" element={<AddServicePage />} />
-          <Route path="services/edit/:id" element={<EditServicePage />} />
-
-          <Route path="report" element={<ReportPage />} />
-          <Route path="transaction" element={<TransactionListPage />} />
+          <Route path="service-management" element={<ServiceManagementPage2 />} />
+          <Route path="service-orders" element={<ServiceOrdersPage />} />
+          <Route path="schedule-management" element={<ScheduleManagementPage />} />
+          <Route path="user-management" element={<UserManagementPage />} />
+          <Route path="user-management/add" element={<AddUserPage />} />
+          <Route path="inventory-overview" element={<InventoryOverviewPage />} />
+          <Route path="report" element={<ReportPage />} />          
         </Route>
       </Routes>
     </BrowserRouter>
