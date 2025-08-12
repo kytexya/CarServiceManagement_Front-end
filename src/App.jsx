@@ -11,6 +11,7 @@ import ProfilePage from '@/pages/client/profile';
 import { ToastContainer } from 'react-toastify';
 import AdminLayout from '@/components/common/admin-layout';
 import ServiceStaffLayout from '@/components/common/service-staff-layout';
+import InventoryManagerLayout from '@/pages/inventory-manager/inventory-manager-layout';
 import ReportPage from '@/pages/admin/report';
 
 
@@ -98,7 +99,8 @@ function App() {
         </Route>
 
         {/* Inventory Manager routes */}
-        <Route path="/inventory-manager" element={<AdminLayout />}>
+        <Route path="/inventory-manager" element={<InventoryManagerLayout />}>
+        <Route index element={<DashboardPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="inventory/add" element={<AddInventoryPage />} />
@@ -110,6 +112,7 @@ function App() {
 
         {/* Admin routes */}
         <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<ReportPage />} /> 
           <Route path="service-management" element={<ServiceManagementPage2 />} />
           <Route path="service-orders" element={<ServiceOrdersPage />} />
           <Route path="schedule-management" element={<ScheduleManagementPage />} />

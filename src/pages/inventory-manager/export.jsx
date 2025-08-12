@@ -1,4 +1,3 @@
-import SidebarInventoryManager from '@/components/common/sidebar-inventory-manager';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -149,9 +148,7 @@ export default function ExportPage() {
   });
 
   return (
-    <div className="flex flex-row w-full">
-      <SidebarInventoryManager />
-      <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full">
         {/* Header */}
         <div className="flex justify-between items-center px-8 py-6 border-b bg-white shadow-sm">
           <div className="flex items-center gap-3">
@@ -544,6 +541,5 @@ export default function ExportPage() {
           </div>
         )}
       </div>
-    </div>
   );
 } 

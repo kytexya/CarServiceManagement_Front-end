@@ -1,4 +1,3 @@
-import SidebarInventoryManager from '@/components/common/sidebar-inventory-manager';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -113,9 +112,7 @@ export default function InventoryListPage() {
   const outOfStockCount = dataList.filter(item => item.stockQuantity === 0).length;
 
   return (
-    <div className="flex flex-row w-full">
-      <SidebarInventoryManager />
-      <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full">
         <div className="flex justify-between items-center px-8 py-4 border-b">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">Danh Sách Phụ Tùng</h1>
@@ -365,6 +362,5 @@ export default function InventoryListPage() {
           </div>
         </div>
       </div>
-    </div>
   );
 } 

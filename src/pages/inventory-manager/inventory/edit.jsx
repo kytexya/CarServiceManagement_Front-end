@@ -1,4 +1,3 @@
-import SidebarInventoryManager from "@/components/common/sidebar-inventory-manager";
 import { showError } from "@/utils";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -41,9 +40,7 @@ export default function EditInventoryPage() {
     };
 
     return (
-        <div className="flex flex-row w-full h-screen bg-gray-50">
-            <SidebarInventoryManager />
-            <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full h-screen bg-gray-50">
                 {/* Header */}
                 <div className="flex justify-between items-center px-8 py-6 border-b bg-white shadow-sm">
                     <div className="flex items-center gap-3">
@@ -259,7 +256,6 @@ export default function EditInventoryPage() {
                         </form>
                     </div>
                 </div>
-            </div>
         </div>
     );
 } 
