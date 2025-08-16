@@ -1,13 +1,13 @@
 import { Outlet } from 'react-router-dom';
-import SidebarAdmin from './sidebar-admin';
+import SidebarInventoryManager from '@/components/common/sidebar-inventory-manager';
 
-export default function AdminLayout() {
+export default function InventoryManagerLayout() {
     return (
         <div className='w-[100vw] h-[100vh] flex'>
-            <SidebarAdmin />
+            <SidebarInventoryManager />
             <div className='flex-1 overflow-auto'>
                 <Outlet />
             </div>
         </div>
     );
-}
+} 

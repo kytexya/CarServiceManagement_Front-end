@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import Logo from '@/assets/images/logo.png';
+import Logo from '@/assets/images/logo-car.png';
 
 export default function SidebarInventoryManager() {
   const location = useLocation();
@@ -18,25 +18,39 @@ export default function SidebarInventoryManager() {
         </div>
       </Link>
       <div className='flex-grow'>
+        <Link to='/inventory-manager/dashboard'>
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('dashboard') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
+          >
+            Dashboard Tồn Kho
+          </div>
+        </Link>
         <Link to='/inventory-manager/inventory'>
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('inventory') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
-            Quản Lý Kho
+            Danh Sách Phụ Tùng
           </div>
         </Link>
-        <Link to='/inventory-manager/orders'>
+        <Link to='/inventory-manager/import'>
           <div
-            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('orders') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('import') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
-            Đơn Hàng NCC
+            Nhập Kho Phụ Tùng
           </div>
         </Link>
-        <Link to='/inventory-manager/reports'>
+        <Link to='/inventory-manager/export'>
           <div
-            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('reports') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('export') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
-            Báo Cáo Tồn Kho
+            Xuất Kho Phụ Tùng
+          </div>
+        </Link>
+        <Link to='/inventory-manager/history'>
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('history') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
+          >
+            Lịch Sử Nhập - Xuất
           </div>
         </Link>
       </div>
@@ -48,7 +62,7 @@ export default function SidebarInventoryManager() {
           // Add logout logic here
           localStorage.removeItem('carserv-profile');
           localStorage.removeItem('carserv-token');
-          window.location.href = '/login-manager';
+          window.location.href = '/';
         }} className="button !bg-red-500 !text-white min-w-[104px]">
           Đăng xuất
         </button>

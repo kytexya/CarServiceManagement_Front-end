@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import Logo from "@/assets/images/logo.png";
+import Logo from "@/assets/images/logo-car.png";
 
 export default function SidebarStaff() {
   const location = useLocation();
@@ -18,40 +18,76 @@ export default function SidebarStaff() {
         </div>
       </Link>
       <div className="flex-grow">
-        <Link to="/service-staff/appointments">
+        <Link to="/service-staff/dashboard">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
-              checkActive("appointments") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+              checkActive("dashboard") ? "bg-white text-primary" : "text-white hover:bg-white/20"
             }`}
           >
-            Lịch hẹn
+            Dashboard
           </div>
         </Link>
-        <Link to="/service-staff/requests">
+        <Link to="/service-staff/service-orders">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
-              checkActive("requests") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+              checkActive("service-orders") ? "bg-white text-primary" : "text-white hover:bg-white/20"
             }`}
           >
-            Yêu cầu dịch vụ
+            Danh sách phiếu dịch vụ
           </div>
         </Link>
-        <Link to="/service-staff/account">
+        <Link to="/service-staff/update-service-history">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
-              checkActive("account") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+              checkActive("update-service-history") ? "bg-white text-primary" : "text-white hover:bg-white/20"
             }`}
           >
-            Quản lý khách hàng
+            Cập nhật lịch sử sửa chữa
           </div>
         </Link>
-        <Link to="/service-staff/transaction">
+        <Link to="/service-staff/used-parts-management">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
-              checkActive("transaction") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+              checkActive("used-parts-management") ? "bg-white text-primary" : "text-white hover:bg-white/20"
             }`}
           >
-            Quản lý giao dịch
+            Quản lý phụ tùng đã sử dụng
+          </div>
+        </Link>
+        <Link to="/service-staff/my-schedule">
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
+              checkActive("my-schedule") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+            }`}
+          >
+            Lịch làm việc cá nhân
+          </div>
+        </Link>
+        <Link to="/service-staff/notify-customer">
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
+              checkActive("notify-customer") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+            }`}
+          >
+            Thông báo dịch vụ
+          </div>
+        </Link>
+        <Link to="/service-staff/vehicle-records">
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
+              checkActive("vehicle-records") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+            }`}
+          >
+            Quản lý hồ sơ xe khách hàng
+          </div>
+        </Link>
+        <Link to="/service-staff/problem-reporting">
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
+              checkActive("problem-reporting") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+            }`}
+          >
+            Báo cáo lỗi / Tạm ngừng xử lý
           </div>
         </Link>
       </div>
@@ -63,7 +99,7 @@ export default function SidebarStaff() {
           onClick={() => {
             localStorage.removeItem("carserv-profile");
             localStorage.removeItem("carserv-token");
-            window.location.href = "/login-manager";
+            window.location.href = "/";
           }}
           className="button !bg-red-500 !text-white min-w-[104px]"
         >
