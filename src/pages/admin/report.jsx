@@ -170,8 +170,8 @@ export default function AdminReportPage() {
 
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
-            <SidebarAdmin />
-            <div className="flex flex-col w-full pl-[220px]">
+            {/* <SidebarAdmin /> */}
+            <div className="flex flex-col w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center px-6 py-4 border-b bg-white shadow-sm">
                     <div className="flex items-center gap-3">

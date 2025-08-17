@@ -11,7 +11,7 @@ export default function SidebarAdmin() {
   };
 
   return (
-    <div className='h-screen w-[220px] bg-primary flex flex-col fixed left-0 top-0 z-50'>
+    <div className='h-screen w-[220px] bg-primary flex flex-col sticky left-0 top-0 z-50'>
       <Link className="px-6 py-4 flex items-center justify-center" to='/'>
         <div className="text-4xl py-4 text-white flex items-center gap-2 justify-center w-full">
           <img src={Logo} alt="logo" className="w-20 h-20 object-cover" />
@@ -59,6 +59,13 @@ export default function SidebarAdmin() {
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('inventory-overview') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
             Quản lý kho phụ tùng
+          </div>
+        </Link>
+        <Link to='/admin/promotions'>
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('promotions') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
+          >
+            Quản lý khuyến mãi
           </div>
         </Link>
       </div>
