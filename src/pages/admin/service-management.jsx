@@ -5,14 +5,19 @@ import IconEdit from "@/components/icons/IconEdit";
 import IconPackage from "@/components/icons/IconPackage";
 import IconPlus from "@/components/icons/IconPlus";
 import { showError } from "@/utils";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function ServiceManagementPage() {
   const [activeTab, setActiveTab] = useState("services");
+  const [serviceTypes, setServiceTypes] = useState([]);
+  const [comboPackages, setComboPackages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem("carserv-token");
 
   // Mock data
-  const serviceTypes = [
+  const serviceTypesMock = [
     {
       id: 1,
       name: "Bảo trì định kỳ",
@@ -47,7 +52,7 @@ export default function ServiceManagementPage() {
     },
   ];
 
-  const comboPackages = [
+  const comboPackagesMock = [
     {
       id: 1,
       name: "Gói Bảo Dưỡng Cơ Bản",
@@ -64,12 +69,82 @@ export default function ServiceManagementPage() {
     },
   ];
 
-  const handleAddService = () => {
-    showError("Chức năng thêm loại dịch vụ chưa được kết nối API.");
+  useEffect(() => {
+    if (activeTab === "services") {
+      fetchServiceTypes();
+    } else {
+      fetchCombos();
+    }
+  }, [activeTab]);
+
+  const fetchServiceTypes = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/api/services/get-all-services", { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      setServiceTypes(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách dịch vụ");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAddCombo = () => {
-    showError("Chức năng thêm gói combo chưa được kết nối API.");
+  const fetchCombos = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/api/services/get-all-service-packages", { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      setComboPackages(res.data.packages || []);
+    } catch (err) {
+      showError("Không tải được danh sách combo");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteService = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa dịch vụ này?")) return;
+    try {
+      await axios.delete(`/api/service-types/${id}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      showSuccess("Xóa dịch vụ thành công");
+      fetchServiceTypes();
+    } catch (err) {
+      showError("Xóa thất bại");
+    }
+  };
+
+  const handleDeleteCombo = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa combo này?")) return;
+    try {
+      await axios.delete(`/api/service-combos/${id}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      showSuccess("Xóa combo thành công");
+      fetchCombos();
+    } catch (err) {
+      showError("Xóa thất bại");
+    }
   };
 
   return (
@@ -201,7 +276,7 @@ export default function ServiceManagementPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {serviceTypes.map((service) => (
+                    {serviceTypesMock.map((service) => (
                       <tr key={service.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
@@ -299,7 +374,7 @@ export default function ServiceManagementPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {comboPackages.map((combo) => (
-                      <tr key={combo.id} className="hover:bg-gray-50">
+                      <tr key={combo.packageId} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {combo.name}
@@ -307,14 +382,15 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">
-                            {combo.services.map((service, index) => (
+                            {/* {combo.services.map((service, index) => (
                               <span
                                 key={index}
                                 className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs mr-1 mb-1"
                               >
                                 {service}
                               </span>
-                            ))}
+                            ))} */}
+                            {combo.description}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -322,13 +398,13 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            {combo.discount}%
+                            {combo.discount ? combo.discount : 0}%
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center gap-2">
                             <a
-                              href={`/admin/service/combo/${combo.id}`}
+                              href={`/admin/service/combo/${combo.packageId}`}
                               className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                             >
                               <IconEdit />

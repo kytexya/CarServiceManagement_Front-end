@@ -6,6 +6,8 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import TextInput from "@/components/form/input";
 import Toggle from "@/components/form/toggle";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const schema = yup.object().shape({
   name: yup.string().required("Vui lòng nhập tên khuyến mãi!"), // not null
@@ -42,9 +44,33 @@ const CreateService = () => {
     },
   });
   const status = watch("status");
+  const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    try {
+      const token = localStorage.getItem("carserv-token");
+
+      const response = await axios.post(
+        `/api/services/create-service`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "anyvalue",
+          },
+        }
+      );
+
+      console.log("Tạo combo dịch vụ thành công:", response.data);
+      alert("Tạo combo dịch vụ thành công!");
+
+      navigate('/admin/service-management')
+    } catch (error) {
+      console.error("Error:", error);
+      alert(
+        error.response?.data?.message || "Không thể tạo combo dịch vụ!"
+      );
+    }
   };
   return (
     <div className="p-6">
