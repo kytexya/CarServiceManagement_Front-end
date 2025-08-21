@@ -1,11 +1,52 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError } from "@/utils";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function ScheduleManagementPage() {
     const [activeTab, setActiveTab] = useState('appointments');
     const [selectedDate, setSelectedDate] = useState('2024-01-15');
+    const [appointments, setAppointments] = useState(null);
+    const token = localStorage.getItem("carserv-token");
+
+    useEffect(() => {
+        if (activeTab === "appointments") {
+          fetchAppointments();
+        } else {
+          fetchWokingHours();
+        }
+    }, [activeTab]);
+
+    const fetchAppointments = async () => {
+        try {
+        const res = await axios.get("/api/Appointment", { 
+            headers: {
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true
+        });
+        setAppointment(res.data || []);
+        } catch (err) {
+        showError("Không tải được");
+        }
+    };
+
+    const fetchWokingHours = async () => {
+        try {
+        const res = await axios.get("/api/Appointment", { 
+            headers: {
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true
+        });
+        setAppointment(res.data || []);
+        } catch (err) {
+        showError("Không tải được");
+        }
+    };
 
     // Mock data
     const workingHours = {
@@ -18,7 +59,7 @@ export default function ScheduleManagementPage() {
         sunday: { start: "09:00", end: "15:00", isOpen: false },
     };
 
-    const appointments = [
+    const appointmentsMock = [
         {
             id: 1,
             customerName: "Nguyễn Văn A",
@@ -180,7 +221,7 @@ export default function ScheduleManagementPage() {
                                 {/* Time Slots */}
                                 <div className="grid grid-cols-6 gap-2">
                                     {timeSlots.map((time) => {
-                                        const appointment = appointments.find(apt => apt.date === selectedDate && apt.time === time);
+                                        const appointment = appointmentsMock.find(apt => apt.date === selectedDate && apt.time === time);
                                         return (
                                             <div key={time} className="relative">
                                                 <div className={`p-3 rounded-lg border text-center text-sm ${
@@ -221,7 +262,7 @@ export default function ScheduleManagementPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {appointments.map((appointment) => (
+                                            {appointmentsMock.map((appointment) => (
                                                 <tr key={appointment.id} className="hover:bg-gray-50">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>

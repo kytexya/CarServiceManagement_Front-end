@@ -1,4 +1,4 @@
-import { showError } from "@/utils";
+import { showError, showSuccess } from "@/utils";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
@@ -60,8 +60,8 @@ export default function RegisterPage() {
       // localStorage.setItem("carserv-token", token);
       // localStorage.setItem("carserv-profile", JSON.stringify(user));
 
-      alert("Đăng ký thành công!");
-      navigate("/login");
+      showSuccess("Đăng ký thành công!");
+      navigate("/");
     } catch (error) {
       console.error("Đăng ký thất bại:", error);
       showError(error.response?.data?.message || "Đăng ký thất bại!");

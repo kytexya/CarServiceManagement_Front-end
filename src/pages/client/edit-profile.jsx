@@ -1,5 +1,5 @@
 import TextInput from '@/components/form/input';
-import { showError } from '@/utils';
+import { showError, showSuccess } from '@/utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -67,7 +67,7 @@ export default function EditProfilePage() {
             setValue('phoneNumber', res.data?.phoneNumber);
             setValue('address', res.data?.address);
 
-            alert("Cập nhật thông tin thành công!");
+            showSuccess("Cập nhật thông tin thành công!");
         } catch (error) {
             console.error("Cập nhật thất bại:", error);
             showError(error.response?.data?.message || "Cập nhật thất bại!");

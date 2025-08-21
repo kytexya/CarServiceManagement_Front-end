@@ -1,6 +1,6 @@
 import Select from "@/components/form/select";
 import { CATEGORIES, SERVICES, UNITS } from "@/utils/constant";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,7 +8,8 @@ import TextInput from "@/components/form/input";
 import Toggle from "@/components/form/toggle";
 import Checkbox from "@/components/form/checkbox";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { showError, showSuccess } from "@/utils";
 
 const schema = yup.object().shape({
   name: yup.string().required("Vui lòng nhập tên khuyến mãi!"), // not null
@@ -34,6 +35,7 @@ const schema = yup.object().shape({
 });
 
 const CreateService = () => {
+  const { id } = useParams();
   const {
     register,
     handleSubmit,
@@ -49,6 +51,29 @@ const CreateService = () => {
   });
   const status = watch("status");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (id) {
+      const fetchService = async () => {
+        try {
+          const token = localStorage.getItem("carserv-token");
+          const response = await axios.get(`/api/services/a/${id}`, {
+            headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" },
+          });
+          const service = response.data;
+          setValue("name", service.name);
+          setValue("category", service.category);
+          setValue("price", service.price);
+          setValue("timer", service.timer);
+          setValue("status", service.status);
+        } catch (error) {
+          console.error(error);
+          showError("Không thể lấy dữ liệu dịch vụ!");
+        }
+      };
+      fetchService();
+    }
+  }, [id, setValue]);
 
   const onSubmit = async (data) => {
     try {
@@ -66,12 +91,12 @@ const CreateService = () => {
       );
 
       console.log("Tạo combo dịch vụ thành công:", response.data);
-      alert("Tạo combo dịch vụ thành công!");
+      showSuccess("Tạo combo dịch vụ thành công!");
 
       navigate('/admin/service-management')
     } catch (error) {
       console.error("Error:", error);
-      alert(
+      showError(
         error.response?.data?.message || "Không thể tạo combo dịch vụ!"
       );
     }
