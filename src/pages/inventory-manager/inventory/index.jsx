@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import { showError } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const mockData = [
   {
     partId: 'PT001',
     partName: 'Lọc dầu động cơ',
-    stockQuantity: 5,
-    importPrice: 350000,
+    quantity: 5,
+    unitPrice: 350000,
     sellingPrice: 450000,
     supplier: 'Toyota Long Biên',
     status: 'Sắp hết',
-    warranty: '2025-06-30',
+    expiryDate: '2025-06-30',
     minThreshold: 10,
     monthlyUsage: 45,
     lastImported: '2024-01-15',
@@ -18,12 +20,12 @@ const mockData = [
   {
     partId: 'PT002',
     partName: 'Bugi đánh lửa',
-    stockQuantity: 50,
-    importPrice: 120000,
+    quantity: 50,
+    unitPrice: 120000,
     sellingPrice: 180000,
     supplier: 'Honda Việt Nam',
     status: 'Còn hàng',
-    warranty: '2026-01-15',
+    expiryDate: '2026-01-15',
     minThreshold: 20,
     monthlyUsage: 120,
     lastImported: '2024-01-20',
@@ -31,12 +33,12 @@ const mockData = [
   {
     partId: 'PT003',
     partName: 'Dây curoa tổng',
-    stockQuantity: 0,
-    importPrice: 800000,
+    quantity: 0,
+    unitPrice: 800000,
     sellingPrice: 1200000,
     supplier: 'Hyundai',
     status: 'Hết hàng',
-    warranty: '2024-12-01',
+    expiryDate: '2024-12-01',
     minThreshold: 5,
     monthlyUsage: 8,
     lastImported: '2023-12-10',
@@ -44,12 +46,12 @@ const mockData = [
   {
     partId: 'PT004',
     partName: 'Bộ lọc gió động cơ',
-    stockQuantity: 3,
-    importPrice: 250000,
+    quantity: 3,
+    unitPrice: 250000,
     sellingPrice: 350000,
     supplier: 'Ford Việt Nam',
     status: 'Sắp hết',
-    warranty: '2025-03-15',
+    expiryDate: '2025-03-15',
     minThreshold: 8,
     monthlyUsage: 25,
     lastImported: '2024-01-18',
@@ -57,12 +59,12 @@ const mockData = [
   {
     partId: 'PT005',
     partName: 'Bộ phanh trước',
-    stockQuantity: 15,
-    importPrice: 1200000,
+    quantity: 15,
+    unitPrice: 1200000,
     sellingPrice: 1800000,
     supplier: 'BMW Việt Nam',
     status: 'Còn hàng',
-    warranty: '2025-08-20',
+    expiryDate: '2025-08-20',
     minThreshold: 12,
     monthlyUsage: 35,
     lastImported: '2024-01-22',
@@ -94,43 +96,97 @@ export default function InventoryListPage() {
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [supplierFilter, setSupplierFilter] = useState('all');
+  const [parts, setParts] = useState([]);
+  const [lowParts, setLowParts] = useState([]);
+  const [outOfStockParts, setOutOfStockParts] = useState([]);
+  const token = localStorage.getItem("carserv-token");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchParts()
+    fetchLowParts()
+    fetchOutOfStockParts()
+  }, []);
+
+
+  const fetchParts = async () => {
+    try {
+      const res = await axios.get("/api/Parts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+      setParts(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
+  const fetchLowParts = async () => {
+    try {
+      const res = await axios.get("/api/Parts/get-low-parts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+      setLowParts(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
+  const fetchOutOfStockParts = async () => {
+    try {
+      const res = await axios.get("/api/Parts/get-out-of-stock-parts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+      setOutOfStockParts(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
 
   const suppliers = Array.from(new Set(mockData.map(item => item.supplier)));
 
-  const filteredList = dataList.filter(item => {
+  const filteredList = parts.filter(item => {
     const matchKeyword =
       item.partName.toLowerCase().includes(keyword.toLowerCase()) ||
-      item.partId.toLowerCase().includes(keyword.toLowerCase());
+      item.partId.toString().toLowerCase().includes(keyword.toLowerCase());
     const matchStatus = statusFilter === 'all' || item.status === statusFilter;
     const matchSupplier = supplierFilter === 'all' || item.supplier === supplierFilter;
     return matchKeyword && matchStatus && matchSupplier;
   });
 
   // Count low stock items
-  const lowStockCount = dataList.filter(item => item.stockQuantity <= item.minThreshold && item.stockQuantity > 0).length;
-  const outOfStockCount = dataList.filter(item => item.stockQuantity === 0).length;
+  const lowStockCount = dataList.filter(item => item.quantity <= item.minThreshold && item.quantity > 0).length;
+  const outOfStockCount = dataList.filter(item => item.quantity === 0).length;
 
   return (
     <div className="flex flex-col w-full">
         <div className="flex justify-between items-center px-8 py-4 border-b">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">Danh Sách Phụ Tùng</h1>
-            {(lowStockCount > 0 || outOfStockCount > 0) && (
+            {(lowParts.length > 0 || outOfStockParts.length > 0) && (
               <div className="flex items-center gap-3">
-                {lowStockCount > 0 && (
+                {lowParts.length > 0 && (
                   <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                     <LowStockIcon />
                     <span className="text-amber-700 font-semibold text-sm">
-                      {lowStockCount} phụ tùng sắp hết hàng
+                      {lowParts.length} phụ tùng sắp hết hàng
                     </span>
                   </div>
                 )}
-                {outOfStockCount > 0 && (
+                {outOfStockParts.length > 0 && (
                   <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                     <OutOfStockIcon />
                     <span className="text-red-700 font-semibold text-sm">
-                      {outOfStockCount} phụ tùng hết hàng
+                      {outOfStockParts.length} phụ tùng hết hàng
                     </span>
                   </div>
                 )}
@@ -239,8 +295,8 @@ export default function InventoryListPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredList.map(item => {
-                    const isLowStock = item.stockQuantity <= item.minThreshold && item.stockQuantity > 0;
-                    const isOutOfStock = item.stockQuantity === 0;
+                    const isLowStock = item.quantity <= item.minThreshold && item.quantity > 0;
+                    const isOutOfStock = item.quantity === 0;
                     return (
                       <tr key={item.partId} className={`border-b last:border-0 ${
                         isOutOfStock ? 'bg-red-50' : isLowStock ? 'bg-amber-50' : ''
@@ -258,23 +314,23 @@ export default function InventoryListPage() {
                               isLowStock ? 'text-amber-600' : 
                               'text-gray-900'
                             }`}>
-                              {item.stockQuantity}
+                              {item.quantity}
                             </span>
                             {isOutOfStock && <OutOfStockIcon />}
                             {isLowStock && <LowStockIcon />}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {item.importPrice.toLocaleString('vi-VN')} ₫
+                          {item.unitPrice.toLocaleString('vi-VN')} ₫
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {item.sellingPrice.toLocaleString('vi-VN')} ₫
+                          {item.unitPrice.toLocaleString('vi-VN')} ₫
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {item.supplier}
                         </td>
                         <td className="px-4 py-3 text-sm text-center text-gray-900">
-                          {item.warranty}
+                          {item.expiryDate}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColor[item.status]}`}>
@@ -342,7 +398,7 @@ export default function InventoryListPage() {
           {/* Pagination */}
           <div className="mt-6 flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Hiển thị <span className="font-medium">{filteredList.length}</span> trong tổng số <span className="font-medium">{dataList.length}</span> phụ tùng
+              Hiển thị <span className="font-medium">{filteredList.length}</span> trong tổng số <span className="font-medium">{filteredList.length}</span> phụ tùng
             </div>
             <div className="flex items-center gap-2">
               <button className="button button-sm">

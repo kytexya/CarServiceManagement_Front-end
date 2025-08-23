@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError } from '@/utils';
+import axios from 'axios';
 
 const StatCard = ({ title, value, icon, color = "blue", trend = null }) => (
     <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -67,10 +68,10 @@ const InventoryItem = ({ item }) => (
         <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-600">{item.name.charAt(0)}</span>
+                    <span className="text-sm font-medium text-gray-600">{item.partName}</span>
                 </div>
                 <div>
-                    <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                    <h4 className="text-sm font-medium text-gray-900">{item.partName}</h4>
                     <p className="text-xs text-gray-500">{item.category}</p>
                 </div>
             </div>
@@ -114,44 +115,84 @@ const HistoryItem = ({ transaction }) => (
 
 export default function InventoryOverviewPage() {
     const [activeTab, setActiveTab] = useState('overview');
+    const [parts, setParts] = useState([]);
+    const [lowParts, setLowParts] = useState([]);
+    const [outOfStockParts, setOutOfStockParts] = useState([]);
+    const token = localStorage.getItem("carserv-token");
 
-    // Mock data
-    const inventoryStats = {
-        totalItems: 156,
-        lowStock: 8,
-        outOfStock: 3,
-        expiringSoon: 5,
-        totalValue: "125.5M VND"
-    };
+    const inventoryStats = useMemo(() => {
+        if (!parts || parts.length === 0) {
+            return {
+                totalItems: 0,
+                lowStock: 0,
+                outOfStock: 0,
+                expiringSoon: 0,
+                totalValue: "0 VND"
+            };
+        }
+
+        const soonThreshold = new Date();
+        soonThreshold.setMonth(soonThreshold.getMonth() + 1);
+
+        let expiringSoon = 0;
+        let totalValue = 0;
+
+        parts.forEach(part => {
+            totalValue += (part.unitPrice || 0) * (part.quantity || 0);
+
+            if (part.expiryDate && new Date(part.expiryDate) <= soonThreshold) {
+                expiringSoon++;
+            }
+        });
+
+        return {
+            totalItems: parts.length,
+            lowStock: lowParts.length,
+            outOfStock: outOfStockParts.length,
+            expiringSoon,
+            totalValue: totalValue.toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+        };
+    }, [parts, lowParts, outOfStockParts]);
+
 
     const alerts = [
         {
             title: "Phụ tùng sắp hết",
-            message: "8 loại phụ tùng có số lượng dưới mức tối thiểu",
+            message: `${inventoryStats.lowStock} loại phụ tùng có số lượng dưới mức tối thiểu`,
             type: "warning",
-            count: 8
+            count: inventoryStats.lowStock
         },
         {
             title: "Phụ tùng hết hàng",
-            message: "3 loại phụ tùng đã hết sạch trong kho",
+            message: `${inventoryStats.outOfStock} loại phụ tùng đã hết sạch trong kho`,
             type: "danger",
-            count: 3
+            count: inventoryStats.outOfStock
         },
         {
             title: "Sắp hết hạn bảo hành",
-            message: "5 loại phụ tùng sẽ hết hạn bảo hành trong 30 ngày tới",
+            message: `${inventoryStats.expiringSoon} loại phụ tùng sẽ hết hạn bảo hành trong 30 ngày tới`,
             type: "info",
-            count: 5
+            count: inventoryStats.expiringSoon
         }
-    ];
+    ].filter(alert => alert.count > 0);
 
-    const lowStockItems = [
+    const lowStockItemsMock = [
         { name: "Dầu nhớt Mobil 1", category: "Dầu nhớt", quantity: 5, unit: "lít", status: "low" },
         { name: "Lọc gió động cơ", category: "Lọc", quantity: 2, unit: "cái", status: "low" },
         { name: "Phanh trước", category: "Phanh", quantity: 1, unit: "bộ", status: "out" },
         { name: "Bugi đánh lửa", category: "Điện", quantity: 3, unit: "bộ", status: "low" },
         { name: "Bình ắc quy", category: "Điện", quantity: 0, unit: "cái", status: "out" }
     ];
+
+    const lowStockItems = parts
+    .filter(part => part.quantity <= 10 && part.quantity > 0)
+    .map(part => ({
+        name: part.partName,
+        category: "Chưa phân loại",
+        quantity: part.quantity,
+        unit: 'cái',
+        status: part.quantity === 0 ? "out" : "low"
+    }));
 
     const recentHistory = [
         { type: "import", item: "Dầu nhớt Mobil 1", quantity: 50, unit: "lít", date: "Hôm nay 14:30", user: "Nguyễn Văn A" },
@@ -168,6 +209,55 @@ export default function InventoryOverviewPage() {
     const handleExportReport = () => {
         showError("Chức năng xuất báo cáo chưa được kết nối API.");
     };
+
+    useEffect(() => {
+        fetchParts()
+        fetchLowParts()
+        fetchOutOfStockParts()
+    }, []);
+
+    const fetchParts = async () => {
+        try {
+            const res = await axios.get("/api/Parts", { 
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                withCredentials: true
+            });
+            setParts(res.data || []);
+        } catch (err) {
+            showError("Không tải được danh sách phụ tùng");
+        }
+    }
+    const fetchLowParts = async () => {
+        try {
+            const res = await axios.get("/api/Parts/get-low-parts", { 
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                withCredentials: true
+            });
+            setLowParts(res.data || []);
+        } catch (err) {
+            showError("Không tải được danh sách phụ tùng");
+        }
+    }
+    const fetchOutOfStockParts = async () => {
+        try {
+            const res = await axios.get("/api/Parts/get-out-of-stock-parts", { 
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                withCredentials: true
+            });
+            setOutOfStockParts(res.data || []);
+        } catch (err) {
+            showError("Không tải được danh sách phụ tùng");
+        }
+    }
 
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
@@ -294,26 +384,14 @@ export default function InventoryOverviewPage() {
                                 <div className="bg-white p-4 rounded-lg shadow-sm">
                                     <h3 className="text-lg font-bold text-gray-900 mb-3">Phân bố theo danh mục</h3>
                                     <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Dầu nhớt</span>
-                                            <span className="text-sm font-medium">45 loại</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Lọc</span>
-                                            <span className="text-sm font-medium">32 loại</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Phanh</span>
-                                            <span className="text-sm font-medium">28 loại</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Điện</span>
-                                            <span className="text-sm font-medium">25 loại</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Khác</span>
-                                            <span className="text-sm font-medium">26 loại</span>
-                                        </div>
+                                        {parts?.map(part => {
+                                            return (
+                                                <div key={part.partId} className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600">{part.partName}</span>
+                                                    {/* <span className="text-sm text-gray-600">{part.partName} loại</span> */}
+                                                </div>
+                                            )
+                                        })}
                                     </div>
                                 </div>
                                 <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -344,7 +422,7 @@ export default function InventoryOverviewPage() {
                             <div className="bg-white p-4 rounded-lg shadow-sm">
                                 <h3 className="text-lg font-bold text-gray-900 mb-3">Phụ tùng sắp hết / hết hàng</h3>
                                 <div className="space-y-3">
-                                    {lowStockItems.map((item, index) => (
+                                    {lowParts.map((item, index) => (
                                         <InventoryItem key={index} item={item} />
                                     ))}
                                 </div>

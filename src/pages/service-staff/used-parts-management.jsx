@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { showError } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const UsedPartsManagement = () => {
   const [parts, setParts] = useState([
@@ -35,6 +37,41 @@ const UsedPartsManagement = () => {
       });
     }
   };
+
+  const token = localStorage.getItem("carserv-token");
+  const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
+
+  const onAddPart = async () => {
+    if (newPart.name && newPart.code && newPart.quantityUsed && newPart.unit && newPart.serviceOrder) {
+      try {
+        const res = await axios.post("/api/used-parts", newPart, { headers });
+        setParts([...parts, res.data]); // res.data là object phụ tùng vừa thêm
+        showSuccess("Thêm phụ tùng thành công");
+        setNewPart({
+          name: '',
+          code: '',
+          quantityUsed: '',
+          unit: '',
+          serviceOrder: '',
+          date: new Date().toISOString().slice(0, 10),
+        });
+      } catch (err) {
+        showError("Không thể thêm phụ tùng");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchParts = async () => {
+      try {
+        const res = await axios.get("/api/used-parts", { headers });
+        setParts(res.data || []);
+      } catch (err) {
+        showError("Không tải được danh sách phụ tùng đã sử dụng");
+      }
+    };
+    fetchParts();
+  }, []);
 
   return (
     <div className="p-6">

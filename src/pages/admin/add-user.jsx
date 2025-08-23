@@ -21,7 +21,7 @@ const schema = yup.object().shape({
     .required("Email là bắt buộc")
     .email("Email không hợp lệ"),
 
-    phone: yup
+    PhoneNumber: yup
     .string()
     .required("Số điện thoại là bắt buộc")
     .matches(/^[0-9]{10,11}$/, "Số điện thoại không hợp lệ"),
@@ -31,7 +31,7 @@ const schema = yup.object().shape({
     .required("Tên đăng nhập là bắt buộc")
     .min(2, "Tên đăng nhập phải có ít nhất 3 ký tự"),
 
-    role: yup
+    RoleName: yup
     .string()
     .required("Vai trò là bắt buộc"),
 
@@ -60,7 +60,7 @@ export default function AddUserPage() {
         resolver: yupResolver(schema),
     });
 
-    const selectedRole = watch('role');
+    const selectedRole = watch('RoleName');
 
     const roles = [
         { value: 'admin', label: 'Admin', description: 'Quản trị viên hệ thống' },
@@ -74,8 +74,7 @@ export default function AddUserPage() {
         setIsLoading(true);
         try {
         const token = localStorage.getItem("carserv-token");
-        console.log(token)
-        const res = await axios.post(`/api/Account/create-user`, data, {
+        const res = await axios.post(`/api/Account/create-new-account`, data, {
             headers: {
             Authorization: `Bearer ${token}`,
             'ngrok-skip-browser-warning': 'anyvalue',
@@ -176,8 +175,8 @@ export default function AddUserPage() {
                                                 label={"Số điện thoại"}
                                                 placeholder={"0123456789"}
                                                 register={register}
-                                                name={"phone"}
-                                                error={errors?.phone}
+                                                name={"PhoneNumber"}
+                                                error={errors?.PhoneNumber}
                                             />
                                         </div>
 
@@ -227,8 +226,8 @@ export default function AddUserPage() {
                                                 label={"Vai trò"}
                                                 placeholder={"Chọn vai trò"}
                                                 register={register}
-                                                name={"role"}
-                                                error={errors?.role}
+                                                name={"RoleName"}
+                                                error={errors?.RoleName}
                                                 options={roles}
                                             />
                                             {selectedRole && (

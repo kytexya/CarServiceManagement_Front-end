@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 export default function ScheduleManagementPage() {
     const [activeTab, setActiveTab] = useState('appointments');
-    const [selectedDate, setSelectedDate] = useState('2024-01-15');
+    const [selectedDate, setSelectedDate] = useState('2025-08-01');
     const [appointments, setAppointments] = useState(null);
     const token = localStorage.getItem("carserv-token");
 
@@ -27,8 +27,9 @@ export default function ScheduleManagementPage() {
             },
             withCredentials: true
         });
-        setAppointment(res.data || []);
+        setAppointments(res.data || []);
         } catch (err) {
+        console.log(err);
         showError("Không tải được");
         }
     };
@@ -42,8 +43,9 @@ export default function ScheduleManagementPage() {
             },
             withCredentials: true
         });
-        setAppointment(res.data || []);
+        setAppointments(res.data || []);
         } catch (err) {
+        console.log(err);
         showError("Không tải được");
         }
     };
@@ -153,6 +155,21 @@ export default function ScheduleManagementPage() {
         showError("Chức năng gán nhân viên chưa được kết nối API.");
     };
 
+    const roundToNearest30 = (dateString) => {
+        const d = new Date(dateString);
+
+        let hours = d.getHours();
+        let minutes = d.getMinutes();
+
+        minutes = minutes < 15 ? 0 : minutes < 45 ? 30 : 0;
+        if (minutes === 0 && d.getMinutes() >= 45) {
+            hours = (hours + 1) % 24;
+        }
+
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+        }
+
+
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
             <div className="flex flex-col w-full">
@@ -221,7 +238,11 @@ export default function ScheduleManagementPage() {
                                 {/* Time Slots */}
                                 <div className="grid grid-cols-6 gap-2">
                                     {timeSlots.map((time) => {
-                                        const appointment = appointmentsMock.find(apt => apt.date === selectedDate && apt.time === time);
+                                        const appointment = appointments?.find(apt => {
+                                            const datePart = apt.appointmentDate.split("T")[0];
+                                            const timePart = roundToNearest30(apt.appointmentDate);
+                                            return datePart === selectedDate && timePart.slice(0, 5) === time;
+                                        });
                                         return (
                                             <div key={time} className="relative">
                                                 <div className={`p-3 rounded-lg border text-center text-sm ${
@@ -262,18 +283,18 @@ export default function ScheduleManagementPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {appointmentsMock.map((appointment) => (
-                                                <tr key={appointment.id} className="hover:bg-gray-50">
+                                            {appointments?.map((appointment) => (
+                                                <tr key={appointment.appointmentId} className="hover:bg-gray-50">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
-                                                            <div className="text-sm font-medium text-gray-900">{appointment.customerName}</div>
-                                                            <div className="text-sm text-gray-500">{appointment.customerPhone}</div>
-                                                            <div className="text-xs text-gray-400">{appointment.vehicleInfo}</div>
+                                                            <div className="text-sm font-medium text-gray-900">{appointment?.customer?.customerNavigation?.fullName}</div>
+                                                            <div className="text-sm text-gray-500">{appointment?.customer?.customerNavigation?.phoneNumber}</div>
+                                                            <div className="text-xs text-gray-400">{appointment?.vehicle}</div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
-                                                            <div className="text-sm text-gray-900">{appointment.service}</div>
+                                                            <div className="text-sm text-gray-900">{appointment.serviceProgresses}</div>
                                                             <div className="text-xs text-gray-500">{appointment.duration} phút</div>
                                                         </div>
                                                     </td>

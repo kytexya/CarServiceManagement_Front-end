@@ -1,10 +1,11 @@
 import TextInput from "@/components/form/input";
 import TextArea from "@/components/form/textarea";
-import { showError } from "@/utils";
+import { showError, showSuccess } from "@/utils";
 import { yupResolver } from "@hookform/resolvers/yup";
+import axios from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
@@ -25,6 +26,8 @@ const schema = yup.object().shape({
 });
 
 export default function AddInventoryPage() {
+    const token = localStorage.getItem("carserv-token");
+    const navigate = useNavigate();
     const {
         register,
         handleSubmit,
@@ -33,9 +36,38 @@ export default function AddInventoryPage() {
         resolver: yupResolver(schema),
     });
 
-    const onSubmit = (data) => {
-        console.log("Form Data:", data);
-        showError("Chức năng thêm phụ tùng chưa được kết nối API.");
+    const onSubmit = async (data) => {
+        const now = new Date();
+        const expiryDate = new Date(now.setFullYear(now.getFullYear() + 1))
+            .toISOString()
+            .split("T")[0];
+        try {
+            const payload = {
+                partName: data.partName,
+                partNumber: data.partNumber,
+                quantity: data.quantity,
+                unitPrice: data.price,
+                supplier: data.supplier,
+                description: data.description,
+                expiryDate: expiryDate,
+                warrantyMonths: 12,
+            };
+
+            const res = await axios.post("/api/Parts/create", {}, {
+                params: payload,
+                headers: {
+                Authorization: `Bearer ${token}`,
+                "ngrok-skip-browser-warning": "anyvalue",
+                },
+                withCredentials: true,
+            });
+
+            showSuccess("Thêm phụ tùng thành công!");
+            navigate("/inventory-manager/inventory");
+        } catch (err) {
+            console.error(err);
+            showError("Không thể thêm phụ tùng. Vui lòng thử lại.");
+        }
     };
 
     return (

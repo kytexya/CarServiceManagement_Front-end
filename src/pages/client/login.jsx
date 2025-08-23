@@ -44,11 +44,11 @@ export default function LoginPage() {
         window.location.href = "/login";
         return;
       }
-      if (profile?.roleId === 1) {
+      if (profile?.roleName === 'admin') {
         window.location.href = "/admin";
-      } else if (profile?.roleId === 2) {
+      } else if (profile?.roleName === 'staff') {
         window.location.href = "/service-staff";
-      } else if (profile?.roleId === 3) {
+      } else if (profile?.roleName === 'inventory_manager') {
         window.location.href = "/inventory-manager";
       } else {
         window.location.href = "/service-staff";
@@ -84,12 +84,12 @@ export default function LoginPage() {
         });
         localStorage.setItem("carserv-profile", JSON.stringify(profileRes.data));
 
-        const role = profileRes.data.roleId;
-        if (role === 1) {
+        const role = profileRes.data.roleName;
+        if (role === 'Admin') {
           window.location.href = "/admin";
-        } else if (role === 2) {
+        } else if (role === 'Staff') {
           window.location.href = "/service-staff";
-        } else if (role === 3) {
+        } else if (role === 'Inventory manager') {
           window.location.href = "/inventory-manager";
         } else {
           window.location.href = "/service-staff";

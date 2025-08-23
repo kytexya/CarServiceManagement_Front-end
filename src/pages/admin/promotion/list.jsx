@@ -8,12 +8,34 @@ import IconLock from "@/components/icons/IconLock";
 import IconPlus from "@/components/icons/IconPlus";
 import IconUnlock from "@/components/icons/IconUnlock";
 import { showError } from "@/utils";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function PromotionPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [promotions, setPromotions] = useState([]);
+  const token = localStorage.getItem("carserv-token");
+
+  const fetchPromotions = async () => {
+    try {
+      const res = await axios.get("/api/Promotion", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "anyvalue",
+        },
+      });
+      setPromotions(res.data || []);
+    } catch (err) {
+      console.error(err);
+      showError("Không tải được danh sách khuyến mãi");
+    }
+  };
+
+  useEffect(() => {
+    fetchPromotions();
+  }, []);
 
   const data = [
     {
@@ -97,20 +119,48 @@ export default function PromotionPage() {
     return matchesFilter && matchesSearch;
   });
 
-  const handleToggleStatus = (userId) => {
-    showError("Chức năng khoá/mở khoá tài khoản chưa được kết nối API.");
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      await axios.put(
+        `/api/Promotion/${id}/status`,
+        `"${currentStatus === "active" ? "inactive" : "active"}"`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "anyvalue",
+          },
+        }
+      );
+      showSuccess("Cập nhật trạng thái thành công");
+      fetchPromotions();
+    } catch (err) {
+      console.error(err);
+      showError("Cập nhật trạng thái thất bại");
+    }
+  };
+
+   const handleDelete = async (id) => {
+    if (confirm(`Bạn có chắc chắn muốn xoá khuyến mãi #${id}?`)) {
+      try {
+        await axios.delete(`/api/Promotion/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "anyvalue",
+          },
+        });
+        showSuccess("Xoá khuyến mãi thành công");
+        fetchPromotions();
+      } catch (err) {
+        console.error(err);
+        showError("Xoá khuyến mãi thất bại");
+      }
+    }
   };
 
   const handleSendActivation = (userId) => {
     showError("Chức năng gửi email kích hoạt chưa được kết nối API.");
   };
-
-  const handleDelete = (id) => {
-    const res = confirm(`Bạn có chắc chắn muốn xoá khuyến mãi ${id} ?`);
-    if (res) {
-        showError("Chức năng xoá chưa được kết nối API.");
-    }    
-  }
 
   return (
     <div className="flex flex-row w-full h-screen bg-gray-50">
@@ -230,7 +280,7 @@ export default function PromotionPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Toggle isActive={item.status === "active"} />
+                        <Toggle isActive={item.status === "active"} onClick={() => handleToggleStatus(item.id, item.status)}  />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex flex-wrap gap-2">

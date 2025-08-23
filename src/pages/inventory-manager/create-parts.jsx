@@ -1,13 +1,16 @@
 import Select from "@/components/form/select";
 import { UNITS } from "@/utils/constant";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import TextInput from "@/components/form/input";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { showSuccess } from "@/utils";
 
 const schema = yup.object().shape({
-  name: yup.string().required("Vui lòng nhập tên phụ tùng!"), // not null
+  partName: yup.string().required("Vui lòng nhập tên phụ tùng!"), // not null
 
   unit: yup
     .number()
@@ -23,17 +26,74 @@ const schema = yup.object().shape({
 });
 
 const CreateParts = () => {
+  const { id } = useParams();
+  const partId = /^\d+$/.test(id) ? id : null;
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
+  useEffect(() => {
+    if (partId) {
+      const fetchPart = async () => {
+        try {
+          const token = localStorage.getItem("carserv-token");
+          const res = await axios.get(`/api/Parts/${partId}`, {
+            headers: { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue', },
+          });
+          const part = res.data;
+          setValue("partName", part.partName);
+          setValue("quantity", part.quantity);
+          setValue("unit", part.unit);
+        } catch (error) {
+          console.error(error);
+          showError("Không thể lấy dữ liệu phụ tùng!");
+        }
+      };
+      fetchPart();
+    }
+  }, [partId, setValue]);
+
+  const onSubmit = async (data) => {
+    try {
+      const token = localStorage.getItem("carserv-token");
+
+      if (partId) {
+        // edit
+        await axios.put(`/api/parts/update`, {}, {
+          params: {
+            partId: partId,
+            partName: data.partName,
+            quantity: data.quantity,
+            unit: data.unit,
+          },
+          headers: { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue', },
+        });
+        showSuccess("Cập nhật phụ tùng thành công!");
+      } else {
+        // add
+        await axios.post(`/api/Parts/create`, {}, {
+          params: {
+            partName: data.partName,
+            quantity: data.quantity,
+            unit: data.unit,
+          },
+          headers: { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue', },
+        });
+        showSuccess("Tạo phụ tùng thành công!");
+      }
+      navigate("/inventory-manager/parts");
+    } catch (error) {
+      console.error(error);
+      showError(error.response?.data?.message || "Không thể lưu phụ tùng!");
+    }
   };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Thêm phụ tùng</h1>
@@ -48,8 +108,8 @@ const CreateParts = () => {
             label={"Tên phụ tùng"}
             placeholder={"Nhập tên phụ tùng"}
             register={register}
-            name={"name"}
-            error={errors?.name}
+            name={"partName"}
+            error={errors?.partName}
           />
           <TextInput
             label={"Số lượng"}

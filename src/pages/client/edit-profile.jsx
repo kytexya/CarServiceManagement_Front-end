@@ -10,7 +10,7 @@ import * as yup from "yup";
 const ENV = import.meta.env.VITE_API_BASE_URL
 
 const schema = yup.object().shape({
-  name: yup
+  fullName: yup
     .string()
     .required("Vui lòng nhập họ tên"),
 
@@ -39,10 +39,10 @@ export default function EditProfilePage() {
         try {
             const profile = JSON.parse(storedProfile);
             setCustomer(profile);
-            setValue('name', profile?.fullName);
+            setValue('fullName', profile?.fullName);
             setValue('email', profile?.email);
             setValue('phoneNumber', profile?.phoneNumber);
-            setValue('address', profile?.address);
+            setValue('Address', profile?.address);
         } catch (error) {
             console.error("Lấy profile từ localStorage thất bại", error);
         }
@@ -52,7 +52,7 @@ export default function EditProfilePage() {
     const onSubmit = async (data) => {
         try {
             const token = localStorage.getItem("carserv-token");
-            const res = await axios.put(`${ENV}/api/Account/update-profile`, data, {
+            const res = await axios.put(`/api/Account/update-profile/${customer.userID}`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
@@ -62,10 +62,20 @@ export default function EditProfilePage() {
 
             console.log("Profile updated:", res.data);
             setCustomer(res.data);
-            setValue('name', res.data?.fullName);
+            setValue('fullName', res.data?.fullName);
             setValue('email', res.data?.email);
             setValue('phoneNumber', res.data?.phoneNumber);
-            setValue('address', res.data?.address);
+            setValue('Address', res.data?.address);
+
+            const storedProfile = localStorage.getItem("carserv-profile");
+            if (storedProfile) {
+                const profileObj = JSON.parse(storedProfile);
+                profileObj.fullName = res.data?.fullName;
+                profileObj.email = res.data?.email;
+                profileObj.phoneNumber = res.data?.phoneNumber;
+                profileObj.address = res.data?.address;
+                localStorage.setItem("carserv-profile", JSON.stringify(profileObj));
+            }
 
             showSuccess("Cập nhật thông tin thành công!");
         } catch (error) {
@@ -83,7 +93,7 @@ export default function EditProfilePage() {
                         <TextInput
                             label={"Họ và tên"}
                             register={register}
-                            name={"name"}
+                            name={"fullName"}
                             error={errors?.name}
                         />
                     </div>
@@ -100,7 +110,7 @@ export default function EditProfilePage() {
                         <TextInput
                             label={"Địa chỉ"}
                             register={register}
-                            name={"address"}
+                            name={"Address"}
                         />
                     </div>
                     <div>

@@ -87,7 +87,7 @@ export default function ServiceManagementPage() {
           },
         withCredentials: true
       });
-      setServiceTypes(res.data || []);
+      setServiceTypes(res.data?.services || []);
     } catch (err) {
       showError("Không tải được danh sách dịch vụ");
     } finally {
@@ -276,8 +276,8 @@ export default function ServiceManagementPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {serviceTypesMock.map((service) => (
-                      <tr key={service.id} className="hover:bg-gray-50">
+                    {serviceTypes.map((service) => (
+                      <tr key={service.serviceId} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {service.name}
@@ -285,11 +285,11 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                            {service.category}
+                            {service?.description}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {service.duration} phút
+                          {service.estimatedLaborHours} phút
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {service.price.toLocaleString()} VND
@@ -297,12 +297,12 @@ export default function ServiceManagementPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              service.status === "Active"
+                              service?.status === "Active"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {service.status === "Active"
+                            {service?.status === "Active"
                               ? "Hoạt động"
                               : "Không hoạt động"}
                           </span>
@@ -310,7 +310,7 @@ export default function ServiceManagementPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center gap-2">
                             <a
-                              href={`/admin/service/${service.id}`}
+                              href={`/admin/service/${service.serviceId}`}
                               className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                             >
                               <IconEdit />
@@ -382,15 +382,14 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">
-                            {/* {combo.services.map((service, index) => (
+                            {combo.services.map((service, index) => (
                               <span
                                 key={index}
                                 className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs mr-1 mb-1"
                               >
-                                {service}
+                                {service.description}
                               </span>
-                            ))} */}
-                            {combo.description}
+                            ))}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -398,7 +397,7 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            {combo.discount ? combo.discount : 0}%
+                            {combo.discount ? combo.discount : 0} VND
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -424,7 +423,7 @@ export default function ServiceManagementPage() {
               </div>
             </div>
           )}
-          {<Pagination totalPage={3} />}
+          {/* {<Pagination totalPage={3} />} */}
         </div>
       </div>
     </div>

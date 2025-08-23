@@ -1,14 +1,41 @@
 import Pagination from '@/components/common/pagination';
 import IconEdit from '@/components/icons/IconEdit';
 import IconEye from '@/components/icons/IconEye';
+import { showError } from '@/utils';
 import { STATUS_CONFIG } from '@/utils/constant';
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const ServiceOrders = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [serviceOrders, setServiceOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem('carserv-token');
 
-  const serviceOrders = [
+  useEffect(() => {
+    const fetchServiceOrders = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get("/api/services/get-all-services", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+          },
+          withCredentials: true
+        });
+        setServiceOrders(res.data?.services || []);
+      } catch (err) {
+        showError("Không tải được danh sách dịch vụ");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServiceOrders();
+  }, []);
+
+  const serviceOrdersMock = [
     {
       id: 1,
       plateNumber: '30A-12345',
@@ -54,7 +81,7 @@ const ServiceOrders = () => {
     );
   };
 
-  const filteredOrders = serviceOrders.filter(order => {
+  const filteredOrders = serviceOrdersMock.filter(order => {
     const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
     const matchesSearch = order.plateNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||

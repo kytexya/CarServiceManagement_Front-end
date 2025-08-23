@@ -1,7 +1,8 @@
-import { showError } from "@/utils";
-import React, { useEffect } from "react";
+import { showError, showSuccess } from "@/utils";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 // Mock data for demonstration
 const mockPart = {
@@ -9,13 +10,16 @@ const mockPart = {
     partName: "Lọc gió điều hòa",
     partNumber: "PNJ-39281",
     quantity: 80,
-    price: 350000,
+    unitPrice: 350000,
     supplier: "Toyota Long Biên",
     description: "Lọc gió cho điều hòa xe Toyota Vios 2022. Hàng chính hãng."
 };
 
 export default function EditInventoryPage() {
     const { id } = useParams();
+    const partId = /^\d+$/.test(id) ? id : null;
+    const navigate = useNavigate();
+    const [partData, setPartData] = useState(null);
     const {
         register,
         handleSubmit,
@@ -24,20 +28,52 @@ export default function EditInventoryPage() {
     } = useForm();
 
     useEffect(() => {
-        // In a real app, you would fetch the part data based on the `id`
-        console.log("Fetching data for part ID:", id);
-        setValue("partName", mockPart.partName);
-        setValue("partNumber", mockPart.partNumber);
-        setValue("quantity", mockPart.quantity);
-        setValue("price", mockPart.price);
-        setValue("supplier", mockPart.supplier);
-        setValue("description", mockPart.description);
-    }, [id, setValue]);
+        const fetchPart = async () => {
+        try {
+            const token = localStorage.getItem("carserv-token");
+            const res = await axios.get(`/api/Parts/${partId}`, {
+            headers: { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue', },
+            });
+            const part = res.data;
 
-    const onSubmit = (data) => {
-        console.log("Updated Form Data:", data);
-        showError(`Chức năng chỉnh sửa phụ tùng ${id} chưa được kết nối API.`);
+            setPartData(part);
+            setValue("partName", part.partName);
+            setValue("partNumber", part.partNumber);
+            setValue("quantity", part.quantity);
+            setValue("unitPrice", part.unitPrice);
+            setValue("supplier", part.supplier);
+            setValue("description", part.description);
+        } catch (error) {
+            console.error(error);
+            showError("Không thể lấy dữ liệu phụ tùng!");
+        }
+        };
+
+        fetchPart();
+    }, [partId, setValue]);
+
+    const onSubmit = async (data) => {
+        try {
+            const token = localStorage.getItem("carserv-token");
+            await axios.put(`/api/parts/update`, {}, {
+                params: {
+                    partId: partId,
+                    partName: data.partName,
+                    quantity: data.quantity,
+                    unitPrice: data.unitPrice,
+                    expiryDate: partData.expiryDate,
+                    warrantyMonths: partData.warrantyMonths,
+                },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            showSuccess("Cập nhật phụ tùng thành công!");
+            navigate("/inventory-manager/inventory");
+        } catch (error) {
+            console.error(error);
+            showError(error.response?.data?.message || "Không thể cập nhật phụ tùng!");
+        }
     };
+
 
     return (
         <div className="flex flex-col w-full h-screen bg-gray-50">
@@ -178,21 +214,21 @@ export default function EditInventoryPage() {
                                         <input
                                             type="number"
                                             className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                errors.price ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-gray-300"
+                                                errors.unitPrice ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-gray-300"
                                             }`}
                                             placeholder="0"
-                                            {...register("price", { 
+                                            {...register("unitPrice", { 
                                                 required: "Vui lòng nhập giá", 
                                                 valueAsNumber: true, 
                                                 min: { value: 0, message: "Giá không được âm" } 
                                             })}
                                         />
-                                        {errors.price && (
+                                        {errors.unitPrice && (
                                             <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                {errors.price.message}
+                                                {errors.unitPrice.message}
                                             </p>
                                         )}
                                     </div>

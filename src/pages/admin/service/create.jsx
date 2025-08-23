@@ -13,12 +13,11 @@ import { showError, showSuccess } from "@/utils";
 const schema = yup.object().shape({
   name: yup.string().required("Vui lòng nhập tên khuyến mãi!"), // not null
 
-  category: yup
-    .number()
-    .typeError("Vui lòng chọn trạng thái")
+  Description: yup
+    .string()
     .required("Vui lòng chọn trạng thái"), // not null
   
-  timer: yup
+  estimatedLaborHours: yup
     .number()
     .typeError("Vui lòng điền thời gian thực hiện dịch vụ!")
     .required("Vui lòng điền thời gian thực hiện dịch vụ!"), // not null
@@ -33,6 +32,7 @@ const schema = yup.object().shape({
 
 const CreateService = () => {
   const { id } = useParams();
+  const serId = /^\d+$/.test(id) ? id : null;
   const {
     register,
     handleSubmit,
@@ -49,18 +49,18 @@ const CreateService = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (id) {
+    if (serId) {
       const fetchService = async () => {
         try {
           const token = localStorage.getItem("carserv-token");
-          const response = await axios.get(`/api/services/a/${id}`, {
+          const response = await axios.get(`/api/services/a/${serId}`, {
             headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" },
           });
           const service = response.data;
           setValue("name", service.name);
           setValue("category", service.category);
           setValue("price", service.price);
-          setValue("timer", service.timer);
+          setValue("estimatedLaborHours", service.estimatedLaborHours);
           setValue("status", service.status);
         } catch (error) {
           console.error(error);
@@ -69,7 +69,7 @@ const CreateService = () => {
       };
       fetchService();
     }
-  }, [id, setValue]);
+  }, [serId, setValue]);
 
   const onSubmit = async (data) => {
     try {
@@ -114,13 +114,12 @@ const CreateService = () => {
             name={"name"}
             error={errors?.name}
           />
-          <Select 
-            name={"category"}
-            options={CATEGORIES}
-            register={register}
+          <TextInput
             label={"Danh mục"}
-            placeholder="Chọn danh mục"
-            error={errors?.category}
+            placeholder={"Nhập danh mục"}
+            register={register}
+            name={"Description"}
+            error={errors?.Description}
           />
           <TextInput
             label={"Giá tiền (VND)"}
@@ -135,8 +134,8 @@ const CreateService = () => {
             placeholder={"Nhập thời gian"}
             register={register}
             type="number"
-            name={"timer"}
-            error={errors?.timer}
+            name={"estimatedLaborHours"}
+            error={errors?.estimatedLaborHours}
           />
           <Toggle
             isActive={true}

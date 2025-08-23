@@ -3,7 +3,7 @@ import IconEdit from "@/components/icons/IconEdit";
 import IconEmail from "@/components/icons/IconEmail";
 import IconLock from "@/components/icons/IconLock";
 import IconUnlock from "@/components/icons/IconUnlock";
-import { showError } from "@/utils";
+import { showError, showSuccess } from "@/utils";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";import axios from "axios";
 import IconNotFound from "@/components/icons/IconNotFound";
@@ -106,8 +106,13 @@ export default function UserManagementPage() {
 
   const handleToggleStatus = async (userId, currentStatus) => {
     try {
-      await axios.patch(`${ENV}/api/users/${userId}/status`, {
-        status: currentStatus === "active" ? "inactive" : "active",
+      const newStatus = currentStatus === true ? false : true;
+      await axios.put(`/api/Account/account-status/${userId}`, newStatus, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          "Content-Type": "application/json",
+        },
       });
       showSuccess("Cập nhật trạng thái thành công");
       fetchUsers();
@@ -346,12 +351,12 @@ export default function UserManagementPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex flex-wrap gap-2">
-                          <a
+                          {/* <a
                             href={`/admin/user-management/${user.userID}`}
                             className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                           >
                             <IconEdit />
-                          </a>
+                          </a> */}
                           <button
                             onClick={() => handleToggleStatus(user.userID)}
                             className={`text-xs  rounded-full hover:bg-slate-300 transition-all duration-100 px-2 ${
@@ -366,12 +371,12 @@ export default function UserManagementPage() {
                               <IconUnlock />
                             )}
                           </button>
-                          <button
+                          {/* <button
                             onClick={() => handleSendActivation(user.userID)}
                             className="text-purple-600 hover:text-purple-900 text-xs rounded-full hover:bg-slate-300 transition-all duration-100 px-2"
                           >
                             <IconEmail />
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>

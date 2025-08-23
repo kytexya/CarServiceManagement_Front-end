@@ -8,7 +8,7 @@ export default function Toggle({
   const [status, setStatus] = useState(isActive);
 
   const toggleStatus = () => {
-    setStatus(!status);
+    // setStatus(!status);
     onClick && onClick();
   };
 

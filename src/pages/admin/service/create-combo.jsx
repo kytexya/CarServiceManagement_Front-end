@@ -14,21 +14,25 @@ import { showError, showSuccess } from "@/utils";
 const schema = yup.object().shape({
   name: yup.string().required("Vui lòng nhập tên khuyến mãi!"), // not null
 
-  services: yup
+  serviceIds: yup
     .array()
     .of(yup.number().integer("Mỗi dịch vụ phải là số nguyên"))
     .min(1, "Phải chọn ít nhất một dịch vụ")
     .typeError("Phải chọn ít nhất một dịch vụ")
     .required("Trường dịch vụ không được để trống"),
 
+  Description: yup
+    .string()
+    .required("Mô tả không được để trống"),
+
   price: yup
     .number()
     .typeError("Vui lòng nhập giá tiền!")
     .required("Vui lòng nhập giá tiền!"), // not null
 
-  percent: yup
+  discount: yup
     .number()
-    .typeError("Vui lòng phần trăm khuyễn mãi")
+    .typeError("Vui lòng nhập giá khuyễn mãi")
     .optional(), // not null
 
   status: yup.string().optional(),
@@ -36,6 +40,7 @@ const schema = yup.object().shape({
 
 const CreateService = () => {
   const { id } = useParams();
+  const comboId = /^\d+$/.test(id) ? id : null;
   const {
     register,
     handleSubmit,
@@ -46,18 +51,18 @@ const CreateService = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       status: "active",
-      percent: 0
+      discount: 0
     },
   });
   const status = watch("status");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (id) {
+    if (comboId) {
       const fetchService = async () => {
         try {
           const token = localStorage.getItem("carserv-token");
-          const response = await axios.get(`/api/services/a/${id}`, {
+          const response = await axios.get(`/api/services/GetAllPartsForPackageService/${comboId}`, {
             headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" },
           });
           const service = response.data;
@@ -73,7 +78,7 @@ const CreateService = () => {
       };
       fetchService();
     }
-  }, [id, setValue]);
+  }, [comboId, setValue]);
 
   const onSubmit = async (data) => {
     try {
@@ -132,15 +137,23 @@ const CreateService = () => {
             placeholder={"Nhập giảm giá"}
             register={register}
             type="number"
-            name={"percent"}
-            error={errors?.percent}
+            name={"discount"}
+            error={errors?.discount}
           />
           <Checkbox
-            name={"services"}
+            name={"serviceIds"}
             register={register}
             label={"Dịch vụ trong gói"}
-            error={errors?.services}
+            placeholder={"Nhập dịch vụ trong gói"}
+            error={errors?.serviceIds}
             options={SERVICES}
+          />
+          <TextInput
+            label={"Mô tả"}
+            placeholder={"Nhập mô tả"}
+            register={register}
+            name={"Description"}
+            error={errors?.Description}
           />
           <Toggle
             isActive={true}
