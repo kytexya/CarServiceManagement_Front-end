@@ -41,7 +41,7 @@ export default function ServiceHistoryPage() {
             const parsedProfile = JSON.parse(storedProfile);
             setProfile(parsedProfile);
         } else {
-            navigate('/login');
+            navigate('/');
         }
     }, [navigate]);
 

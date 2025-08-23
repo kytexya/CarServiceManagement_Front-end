@@ -11,7 +11,7 @@ const mockPart = {
     partNumber: "PNJ-39281",
     quantity: 80,
     unitPrice: 350000,
-    supplier: "Toyota Long Biên",
+    supplierName: "Toyota Long Biên",
     description: "Lọc gió cho điều hòa xe Toyota Vios 2022. Hàng chính hãng."
 };
 
@@ -41,7 +41,7 @@ export default function EditInventoryPage() {
             setValue("partNumber", part.partNumber);
             setValue("quantity", part.quantity);
             setValue("unitPrice", part.unitPrice);
-            setValue("supplier", part.supplier);
+            setValue("supplierName", part.supplierName);
             setValue("description", part.description);
         } catch (error) {
             console.error(error);
@@ -243,17 +243,17 @@ export default function EditInventoryPage() {
                                         <input
                                             type="text"
                                             className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                errors.supplier ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-gray-300"
+                                                errors.supplierName ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-gray-300"
                                             }`}
                                             placeholder="Nhập tên nhà cung cấp..."
-                                            {...register("supplier", { required: "Vui lòng nhập nhà cung cấp" })}
+                                            {...register("supplierName", { required: "Vui lòng nhập nhà cung cấp" })}
                                         />
-                                        {errors.supplier && (
+                                        {errors.supplierName && (
                                             <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                {errors.supplier.message}
+                                                {errors.supplierName.message}
                                             </p>
                                         )}
                                     </div>

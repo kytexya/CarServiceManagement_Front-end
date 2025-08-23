@@ -147,8 +147,38 @@ export default function ScheduleManagementPage() {
         showError("Chức năng cập nhật giờ làm việc chưa được kết nối API.");
     };
 
-    const handleConfirmAppointment = (appointmentId) => {
-        showError("Chức năng xác nhận lịch hẹn chưa được kết nối API.");
+    const handleConfirmAppointment = async (appointment) => {
+        try {
+            const token = localStorage.getItem("carserv-token");
+
+            const response = await axios.post(
+                `/api/Appointment/schedule`,
+                {
+                    vehicleId: appointment.vehicleId,
+                    packageId: appointment.packageId,
+                    promotionId: appointment.promotionId,
+                    appointmentDate: appointment.appointmentDate,
+                    serviceIds: appointment.appointmentServices,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "ngrok-skip-browser-warning": "anyvalue",
+                    },
+                    params: {
+                        customerId: appointment.customerId
+                    }
+                }
+            );
+            showSuccess("Xác nhận lịch hẹn thành công!");
+
+            navigate('/admin/service-management')
+        } catch (error) {
+            console.error("Error:", error);
+            showError(
+                error.response?.data?.message || "Xác nhận lịch hẹn thất bại!"
+            );
+        }
     };
 
     const handleAssignStaff = (appointmentId) => {
@@ -287,9 +317,9 @@ export default function ScheduleManagementPage() {
                                                 <tr key={appointment.appointmentId} className="hover:bg-gray-50">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
-                                                            <div className="text-sm font-medium text-gray-900">{appointment?.customer?.customerNavigation?.fullName}</div>
-                                                            <div className="text-sm text-gray-500">{appointment?.customer?.customerNavigation?.phoneNumber}</div>
-                                                            <div className="text-xs text-gray-400">{appointment?.vehicle}</div>
+                                                            <div className="text-sm font-medium text-gray-900">{appointment?.customerName}</div>
+                                                            <div className="text-sm text-gray-500">{appointment?.customerPhone}</div>
+                                                            <div className="text-xs text-gray-400">{appointment?.vehicleMake + ' ' + appointment?.vehicleModel}</div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -299,9 +329,14 @@ export default function ScheduleManagementPage() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900">{appointment.date}</div>
-                                                        <div className="text-sm text-gray-500">{appointment.time}</div>
+                                                        <div className="text-sm text-gray-900">
+                                                            {new Date(appointment.appointmentDate).toLocaleDateString("vi-VN", { year: "numeric", month: "2-digit", day: "2-digit" })}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {new Date(appointment.appointmentDate).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                                        </div>
                                                     </td>
+
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm text-gray-900">{appointment.assignedStaff || 'Chưa gán'}</div>
                                                     </td>
@@ -313,7 +348,7 @@ export default function ScheduleManagementPage() {
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <div className="flex gap-2">
                                                             <button
-                                                                onClick={() => handleConfirmAppointment(appointment.id)}
+                                                                onClick={() => handleConfirmAppointment(appointment)}
                                                                 className="text-blue-600 hover:text-blue-900"
                                                             >
                                                                 Xác nhận

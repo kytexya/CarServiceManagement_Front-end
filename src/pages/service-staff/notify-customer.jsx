@@ -1,38 +1,12 @@
-import React, { useState } from 'react';
+import { showError } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const NotifyCustomer = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [message, setMessage] = useState('');
-  const [notificationHistory, setNotificationHistory] = useState([
-    {
-      id: 1,
-      customerName: 'Nguyễn Văn A',
-      plateNumber: '30A-12345',
-      type: 'received',
-      message: 'Xe của bạn đã được nhận và đang kiểm tra.',
-      sentAt: '2024-01-15 10:30',
-      status: 'sent'
-    },
-    {
-      id: 2,
-      customerName: 'Trần Thị B',
-      plateNumber: '51B-67890',
-      type: 'in-progress',
-      message: 'Xe của bạn đang được sửa chữa, dự kiến hoàn thành trong 2 giờ.',
-      sentAt: '2024-01-15 11:15',
-      status: 'sent'
-    },
-    {
-      id: 3,
-      customerName: 'Lê Văn C',
-      plateNumber: '29C-11111',
-      type: 'completed',
-      message: 'Xe của bạn đã hoàn thành sửa chữa, vui lòng đến nhận xe.',
-      sentAt: '2024-01-15 14:20',
-      status: 'sent'
-    }
-  ]);
+  const [notificationHistory, setNotificationHistory] = useState([]);
 
   const customers = [
     { id: 1, name: 'Nguyễn Văn A', phone: '0123456789', plateNumber: '30A-12345' },
@@ -60,6 +34,11 @@ const NotifyCustomer = () => {
       id: 'delay',
       title: 'Cần thêm thời gian',
       message: 'Do phát hiện thêm vấn đề, xe của bạn cần thêm thời gian để sửa chữa. Dự kiến hoàn thành lúc {time}.'
+    },
+    {
+      id: 'Promotion',
+      title: 'Khuyến mãi',
+      message: '10% off on your next service!'
     }
   ];
 
@@ -68,7 +47,8 @@ const NotifyCustomer = () => {
       received: { color: 'bg-blue-100 text-blue-800', text: 'Đã nhận xe' },
       'in-progress': { color: 'bg-yellow-100 text-yellow-800', text: 'Đang sửa' },
       completed: { color: 'bg-green-100 text-green-800', text: 'Hoàn thành' },
-      delay: { color: 'bg-orange-100 text-orange-800', text: 'Chậm trễ' }
+      delay: { color: 'bg-orange-100 text-orange-800', text: 'Chậm trễ' },
+      Promotion: { color: 'bg-orange-100 text-orange-800', text: 'Khuyến mãi' }
     };
     
     const config = typeConfig[type] || typeConfig.received;
@@ -87,22 +67,26 @@ const NotifyCustomer = () => {
     }
   };
 
-  const handleSendNotification = () => {
+  const handleSendNotification = async () => {
     if (selectedCustomer && message) {
       const customer = customers.find(c => c.id == selectedCustomer);
       const template = templates.find(t => t.id === selectedTemplate);
-      
-      const newNotification = {
-        id: notificationHistory.length + 1,
-        customerName: customer.name,
-        plateNumber: customer.plateNumber,
-        type: selectedTemplate,
-        message: message,
-        sentAt: new Date().toLocaleString('vi-VN'),
-        status: 'sent'
-      };
-      
-      setNotificationHistory([newNotification, ...notificationHistory]);
+
+      try {
+        const res = await axios.post("/api/Notification/create", {
+          userId: selectedCustomer,
+          title: selectedTemplate,
+          message: message,
+          sentAt: new Date().toISOString(),
+          isRead: false,
+          type: selectedTemplate,
+        }, {
+          headers
+        });
+        fetchNoti();
+      } catch (err) {
+        showError("Không tải được danh sách thông báo");
+      }
       
       // Reset form
       setSelectedCustomer('');
@@ -110,6 +94,36 @@ const NotifyCustomer = () => {
       setMessage('');
     }
   };
+
+  const token = localStorage.getItem("carserv-token");
+  const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
+
+  const fetchNoti = async () => {
+    try {
+      const res = await axios.get("/api/Notification", {
+        headers
+      });
+      setNotificationHistory(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách thông báo");
+    }
+  };
+
+  const fetchCustomer = async () => {
+    // try {
+    //   const res = await axios.get("/api/Notification", {
+    //     headers
+    //   });
+    //   setNotificationHistory(res.data || []);
+    // } catch (err) {
+    //   showError("Không tải được danh sách thông báo");
+    // }
+  };
+
+  useEffect(() => {
+    fetchNoti();
+    fetchCustomer();
+  }, []);
 
   return (
     <div className="p-6">
@@ -222,9 +236,9 @@ const NotifyCustomer = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {notificationHistory.map((notification) => (
-                <tr key={notification.id} className="hover:bg-gray-50">
+                <tr key={notification.notificationId} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {notification.customerName}
+                    {notification?.user?.fullName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {notification.plateNumber}

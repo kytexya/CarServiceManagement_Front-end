@@ -10,7 +10,7 @@ const mockData = [
     quantity: 5,
     unitPrice: 350000,
     sellingPrice: 450000,
-    supplier: 'Toyota Long Biên',
+    supplierName: 'Toyota Long Biên',
     status: 'Sắp hết',
     expiryDate: '2025-06-30',
     minThreshold: 10,
@@ -23,7 +23,7 @@ const mockData = [
     quantity: 50,
     unitPrice: 120000,
     sellingPrice: 180000,
-    supplier: 'Honda Việt Nam',
+    supplierName: 'Honda Việt Nam',
     status: 'Còn hàng',
     expiryDate: '2026-01-15',
     minThreshold: 20,
@@ -36,7 +36,7 @@ const mockData = [
     quantity: 0,
     unitPrice: 800000,
     sellingPrice: 1200000,
-    supplier: 'Hyundai',
+    supplierName: 'Hyundai',
     status: 'Hết hàng',
     expiryDate: '2024-12-01',
     minThreshold: 5,
@@ -49,7 +49,7 @@ const mockData = [
     quantity: 3,
     unitPrice: 250000,
     sellingPrice: 350000,
-    supplier: 'Ford Việt Nam',
+    supplierName: 'Ford Việt Nam',
     status: 'Sắp hết',
     expiryDate: '2025-03-15',
     minThreshold: 8,
@@ -62,7 +62,7 @@ const mockData = [
     quantity: 15,
     unitPrice: 1200000,
     sellingPrice: 1800000,
-    supplier: 'BMW Việt Nam',
+    supplierName: 'BMW Việt Nam',
     status: 'Còn hàng',
     expiryDate: '2025-08-20',
     minThreshold: 12,
@@ -152,7 +152,7 @@ export default function InventoryListPage() {
     }
   }
 
-  const suppliers = Array.from(new Set(mockData.map(item => item.supplier)));
+  const suppliers = Array.from(new Set(parts.map(item => item.supplierName)));
 
   const filteredList = parts.filter(item => {
     const matchKeyword =
@@ -321,20 +321,20 @@ export default function InventoryListPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {item.unitPrice.toLocaleString('vi-VN')} ₫
+                          {item.currentUnitPrice.toLocaleString('vi-VN')} ₫
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {item.unitPrice.toLocaleString('vi-VN')} ₫
+                          {item.currentUnitPrice.toLocaleString('vi-VN')} ₫
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
-                          {item.supplier}
+                          {item.supplierName}
                         </td>
                         <td className="px-4 py-3 text-sm text-center text-gray-900">
                           {item.expiryDate}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColor[item.status]}`}>
-                            {item.status}
+                            {item.quantity === 0 ? 'Hết hàng' : item.quantity < 10 ? 'Sắp hết hàng' : 'Còn hàng'}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">

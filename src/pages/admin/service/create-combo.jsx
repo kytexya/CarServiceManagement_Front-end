@@ -21,7 +21,7 @@ const schema = yup.object().shape({
     .typeError("Phải chọn ít nhất một dịch vụ")
     .required("Trường dịch vụ không được để trống"),
 
-  Description: yup
+  description: yup
     .string()
     .required("Mô tả không được để trống"),
 
@@ -62,15 +62,17 @@ const CreateService = () => {
       const fetchService = async () => {
         try {
           const token = localStorage.getItem("carserv-token");
-          const response = await axios.get(`/api/services/GetAllPartsForPackageService/${comboId}`, {
+          const response = await axios.get(`/api/services/get-service-package/${comboId}`, {
             headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" },
           });
           const service = response.data;
           setValue("name", service.name);
-          setValue("category", service.category);
+          setValue("serviceIds", service.services.map(s => String(s.serviceId)));
           setValue("price", service.price);
           setValue("timer", service.timer);
+          setValue("description", service.description);
           setValue("status", service.status);
+          console.log(service.services.map(s => s.serviceId));
         } catch (error) {
           console.error(error);
           showError("Không thể lấy dữ liệu dịch vụ!");
@@ -84,19 +86,35 @@ const CreateService = () => {
     try {
       const token = localStorage.getItem("carserv-token");
 
-      const response = await axios.post(
-        `/api/services/create-service-package`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "ngrok-skip-browser-warning": "anyvalue",
-          },
-        }
-      );
+      if (comboId) {
+        const response = await axios.put(
+          `/api/services/update-service-package`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "anyvalue",
+            },
+          }
+        );
 
-      console.log("Tạo combo dịch vụ thành công:", response.data);
-      showSuccess("Tạo combo dịch vụ thành công!");
+        console.log("Cập nhật dịch vụ thành công:", response.data);
+        showSuccess("Cập nhật dịch vụ thành công!");
+      } else {
+        const response = await axios.post(
+          `/api/services/create-service-package`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "anyvalue",
+            },
+          }
+        );
+
+        console.log("Tạo combo dịch vụ thành công:", response.data);
+        showSuccess("Tạo combo dịch vụ thành công!");
+      }
 
       navigate('/admin/service-management')
     } catch (error) {
@@ -152,8 +170,8 @@ const CreateService = () => {
             label={"Mô tả"}
             placeholder={"Nhập mô tả"}
             register={register}
-            name={"Description"}
-            error={errors?.Description}
+            name={"description"}
+            error={errors?.description}
           />
           <Toggle
             isActive={true}

@@ -39,7 +39,7 @@ const UpdateServiceHistory = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await axios.get("/api/vehicles", { headers });
+        const res = await axios.get("/api/vehicle", { headers });
         setVehicles(res.data || []);
       } catch (err) {
         showError("Không tải được danh sách xe");
@@ -117,9 +117,9 @@ const UpdateServiceHistory = () => {
               onChange={(e) => setSelectedVehicle(e.target.value)}
             >
               <option value="">Chọn biển số xe</option>
-              {vehiclesMock.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.id}>
-                  {vehicle.plateNumber} - {vehicle.customerName}
+              {vehicles.map(vehicle => (
+                <option key={vehicle.vehicleId} value={vehicle.vehicleId}>
+                  {vehicle.licensePlate} - {vehicle.customer}
                 </option>
               ))}
             </select>
@@ -131,7 +131,7 @@ const UpdateServiceHistory = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Khách hàng</label>
                 <input
                   type="text"
-                  value={vehiclesMock.find(v => v.id == selectedVehicle)?.customerName || ''}
+                  value={vehicles.find(v => v.vehicleId == selectedVehicle)?.customer || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
                   readOnly
                 />
@@ -140,7 +140,10 @@ const UpdateServiceHistory = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Model xe</label>
                 <input
                   type="text"
-                  value={vehiclesMock.find(v => v.id == selectedVehicle)?.model || ''}
+                  value={
+                    vehicles.find(v => v.vehicleId == selectedVehicle)?.make + ' ' + 
+                    vehicles.find(v => v.vehicleId == selectedVehicle)?.model + ' ' + 
+                    vehicles.find(v => v.vehicleId == selectedVehicle)?.year || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
                   readOnly
                 />

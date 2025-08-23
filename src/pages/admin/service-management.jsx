@@ -4,7 +4,7 @@ import IconBin from "@/components/icons/IconBin";
 import IconEdit from "@/components/icons/IconEdit";
 import IconPackage from "@/components/icons/IconPackage";
 import IconPlus from "@/components/icons/IconPlus";
-import { showError } from "@/utils";
+import { showError, showSuccess } from "@/utils";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -116,7 +116,7 @@ export default function ServiceManagementPage() {
   const handleDeleteService = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa dịch vụ này?")) return;
     try {
-      await axios.delete(`/api/service-types/${id}`, { 
+      const res = await axios.delete(`/api/services/delete-service/${id}`, { 
         headers: {
           Authorization: `Bearer ${token}`,
           'ngrok-skip-browser-warning': 'anyvalue',
@@ -133,7 +133,7 @@ export default function ServiceManagementPage() {
   const handleDeleteCombo = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa combo này?")) return;
     try {
-      await axios.delete(`/api/service-combos/${id}`, { 
+      const res = await axios.delete(`/api/services/delete-service-package/${id}`, { 
         headers: {
           Authorization: `Bearer ${token}`,
           'ngrok-skip-browser-warning': 'anyvalue',
@@ -316,7 +316,7 @@ export default function ServiceManagementPage() {
                               <IconEdit />
                             </a>
                             <button
-                              onClick={console.log}
+                              onClick={() => handleDeleteService(service.serviceId)}
                               className="text-red-600 hover:text-red-900"
                             >
                               <IconBin />
@@ -409,7 +409,7 @@ export default function ServiceManagementPage() {
                               <IconEdit />
                             </a>
                             <button
-                              onClick={console.log}
+                              onClick={() => handleDeleteCombo(combo.packageId)}
                               className="text-red-600 hover:text-red-900"
                             >
                               <IconBin />

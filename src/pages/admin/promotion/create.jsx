@@ -9,12 +9,12 @@ import Checkbox from "@/components/form/checkbox";
 import Toggle from "@/components/form/toggle";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { showError } from "@/utils";
+import { showError, showSuccess } from "@/utils";
 
 const schema = yup.object().shape({
-  name: yup.string().required("Vui lòng nhập tên khuyến mãi!"), // not null
+  title: yup.string().required("Vui lòng nhập tên khuyến mãi!"), // not null
 
-  percent: yup
+  discountPercentage: yup
     .number()
     .typeError("Vui lòng chọn phần trăm")
     .required("Vui lòng chọn phần trăm"), // not null
@@ -52,7 +52,7 @@ const CreatePromotion = () => {
       const fetchPromotion = async () => {
         try {
           const token = localStorage.getItem("carserv-token");
-          const res = await axios.get(`/api/promotions/${promotionId}`, {
+          const res = await axios.get(`/api/Promotion/retrieve-promotion/${promotionId}`, {
             headers: { 
               Authorization: `Bearer ${token}`,
               "ngrok-skip-browser-warning": "anyvalue" 
@@ -60,8 +60,8 @@ const CreatePromotion = () => {
           });
           const promo = res.data;
 
-          setValue("name", promo.name);
-          setValue("percent", promo.percent);
+          setValue("title", promo.title);
+          setValue("discountPercentage", promo.discountPercentage);
           setValue("services", promo.services?.map(s => s.id));
           setValue("status", promo.status);
         } catch (error) {
@@ -80,7 +80,7 @@ const CreatePromotion = () => {
       let response;
       if (promotionId) {
         // update
-        response = await axios.put(`/api/promotions/${promotionId}`, data, {
+        response = await axios.put(`/api/Promotion/update-promotion/${promotionId}`, data, {
           headers: {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "anyvalue",
@@ -89,7 +89,7 @@ const CreatePromotion = () => {
         showSuccess("Cập nhật khuyến mãi thành công!");
       } else {
         // create
-        response = await axios.post(`/api/promotions`, data, {
+        response = await axios.post(`/api/Promotion/create-promotion`, data, {
           headers: {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "anyvalue",
@@ -99,7 +99,7 @@ const CreatePromotion = () => {
       }
 
       console.log("Promotion saved:", response.data);
-      navigate("/admin/promotion-management");
+      navigate("/admin/promotions");
     } catch (error) {
       console.error("Error:", error);
       showError(error.response?.data?.message || "Không thể lưu khuyến mãi!");
@@ -119,16 +119,16 @@ const CreatePromotion = () => {
             label={"Tên khuyến mãi"}
             placeholder={"Nhập tên khuyến mãi"}
             register={register}
-            name={"name"}
-            error={errors?.name}
+            name={"title"}
+            error={errors?.title}
           />
           <TextInput
             label={"Phần trăm"}
             placeholder={"Nhập phần trăm"}
             register={register}
             type="number"
-            name={"percent"}
-            error={errors?.percent}
+            name={"discountPercentage"}
+            error={errors?.discountPercentage}
           />
           <Checkbox
             name={"services"}

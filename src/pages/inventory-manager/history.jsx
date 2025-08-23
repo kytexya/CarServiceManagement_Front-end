@@ -1,5 +1,4 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const mockHistoryData = [
@@ -114,28 +113,6 @@ export default function HistoryPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  const [historyData, setHistoryData] = useState([]);
-  const token = localStorage.getItem("carserv-token");
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await axios.get("/api/History", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'ngrok-skip-browser-warning': 'anyvalue',
-          },
-          withCredentials: true
-        });
-        setHistoryData(res.data || []);
-      } catch (error) {
-        console.error('Lỗi khi fetch dữ liệu:', error);
-      }
-    }
-
-    fetchData();
-  }, []);
-
   const filteredHistory = mockHistoryData.filter(item => {
     const matchKeyword = item.partName.toLowerCase().includes(searchKeyword.toLowerCase()) ||
                         item.partId.toLowerCase().includes(searchKeyword.toLowerCase()) ||
@@ -177,66 +154,6 @@ export default function HistoryPage() {
     );
   };
 
-  const exportToExcel = async () => {
-    try {
-      const res = await axios.get('/api/history/export/excel', {
-        params: {
-          search: searchKeyword,
-          type: typeFilter,
-          part: partFilter,
-          staff: staffFilter,
-          dateFrom,
-          dateTo
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'ngrok-skip-browser-warning': 'anyvalue',
-        },
-        responseType: 'blob',
-      });
-
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'history.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error('Lỗi khi xuất Excel:', error);
-    }
-  };
-
-  const exportToPDF = async () => {
-  try {
-    const res = await axios.get('/api/history/export/pdf', {
-      params: {
-        search: searchKeyword,
-        type: typeFilter,
-        part: partFilter,
-        staff: staffFilter,
-        dateFrom,
-        dateTo
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'ngrok-skip-browser-warning': 'anyvalue',
-      },
-      responseType: 'blob',
-    });
-
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'history.pdf');
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (error) {
-    console.error('Lỗi khi xuất PDF:', error);
-  }
-};
-
   return (
     <div className="flex flex-col w-full">
         {/* Header */}
@@ -253,13 +170,13 @@ export default function HistoryPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="button" onClick={exportToExcel}>
+            <button className="button">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               Xuất Excel
             </button>
-            <button className="button" onClick={exportToPDF}>
+            <button className="button">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>

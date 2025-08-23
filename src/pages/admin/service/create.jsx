@@ -13,9 +13,14 @@ import { showError, showSuccess } from "@/utils";
 const schema = yup.object().shape({
   name: yup.string().required("Vui lòng nhập tên khuyến mãi!"), // not null
 
-  Description: yup
+  description: yup
     .string()
-    .required("Vui lòng chọn trạng thái"), // not null
+    .required("Vui lòng nhập mô tả"), // not null
+
+  ServiceParts: yup
+    .number()
+    .typeError("Vui lòng chọn danh mục")
+    .required("Vui lòng chọn danh mục"),
   
   estimatedLaborHours: yup
     .number()
@@ -53,15 +58,16 @@ const CreateService = () => {
       const fetchService = async () => {
         try {
           const token = localStorage.getItem("carserv-token");
-          const response = await axios.get(`/api/services/a/${serId}`, {
+          const response = await axios.get(`/api/services/get-service/${serId}`, {
             headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" },
           });
           const service = response.data;
           setValue("name", service.name);
-          setValue("category", service.category);
+          setValue("description", service.description);
           setValue("price", service.price);
           setValue("estimatedLaborHours", service.estimatedLaborHours);
           setValue("status", service.status);
+          setValue("ServiceParts", service?.parts?.[0].partId);
         } catch (error) {
           console.error(error);
           showError("Không thể lấy dữ liệu dịch vụ!");
@@ -75,19 +81,47 @@ const CreateService = () => {
     try {
       const token = localStorage.getItem("carserv-token");
 
-      const response = await axios.post(
-        `/api/services/create-service`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "ngrok-skip-browser-warning": "anyvalue",
+      if (serId) {
+        const response = await axios.put(
+          `/api/services/update-service/${serId}`,
+          {
+            ...data,
+            ServiceParts: [{
+              partId: data.ServiceParts,
+              quantityRequired: 0
+            }]
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "anyvalue",
+            },
+          }
+        );
 
-      console.log("Tạo combo dịch vụ thành công:", response.data);
-      showSuccess("Tạo combo dịch vụ thành công!");
+        console.log("Cập nhật loại dịch vụ thành công:", response.data);
+        showSuccess("Cập nhật loại dịch vụ thành công!");
+      } else {
+        const response = await axios.post(
+          `/api/services/create-service`,
+          {
+            ...data,
+            ServiceParts: [{
+              partId: data.ServiceParts,
+              quantityRequired: 0
+            }]
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "anyvalue",
+            },
+          }
+        );
+
+        console.log("Tạo loại dịch vụ thành công:", response.data);
+        showSuccess("Tạo loại dịch vụ thành công!");
+      }
 
       navigate('/admin/service-management')
     } catch (error) {
@@ -118,8 +152,16 @@ const CreateService = () => {
             label={"Danh mục"}
             placeholder={"Nhập danh mục"}
             register={register}
-            name={"Description"}
-            error={errors?.Description}
+            name={"description"}
+            error={errors?.description}
+          />
+          <Select 
+            name={"ServiceParts"}
+            options={CATEGORIES}
+            register={register}
+            label={"Danh mục"}
+            placeholder="Chọn danh mục"
+            error={errors?.ServiceParts}
           />
           <TextInput
             label={"Giá tiền (VND)"}

@@ -2,12 +2,34 @@ import Pagination from '@/components/common/pagination';
 import IconEdit from '@/components/icons/IconEdit';
 import IconEye from '@/components/icons/IconEye';
 import IconPlus from '@/components/icons/IconPlus';
+import { showError } from '@/utils';
 import { STATUS_CONFIG, STATUSES } from '@/utils/constant';
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const ProblemReporting = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [reports, setReports] = useState([]);
+  const token = localStorage.getItem("carserv-token");
+  const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
+
+  const fetchReports = async () => {
+    try {
+      const res = await axios.get(`/api/problem-reporting`, {
+        headers,
+        withCredentials: true,
+      });
+
+      setReports(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách báo cáo");
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   const serviceOrders = [
     {

@@ -19,7 +19,7 @@ const schema = yup.object().shape({
   password: yup
     .string()
     .required("Vui lòng nhập mật khẩu")
-    .min(6, "Mật khẩu cần ít nhất 6 ký tự"),
+    .min(3, "Mật khẩu cần ít nhất 3 ký tự"),
 });
 
 export default function LoginPage() {
@@ -41,14 +41,15 @@ export default function LoginPage() {
       if (decoded.exp < now) {
         localStorage.removeItem("carserv-token");
         localStorage.removeItem("carserv-profile");
-        window.location.href = "/login";
+        window.location.href = "/";
         return;
       }
-      if (profile?.roleName === 'admin') {
+      const parsedProfile = JSON.parse(profile);
+      if (parsedProfile?.roleName === 'Admin') {
         window.location.href = "/admin";
-      } else if (profile?.roleName === 'staff') {
+      } else if (parsedProfile?.roleName === 'Staff') {
         window.location.href = "/service-staff";
-      } else if (profile?.roleName === 'inventory_manager') {
+      } else if (parsedProfile?.roleName === 'Inventory manager') {
         window.location.href = "/inventory-manager";
       } else {
         window.location.href = "/service-staff";
