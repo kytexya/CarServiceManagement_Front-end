@@ -218,7 +218,7 @@ export default function DashboardPage() {
         },
         withCredentials: true
       });
-      setParts(res.data || []);
+      setParts(res.data.items || []);
     } catch (err) {
       showError("Không tải được danh sách phụ tùng");
     }

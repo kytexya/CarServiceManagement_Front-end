@@ -1,3 +1,4 @@
+import Pagination from "@/components/common/pagination";
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError } from "@/utils";
 import axios from "axios";
@@ -7,18 +8,24 @@ import { Link } from "react-router-dom";
 export default function ServiceOrdersPage() {
     const [activeFilter, setActiveFilter] = useState('all');
     const [orders, setOrders] = useState([]);
+    const [pagination, setPagination] = useState({
+        totalItems: 0,
+        totalPages: 1,
+        currentPage: 1,
+        pageSize: 10,
+    });
     const token = localStorage.getItem("carserv-token");
 
     useEffect(() => {
-        const fetchOrders = async () => {
+        const fetchOrders = async (page = 1) => {
         try {
-            const response = await axios.get(`/api/Order`, {
+            const response = await axios.get(`/api/Order?currentPage=${page}&pageSize=${pagination.pageSize}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "ngrok-skip-browser-warning": "anyvalue",
             },
             });
-            const mapped = response.data?.map(order => {
+            const mapped = response.data.items?.map(order => {
                 const appointment = order.appointment;
                 const customer = appointment?.customer?.customerNavigation;
                 const vehicle = appointment?.vehicle;
@@ -45,14 +52,21 @@ export default function ServiceOrdersPage() {
                 }) || [];
 
             setOrders(mapped);
+            setPagination((prev) => ({
+                ...prev,
+                totalItems: response.data.totalItems,
+                totalPages: response.data.totalPages,
+                currentPage: response.data.currentPage,
+                pageSize: response.data.pageSize,
+            }));
         } catch (error) {
             console.error(error);
             showError("Không thể tải danh sách đơn dịch vụ!");
         }
         };
 
-        fetchOrders();
-    }, []);
+        fetchOrders(pagination.currentPage);
+    }, [pagination.currentPage]);
 
     const formatDate = (dateStr) => {
         if (!dateStr) return "N/A";
@@ -311,6 +325,17 @@ export default function ServiceOrdersPage() {
                                 </svg>
                                 <p className="text-gray-500">Không có đơn dịch vụ nào</p>
                             </div>
+                        )}
+                        {pagination.totalItems > 0 && filteredOrders.length > 0 && (
+                            <Pagination
+                                totalPage={pagination.totalPages}
+                                currentPage={pagination.currentPage}
+                                totalItems={pagination.totalItems}
+                                pageSize={pagination.pageSize}
+                                onPageChange={(page) =>
+                                setPagination((prev) => ({ ...prev, currentPage: page }))
+                                }
+                            />
                         )}
                     </div>
                 </div>

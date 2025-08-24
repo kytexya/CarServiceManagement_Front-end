@@ -1,3 +1,4 @@
+import Pagination from '@/components/common/pagination';
 import { showError } from '@/utils';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -99,26 +100,39 @@ export default function InventoryListPage() {
   const [parts, setParts] = useState([]);
   const [lowParts, setLowParts] = useState([]);
   const [outOfStockParts, setOutOfStockParts] = useState([]);
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
   const token = localStorage.getItem("carserv-token");
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchParts()
+    fetchParts(pagination.currentPage)
     fetchLowParts()
     fetchOutOfStockParts()
-  }, []);
+  }, [pagination.currentPage]);
 
 
-  const fetchParts = async () => {
+  const fetchParts = async (page = 1) => {
     try {
-      const res = await axios.get("/api/Parts", {
+      const res = await axios.get(`/api/Parts?currentPage=${page}&pageSize=${pagination.pageSize}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'ngrok-skip-browser-warning': 'anyvalue',
         },
         withCredentials: true
       });
-      setParts(res.data || []);
+      setParts(res.data.items || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
     } catch (err) {
       showError("Không tải được danh sách phụ tùng");
     }
@@ -402,26 +416,17 @@ export default function InventoryListPage() {
           </div>
 
           {/* Pagination */}
-          <div className="mt-6 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Hiển thị <span className="font-medium">{filteredList.length}</span> trong tổng số <span className="font-medium">{filteredList.length}</span> phụ tùng
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="button button-sm">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Trước
-              </button>
-              <span className="px-3 py-2 text-sm text-gray-700">1</span>
-              <button className="button button-sm">
-                Sau
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
+          {pagination.totalItems > 0 && filteredList.length > 0 && (
+            <Pagination
+              totalPage={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              totalItems={pagination.totalItems}
+              pageSize={pagination.pageSize}
+              onPageChange={(page) =>
+                setPagination((prev) => ({ ...prev, currentPage: page }))
+              }
+            />
+          )}
         </div>
       </div>
   );

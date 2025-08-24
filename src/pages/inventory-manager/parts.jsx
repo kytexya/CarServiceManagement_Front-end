@@ -9,6 +9,12 @@ const Parts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [parts, setParts] = useState([]);
   const [sortOption, setSortOption] = useState("Mới nhất");
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
   const token = localStorage.getItem("carserv-token");
   const data = [
     { partId: 1, partName: "Má phanh", unit: "bộ", quantity: 20 },
@@ -45,19 +51,27 @@ const Parts = () => {
   });
 
   useEffect(() => {
-    fetchParts()
-  }, []);
+    fetchParts(pagination.currentPage);
+  }, [pagination.currentPage]);
 
-  const fetchParts = async () => {
+  const fetchParts = async (page = 1) => {
     try {
-      const res = await axios.get("/api/Parts", {
+      const res = await axios.get(`/api/Parts?currentPage=${page}&pageSize=${pagination.pageSize}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'ngrok-skip-browser-warning': 'anyvalue',
         },
         withCredentials: true
       });
-      setParts(res.data || []);
+
+      setParts(res.data.items || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
     } catch (err) {
       showError("Không tải được danh sách phụ tùng");
     }
@@ -167,7 +181,17 @@ const Parts = () => {
         </div>
       </div>
       {/* Pagination */}
-      {sortedData.length > 0 && <Pagination totalPage={1} />}
+      {pagination.totalItems > 0 && sortedData.length > 0 && (
+        <Pagination
+          totalPage={pagination.totalPages}
+          currentPage={pagination.currentPage}
+          totalItems={pagination.totalItems}
+          pageSize={pagination.pageSize}
+          onPageChange={(page) =>
+            setPagination((prev) => ({ ...prev, currentPage: page }))
+          }
+        />
+      )}
     </div>
   );
 };

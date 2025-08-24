@@ -118,6 +118,12 @@ export default function InventoryOverviewPage() {
     const [parts, setParts] = useState([]);
     const [lowParts, setLowParts] = useState([]);
     const [outOfStockParts, setOutOfStockParts] = useState([]);
+    const [pagination, setPagination] = useState({
+        totalItems: 0,
+        totalPages: 1,
+        currentPage: 1,
+        pageSize: 10,
+    });
     const token = localStorage.getItem("carserv-token");
 
     const inventoryStats = useMemo(() => {
@@ -211,21 +217,28 @@ export default function InventoryOverviewPage() {
     };
 
     useEffect(() => {
-        fetchParts()
+        fetchParts(pagination.currentPage)
         fetchLowParts()
         fetchOutOfStockParts()
-    }, []);
+    }, [pagination.currentPage]);
 
-    const fetchParts = async () => {
+    const fetchParts = async (page = 1) => {
         try {
-            const res = await axios.get("/api/Parts", { 
+            const res = await axios.get(`/api/Parts?currentPage=${page}&pageSize=${pagination.pageSize}`, { 
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
                 },
                 withCredentials: true
             });
-            setParts(res.data || []);
+            setParts(res.data.items || []);
+            setPagination((prev) => ({
+                ...prev,
+                totalItems: res.data.totalItems,
+                totalPages: res.data.totalPages,
+                currentPage: res.data.currentPage,
+                pageSize: res.data.pageSize,
+            }));
         } catch (err) {
             showError("Không tải được danh sách phụ tùng");
         }

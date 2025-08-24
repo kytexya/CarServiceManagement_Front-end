@@ -13,6 +13,18 @@ export default function ServiceManagementPage() {
   const [activeTab, setActiveTab] = useState("services");
   const [serviceTypes, setServiceTypes] = useState([]);
   const [comboPackages, setComboPackages] = useState([]);
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
+  const [paginationCombo, setPaginationCombo] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("carserv-token");
 
@@ -71,16 +83,16 @@ export default function ServiceManagementPage() {
 
   useEffect(() => {
     if (activeTab === "services") {
-      fetchServiceTypes();
+      fetchServiceTypes(pagination.currentPage);
     } else {
-      fetchCombos();
+      fetchCombos(paginationCombo.currentPage);
     }
-  }, [activeTab]);
+  }, [activeTab, pagination.currentPage, paginationCombo.currentPage]);
 
-  const fetchServiceTypes = async () => {
+  const fetchServiceTypes = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/services/get-all-services", { 
+      const res = await axios.get(`/api/services/get-all-services?currentPage=${page}&pageSize=${pagination.pageSize}`, { 
         headers: {
           Authorization: `Bearer ${token}`,
           'ngrok-skip-browser-warning': 'anyvalue',
@@ -88,6 +100,13 @@ export default function ServiceManagementPage() {
         withCredentials: true
       });
       setServiceTypes(res.data?.services || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems || res.data?.services.length,
+        totalPages: res.data.totalPages || 1,
+        currentPage: res.data.currentPage || 1,
+        pageSize: res.data.pageSize || 1,
+      }));
     } catch (err) {
       showError("Không tải được danh sách dịch vụ");
     } finally {
@@ -95,10 +114,10 @@ export default function ServiceManagementPage() {
     }
   };
 
-  const fetchCombos = async () => {
+  const fetchCombos = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/services/get-all-service-packages", { 
+      const res = await axios.get(`/api/services/get-all-service-packages?currentPage=${page}&pageSize=${paginationCombo.pageSize}`, { 
         headers: {
           Authorization: `Bearer ${token}`,
           'ngrok-skip-browser-warning': 'anyvalue',
@@ -106,6 +125,13 @@ export default function ServiceManagementPage() {
         withCredentials: true
       });
       setComboPackages(res.data.packages || []);
+      setPaginationCombo((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems || res.data.packages.length,
+        totalPages: res.data.totalPages || 1,
+        currentPage: res.data.currentPage || 1,
+        pageSize: res.data.pageSize || 1,
+      }));
     } catch (err) {
       showError("Không tải được danh sách combo");
     } finally {
@@ -427,7 +453,28 @@ export default function ServiceManagementPage() {
               </div>
             </div>
           )}
-          {/* {<Pagination totalPage={3} />} */}
+          {activeTab === 'services' && pagination.totalItems > 0 && serviceTypes.length > 0 && (
+            <Pagination
+              totalPage={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              totalItems={pagination.totalItems}
+              pageSize={pagination.pageSize}
+              onPageChange={(page) =>
+                setPagination((prev) => ({ ...prev, currentPage: page }))
+              }
+            />
+          )}
+          {activeTab === 'combos' && paginationCombo.totalItems > 0 && comboPackages.length > 0 && (
+            <Pagination
+              totalPage={paginationCombo.totalPages}
+              currentPage={paginationCombo.currentPage}
+              totalItems={paginationCombo.totalItems}
+              pageSize={paginationCombo.pageSize}
+              onPageChange={(page) =>
+                setPaginationCombo((prev) => ({ ...prev, currentPage: page }))
+              }
+            />
+          )}
         </div>
       </div>
     </div>

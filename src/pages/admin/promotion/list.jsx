@@ -17,17 +17,30 @@ export default function PromotionPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [promotions, setPromotions] = useState([]);
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
   const token = localStorage.getItem("carserv-token");
 
-  const fetchPromotions = async () => {
+  const fetchPromotions = async (page = 1) => {
     try {
-      const res = await axios.get("/api/Promotion/retrieve-all-promotion", {
+      const res = await axios.get(`/api/Promotion/retrieve-all-promotion?currentPage=${page}&pageSize=${pagination.pageSize}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "ngrok-skip-browser-warning": "anyvalue",
         },
       });
-      setPromotions(res.data || []);
+      setPromotions(res.data.items || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
     } catch (err) {
       console.error(err);
       showError("Không tải được danh sách khuyến mãi");
@@ -35,8 +48,8 @@ export default function PromotionPage() {
   };
 
   useEffect(() => {
-    fetchPromotions();
-  }, []);
+    fetchPromotions(pagination.currentPage);
+  }, [pagination.currentPage]);
 
   const data = [
     {
@@ -303,7 +316,17 @@ export default function PromotionPage() {
                 </tbody>
               </table>
             </div>
-            {filteredData.length > 0 && <Pagination totalPage={1} />}
+            {pagination.totalItems > 0 && filteredData.length > 0 && (
+              <Pagination
+                totalPage={pagination.totalPages}
+                currentPage={pagination.currentPage}
+                totalItems={pagination.totalItems}
+                pageSize={pagination.pageSize}
+                onPageChange={(page) =>
+                  setPagination((prev) => ({ ...prev, currentPage: page }))
+                }
+              />
+            )}
 
             {filteredData.length === 0 && (
               <div className="text-center py-12">

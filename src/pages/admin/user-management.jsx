@@ -7,12 +7,19 @@ import { showError, showSuccess } from "@/utils";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";import axios from "axios";
 import IconNotFound from "@/components/icons/IconNotFound";
+import Pagination from "@/components/common/pagination";
 const ENV = import.meta.env.VITE_API_BASE_URL;
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
 
   // Mock data
   const usersMock = [
@@ -30,9 +37,9 @@ export default function UserManagementPage() {
     },
   ];
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1) => {
     try {
-      const res = await axios.get(`/api/Account`, {
+      const res = await axios.get(`/api/Account?currentPage=${page}&pageSize=${pagination.pageSize}`, {
         params: {
           currentPage: 1,
           pageSize: 10
@@ -44,6 +51,13 @@ export default function UserManagementPage() {
         // withCredentials: true,
       });
       setUsers(res?.data?.items);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
     } catch (err) {
       console.error(err);
       showError("Lấy danh sách người dùng thất bại");
@@ -52,8 +66,8 @@ export default function UserManagementPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(pagination.currentPage);
+  }, [pagination.currentPage]);
 
   const getRoleColor = (role) => {
     switch (role) {
@@ -392,6 +406,17 @@ export default function UserManagementPage() {
               </div>
             )}
           </div>
+          {pagination.totalItems > 0 && filteredUsers.length > 0 && (
+            <Pagination
+              totalPage={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              totalItems={pagination.totalItems}
+              pageSize={pagination.pageSize}
+              onPageChange={(page) =>
+                setPagination((prev) => ({ ...prev, currentPage: page }))
+              }
+            />
+          )}
         </div>
       </div>
     </div>

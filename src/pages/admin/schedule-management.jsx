@@ -1,3 +1,4 @@
+import Pagination from "@/components/common/pagination";
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError } from "@/utils";
 import axios from "axios";
@@ -8,26 +9,39 @@ export default function ScheduleManagementPage() {
     const [activeTab, setActiveTab] = useState('appointments');
     const [selectedDate, setSelectedDate] = useState('2025-08-01');
     const [appointments, setAppointments] = useState(null);
+    const [pagination, setPagination] = useState({
+        totalItems: 0,
+        totalPages: 1,
+        currentPage: 1,
+        pageSize: 10,
+    });
     const token = localStorage.getItem("carserv-token");
 
     useEffect(() => {
         if (activeTab === "appointments") {
-          fetchAppointments();
+          fetchAppointments(pagination.currentPage);
         } else {
           fetchWokingHours();
         }
-    }, [activeTab]);
+    }, [activeTab, pagination.currentPage]);
 
-    const fetchAppointments = async () => {
+    const fetchAppointments = async (page = 1) => {
         try {
-        const res = await axios.get("/api/Appointment", { 
+        const res = await axios.get(`/api/Appointment?currentPage=${page}&pageSize=${pagination.pageSize}`, { 
             headers: {
             Authorization: `Bearer ${token}`,
             'ngrok-skip-browser-warning': 'anyvalue',
             },
             withCredentials: true
         });
-        setAppointments(res.data || []);
+        setAppointments(res.data.items || []);
+        setPagination((prev) => ({
+            ...prev,
+            totalItems: res.data.totalItems,
+            totalPages: res.data.totalPages,
+            currentPage: res.data.currentPage,
+            pageSize: res.data.pageSize,
+        }));
         } catch (err) {
         console.log(err);
         showError("Không tải được");
@@ -366,6 +380,17 @@ export default function ScheduleManagementPage() {
                                         </tbody>
                                     </table>
                                 </div>
+                                {pagination.totalItems > 0 && (
+                                    <Pagination
+                                        totalPage={pagination.totalPages}
+                                        currentPage={pagination.currentPage}
+                                        totalItems={pagination.totalItems}
+                                        pageSize={pagination.pageSize}
+                                        onPageChange={(page) =>
+                                        setPagination((prev) => ({ ...prev, currentPage: page }))
+                                        }
+                                    />
+                                )}
                             </div>
                         </div>
                     )}

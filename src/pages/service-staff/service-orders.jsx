@@ -13,19 +13,25 @@ const ServiceOrders = () => {
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem('carserv-token');
   const [sortOption, setSortOption] = useState("Mới nhất");
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
 
   useEffect(() => {
-    const fetchServiceOrders = async () => {
+    const fetchServiceOrders = async (page = 1) => {
       try {
         setLoading(true);
-        const res = await axios.get("/api/Order", {
+        const res = await axios.get(`/api/Order?currentPage=${page}&pageSize=${pagination.pageSize}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'ngrok-skip-browser-warning': 'anyvalue',
           },
           withCredentials: true
         });
-        const mapped = res.data?.map(order => ({
+        const mapped = res.data.items?.map(order => ({
           id: order.orderId,
           plateNumber: order.appointment?.vehicle?.licensePlate || 'N/A',
           customerName: order.appointment?.customer?.customerNavigation?.fullName || 'N/A',
@@ -36,6 +42,13 @@ const ServiceOrders = () => {
           createdAt: formatDate(order.appointment?.appointmentDate || order.createdAt),
         })) || [];
         setServiceOrders(mapped);
+        setPagination((prev) => ({
+          ...prev,
+          totalItems: res.data.totalItems,
+          totalPages: res.data.totalPages,
+          currentPage: res.data.currentPage,
+          pageSize: res.data.pageSize,
+        }));
       } catch (err) {
         showError("Không tải được danh sách dịch vụ");
       } finally {
@@ -43,8 +56,8 @@ const ServiceOrders = () => {
       }
     };
 
-    fetchServiceOrders();
-  }, []);
+    fetchServiceOrders(pagination.currentPage);
+  }, [pagination.currentPage]);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
@@ -243,7 +256,17 @@ const ServiceOrders = () => {
         </div>
       </div>
       {/* Pagination */}
-      <Pagination totalPage={3} />
+      {pagination.totalItems > 0 && sortedOrders.length > 0 && (
+        <Pagination
+          totalPage={pagination.totalPages}
+          currentPage={pagination.currentPage}
+          totalItems={pagination.totalItems}
+          pageSize={pagination.pageSize}
+          onPageChange={(page) =>
+            setPagination((prev) => ({ ...prev, currentPage: page }))
+          }
+        />
+      )}
     </div>
   );
 };
