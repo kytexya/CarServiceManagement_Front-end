@@ -58,6 +58,7 @@ import PromotionPage from "./pages/admin/promotion/list";
 import CreatePromotion from "./pages/admin/promotion/create";
 import CreateComboService from "./pages/admin/service/create-combo";
 import CreateService from "./pages/admin/service/create";
+import InventoryDetailsPage from "./pages/admin/inventory-detail";
 
 // Placeholder for new pages
 const ServicesPage = () => (
@@ -182,6 +183,12 @@ function App() {
             path="inventory-overview"
             element={<InventoryOverviewPage />}
           />
+          <Route
+            path="inventory-details"
+            element={<InventoryDetailsPage />}
+          />
+          <Route path="parts/new" element={<CreateParts />} />
+          <Route path="parts/:id" element={<CreateParts />} />
           <Route path="report" element={<ReportPage />} />
           <Route path="promotions" element={<PromotionPage />} />
           <Route path="promotion/new" element={<CreatePromotion />} />
