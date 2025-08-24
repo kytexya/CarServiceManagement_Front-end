@@ -3,6 +3,7 @@ import IconEdit from '@/components/icons/IconEdit';
 import IconEye from '@/components/icons/IconEye';
 import { STATUS_CONFIG } from '@/utils/constant';
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const ServiceOrders = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -66,12 +67,14 @@ const ServiceOrders = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Danh sách phiếu dịch vụ</h1>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-semibold shadow transition-colors duration-200 flex items-center">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Tạo phiếu mới
-        </button>
+        <Link to="/service-staff/service-order/new">
+          <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-semibold shadow transition-colors duration-200 flex items-center">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Tạo phiếu mới
+          </button>
+        </Link>
       </div>
       {/* Filters */}
       <div className="bg-white rounded-lg border p-6 shadow-sm mb-6">
@@ -158,7 +161,7 @@ const ServiceOrders = () => {
                       <button className="rounded-full p-2 hover:bg-blue-100 transition-colors text-blue-600">
                         <IconEye />
                       </button>
-                      <a href={`/service-staff/notify-customer/${order.id}`} className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600">
+                      <a href={`/service-staff/service-order/${order.id}`} className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600">
                         <IconEdit />
                       </a>
                     </div>
