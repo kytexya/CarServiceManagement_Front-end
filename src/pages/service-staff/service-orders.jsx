@@ -12,19 +12,30 @@ const ServiceOrders = () => {
   const [serviceOrders, setServiceOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem('carserv-token');
+  const [sortOption, setSortOption] = useState("Mới nhất");
 
   useEffect(() => {
     const fetchServiceOrders = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("/api/services/get-all-services", {
+        const res = await axios.get("/api/Order", {
           headers: {
             Authorization: `Bearer ${token}`,
             'ngrok-skip-browser-warning': 'anyvalue',
           },
           withCredentials: true
         });
-        setServiceOrders(res.data?.services || []);
+        const mapped = res.data?.map(order => ({
+          id: order.orderId,
+          plateNumber: order.appointment?.vehicle?.licensePlate || 'N/A',
+          customerName: order.appointment?.customer?.customerNavigation?.fullName || 'N/A',
+          phone: order.appointment?.customer?.customerNavigation?.phoneNumber || 'N/A',
+          service: order.appointment?.appointmentServices?.map(s => s.service?.name).join(", ") || 'N/A',
+          status: order.appointment?.status || 'pending',
+          assignedTo: order.appointment?.serviceHistory?.staff?.staff || 'Chưa phân công',
+          createdAt: formatDate(order.appointment?.appointmentDate || order.createdAt),
+        })) || [];
+        setServiceOrders(mapped);
       } catch (err) {
         showError("Không tải được danh sách dịch vụ");
       } finally {
@@ -34,6 +45,13 @@ const ServiceOrders = () => {
 
     fetchServiceOrders();
   }, []);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    return new Date(dateStr).toLocaleString("vi-VN", {
+      hour12: false
+    });
+  };
 
   const serviceOrdersMock = [
     {
@@ -81,13 +99,38 @@ const ServiceOrders = () => {
     );
   };
 
-  const filteredOrders = serviceOrdersMock.filter(order => {
+  const filteredOrders = serviceOrders.filter(order => {
     const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
     const matchesSearch = order.plateNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.service.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
+  const sortOrders = (orders) => {
+    switch (sortOption) {
+      case "Mới nhất":
+        return [...orders].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      case "Cũ nhất":
+        return [...orders].sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+      case "Theo tên khách hàng":
+        return [...orders].sort((a, b) =>
+          a.customerName.localeCompare(b.customerName, "vi", { sensitivity: "base" })
+        );
+      case "Theo biển số xe":
+        return [...orders].sort((a, b) =>
+          a.plateNumber.localeCompare(b.plateNumber, "vi", { sensitivity: "base" })
+        );
+      default:
+        return orders;
+    }
+  };
+
+  const sortedOrders = sortOrders(filteredOrders);
 
   return (
     <div className="p-6">
@@ -129,7 +172,10 @@ const ServiceOrders = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Sắp xếp</label>
-            <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select 
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}>
               <option>Mới nhất</option>
               <option>Cũ nhất</option>
               <option>Theo tên khách hàng</option>
@@ -162,7 +208,7 @@ const ServiceOrders = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOrders.map((order) => (
+              {sortedOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div>

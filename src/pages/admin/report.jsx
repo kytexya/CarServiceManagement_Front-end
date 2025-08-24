@@ -196,7 +196,7 @@ export default function AdminReportPage() {
             });
             setSummary(res.data);
         } catch (err) {
-            showError("Không tải được dữ liệu thống kê");
+            // showError("Không tải được dữ liệu thống kê");
         }
     };
 
@@ -210,7 +210,7 @@ export default function AdminReportPage() {
             });
             setAlerts(res.data);
         } catch (err) {
-            showError("Không tải được dữ liệu thống kê");
+            // showError("Không tải được dữ liệu thống kê");
         }
     };
 
@@ -224,7 +224,7 @@ export default function AdminReportPage() {
             });
             setRevenueData(res.data);
         } catch (err) {
-            showError("Không tải được dữ liệu thống kê");
+            // showError("Không tải được dữ liệu thống kê");
         }
     };
 
@@ -238,7 +238,7 @@ export default function AdminReportPage() {
             });
             setEmployee(res.data);
         } catch (err) {
-            showError("Không tải được dữ liệu thống kê");
+            // showError("Không tải được dữ liệu thống kê");
         }
     };
 
@@ -252,7 +252,7 @@ export default function AdminReportPage() {
             });
             setSparePartsUsageData(res.data);
         } catch (err) {
-            showError("Không tải được dữ liệu thống kê");
+            // showError("Không tải được dữ liệu thống kê");
         }
     };
 

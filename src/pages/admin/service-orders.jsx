@@ -1,10 +1,65 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError } from "@/utils";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function ServiceOrdersPage() {
     const [activeFilter, setActiveFilter] = useState('all');
+    const [orders, setOrders] = useState([]);
+    const token = localStorage.getItem("carserv-token");
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+        try {
+            const response = await axios.get(`/api/Order`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "ngrok-skip-browser-warning": "anyvalue",
+            },
+            });
+            const mapped = response.data?.map(order => {
+                const appointment = order.appointment;
+                const customer = appointment?.customer?.customerNavigation;
+                const vehicle = appointment?.vehicle;
+
+                return {
+                    id: order.orderId,
+                    customerName: customer?.fullName || "N/A",
+                    customerPhone: customer?.phoneNumber || "N/A",
+                    services: appointment?.appointmentServices?.map(s => s.service?.name) || [],
+                    totalAmount: order.orderDetails?.reduce((sum, d) => sum + (d.lineTotal || 0), 0) || 0,
+                    status: appointment?.status || "Scheduled",
+                    scheduledDate: appointment?.appointmentDate 
+                    ? new Date(appointment.appointmentDate).toISOString().split("T")[0] 
+                    : "N/A",
+                    scheduledTime: appointment?.appointmentDate 
+                    ? new Date(appointment.appointmentDate).toISOString().split("T")[1].slice(0,5) 
+                    : "N/A",
+                    assignedStaff: appointment?.serviceHistory?.staff?.staff || "Chưa gán",
+                    vehicleInfo: vehicle 
+                    ? `${vehicle.make} ${vehicle.model} ${vehicle.year} - ${vehicle.licensePlate}` 
+                    : "N/A",
+                    notes: appointment?.serviceProgresses?.[0]?.note || ""
+                };
+                }) || [];
+
+            setOrders(mapped);
+        } catch (error) {
+            console.error(error);
+            showError("Không thể tải danh sách đơn dịch vụ!");
+        }
+        };
+
+        fetchOrders();
+    }, []);
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "N/A";
+        return new Date(dateStr).toLocaleString("vi-VN", {
+        hour12: false
+        });
+    };
 
     // Mock data
     const serviceOrders = [
@@ -93,8 +148,8 @@ export default function ServiceOrdersPage() {
     };
 
     const filteredOrders = activeFilter === 'all' 
-        ? serviceOrders 
-        : serviceOrders.filter(order => order.status.toLowerCase() === activeFilter.toLowerCase());
+        ? orders 
+        : orders.filter(order => order.status.toLowerCase() === activeFilter.toLowerCase());
 
     const handleAssignStaff = (orderId) => {
         showError("Chức năng gán nhân viên chưa được kết nối API.");
@@ -134,7 +189,7 @@ export default function ServiceOrdersPage() {
                                     : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                         >
-                            Tất cả ({serviceOrders.length})
+                            Tất cả ({orders.length})
                         </button>
                         <button
                             onClick={() => setActiveFilter('scheduled')}
@@ -144,7 +199,7 @@ export default function ServiceOrdersPage() {
                                     : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                         >
-                            Đã đặt lịch ({serviceOrders.filter(o => o.status === 'Scheduled').length})
+                            Đã đặt lịch ({orders.filter(o => o.status === 'Scheduled').length})
                         </button>
                         <button
                             onClick={() => setActiveFilter('in progress')}
@@ -154,7 +209,7 @@ export default function ServiceOrdersPage() {
                                     : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                         >
-                            Đang xử lý ({serviceOrders.filter(o => o.status === 'In Progress').length})
+                            Đang xử lý ({orders.filter(o => o.status === 'In Progress').length})
                         </button>
                         <button
                             onClick={() => setActiveFilter('completed')}
@@ -164,7 +219,7 @@ export default function ServiceOrdersPage() {
                                     : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                         >
-                            Đã hoàn thành ({serviceOrders.filter(o => o.status === 'Completed').length})
+                            Đã hoàn thành ({orders.filter(o => o.status === 'Completed').length})
                         </button>
                         <button
                             onClick={() => setActiveFilter('cancelled')}
@@ -174,7 +229,7 @@ export default function ServiceOrdersPage() {
                                     : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                         >
-                            Đã hủy ({serviceOrders.filter(o => o.status === 'Cancelled').length})
+                            Đã hủy ({orders.filter(o => o.status === 'Cancelled').length})
                         </button>
                     </div>
 

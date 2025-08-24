@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 const Parts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [parts, setParts] = useState([]);
+  const [sortOption, setSortOption] = useState("Mới nhất");
   const token = localStorage.getItem("carserv-token");
   const data = [
     { partId: 1, partName: "Má phanh", unit: "bộ", quantity: 20 },
@@ -26,6 +27,21 @@ const Parts = () => {
       order.partName.toLowerCase().includes(searchTerm.toLowerCase());
 
     return matchKeyword;
+  });
+
+  const sortedData = [...filteredData].sort((a, b) => {
+    switch (sortOption) {
+      case "Mới nhất":
+        return b.partId - a.partId;
+      case "Cũ nhất":
+        return a.partId - b.partId;
+      case "Nhiều nhất":
+        return b.quantity - a.quantity;
+      case "Ít nhất":
+        return a.quantity - b.quantity;
+      default:
+        return 0;
+    }
   });
 
   useEffect(() => {
@@ -87,7 +103,10 @@ const Parts = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Sắp xếp
             </label>
-            <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select 
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}>
               <option>Mới nhất</option>
               <option>Cũ nhất</option>
               <option>Nhiều nhất</option>
@@ -117,7 +136,7 @@ const Parts = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((order) => (
+              {sortedData.map((order) => (
                 <tr key={order.partId} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {order.partName}
@@ -148,7 +167,7 @@ const Parts = () => {
         </div>
       </div>
       {/* Pagination */}
-      {filteredData.length > 0 && <Pagination totalPage={1} />}
+      {sortedData.length > 0 && <Pagination totalPage={1} />}
     </div>
   );
 };

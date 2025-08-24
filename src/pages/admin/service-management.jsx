@@ -297,14 +297,18 @@ export default function ServiceManagementPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              service?.status === "Active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
+                              // service?.status === "Active"
+                              //   ? "bg-green-100 text-green-800"
+                              //   : "bg-red-100 text-red-800"
+                              // todo
+                              'bg-green-100 text-green-800'
                             }`}
                           >
-                            {service?.status === "Active"
+                            {/* {service?.status === "Active"
                               ? "Hoạt động"
-                              : "Không hoạt động"}
+                              : "Không hoạt động"} */}
+                            {/* todo */}
+                            Hoạt động
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

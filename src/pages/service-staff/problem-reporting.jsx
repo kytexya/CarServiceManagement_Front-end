@@ -186,7 +186,7 @@ const ProblemReporting = () => {
                       <button className="rounded-full p-2 hover:bg-blue-100 transition-colors text-blue-600">
                         <IconEye />
                       </button>
-                      <a href={`/service-staff/notify-customer/${order.id}`} className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600">
+                      <a href={`/service-staff/problem-reporting/${order.id}`} className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600">
                         <IconEdit />
                       </a>
                     </div>

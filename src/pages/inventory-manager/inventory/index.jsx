@@ -155,11 +155,17 @@ export default function InventoryListPage() {
   const suppliers = Array.from(new Set(parts.map(item => item.supplierName)));
 
   const filteredList = parts.filter(item => {
+    const status =
+    item.quantity === 0
+      ? 'Hết hàng'
+      : item.quantity < 10
+        ? 'Sắp hết hàng'
+        : 'Còn hàng';
     const matchKeyword =
       item.partName.toLowerCase().includes(keyword.toLowerCase()) ||
       item.partId.toString().toLowerCase().includes(keyword.toLowerCase());
-    const matchStatus = statusFilter === 'all' || item.status === statusFilter;
-    const matchSupplier = supplierFilter === 'all' || item.supplier === supplierFilter;
+    const matchStatus = statusFilter === 'all' || status === statusFilter;
+    const matchSupplier = supplierFilter === 'all' || item.supplierName === supplierFilter;
     return matchKeyword && matchStatus && matchSupplier;
   });
 
