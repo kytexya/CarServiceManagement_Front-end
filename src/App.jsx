@@ -60,6 +60,7 @@ import CreateComboService from "./pages/admin/service/create-combo";
 import CreateService from "./pages/admin/service/create";
 import InventoryDetailsPage from "./pages/admin/inventory-detail";
 import CreateServiceOrder from "./pages/service-staff/create-service-order";
+import EditServiceOrder from "./pages/admin/edit-service-order";
 
 // Placeholder for new pages
 const ServicesPage = () => (
@@ -176,6 +177,7 @@ function App() {
             element={<ServiceManagementPage2 />}
           />
           <Route path="service-orders" element={<ServiceOrdersPage />} />
+          <Route path="service-order/:id" element={<EditServiceOrder />} />
           <Route
             path="schedule-management"
             element={<ScheduleManagementPage />}

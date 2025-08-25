@@ -1,9 +1,10 @@
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError } from "@/utils";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function ServiceOrdersPage() {
+    const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -112,7 +113,7 @@ export default function ServiceOrdersPage() {
     };
 
     const handleUpdateStatus = (orderId) => {
-        showError("Chức năng cập nhật trạng thái chưa được kết nối API.");
+        navigate(`/admin/service-order/${orderId}`)
     };
 
     return (
