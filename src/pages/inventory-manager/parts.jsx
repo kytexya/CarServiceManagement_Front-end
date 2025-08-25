@@ -1,33 +1,87 @@
 import Pagination from "@/components/common/pagination";
 import IconEdit from "@/components/icons/IconEdit";
 import IconEye from "@/components/icons/IconEye";
-import React, { useState } from "react";
+import { showError } from "@/utils";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 const Parts = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [parts, setParts] = useState([]);
+  const [sortOption, setSortOption] = useState("Mới nhất");
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
+  const token = localStorage.getItem("carserv-token");
   const data = [
-    { id: 1, name: "Má phanh", unit: "bộ", quantity: 20 },
-    { id: 2, name: "Lọc dầu", unit: "cái", quantity: 50 },
-    { id: 3, name: "Bugi", unit: "cái", quantity: 100 },
-    { id: 4, name: "Lọc gió", unit: "cái", quantity: 40 },
-    { id: 5, name: "Bóng đèn pha", unit: "cái", quantity: 60 },
-    { id: 6, name: "Ắc quy", unit: "cái", quantity: 15 },
-    { id: 7, name: "Ống nước làm mát", unit: "cái", quantity: 30 },
-    { id: 8, name: "Bàn ép ly hợp", unit: "bộ", quantity: 10 },
-    { id: 9, name: "Dây curoa cam", unit: "cái", quantity: 25 },
-    { id: 10, name: "Máy phát điện", unit: "cái", quantity: 8 },
+    { partId: 1, partName: "Má phanh", unit: "bộ", quantity: 20 },
+    { partId: 2, partName: "Lọc dầu", unit: "cái", quantity: 50 },
+    { partId: 3, partName: "Bugi", unit: "cái", quantity: 100 },
+    { partId: 4, partName: "Lọc gió", unit: "cái", quantity: 40 },
+    { partId: 5, partName: "Bóng đèn pha", unit: "cái", quantity: 60 },
+    { partId: 6, partName: "Ắc quy", unit: "cái", quantity: 15 },
+    { partId: 7, partName: "Ống nước làm mát", unit: "cái", quantity: 30 },
+    { partId: 8, partName: "Bàn ép ly hợp", unit: "bộ", quantity: 10 },
+    { partId: 9, partName: "Dây curoa cam", unit: "cái", quantity: 25 },
+    { partId: 10, partName: "Máy phát điện", unit: "cái", quantity: 8 },
   ];
-  const filteredData = data.filter((order) => {
+  const filteredData = parts.filter((order) => {
     const matchKeyword =
-      order.name.toLowerCase().includes(searchTerm.toLowerCase());
+      order.partName.toLowerCase().includes(searchTerm.toLowerCase());
 
     return matchKeyword;
   });
+
+  const sortedData = [...filteredData].sort((a, b) => {
+    switch (sortOption) {
+      case "Mới nhất":
+        return b.partId - a.partId;
+      case "Cũ nhất":
+        return a.partId - b.partId;
+      case "Nhiều nhất":
+        return b.quantity - a.quantity;
+      case "Ít nhất":
+        return a.quantity - b.quantity;
+      default:
+        return 0;
+    }
+  });
+
+  useEffect(() => {
+    fetchParts(pagination.currentPage);
+  }, [pagination.currentPage]);
+
+  const fetchParts = async (page = 1) => {
+    try {
+      const res = await axios.get(`/api/Parts?currentPage=${page}&pageSize=${pagination.pageSize}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+
+      setParts(res.data.items || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Danh sách phiếu dịch vụ</h1>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-semibold shadow transition-colors duration-200 flex items-center">
+        <Link to="/inventory-manager/inventory/add" className="button primary">
           <svg
             className="w-4 h-4 mr-2"
             fill="none"
@@ -42,7 +96,7 @@ const Parts = () => {
             />
           </svg>
           Thêm phụ tùng
-        </button>
+        </Link>
       </div>
       {/* Filters */}
       <div className="bg-white rounded-lg border p-6 shadow-sm mb-6">
@@ -63,7 +117,10 @@ const Parts = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Sắp xếp
             </label>
-            <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select 
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}>
               <option>Mới nhất</option>
               <option>Cũ nhất</option>
               <option>Nhiều nhất</option>
@@ -93,16 +150,16 @@ const Parts = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
+              {sortedData.map((order) => (
+                <tr key={order.partId} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {order.name}
+                    {order.partName}
                   </td>
                   <td className="px-4 py-3 text-sm text-center text-gray-900">
                     {order.quantity}
                   </td>
                   <td className="px-4 py-3 text-sm text-center text-gray-900">
-                    {order.unit}
+                    {order.unit || 'Bộ'}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
                     <div className="flex justify-center space-x-2">
@@ -110,7 +167,7 @@ const Parts = () => {
                         <IconEye />
                       </button>
                       <a
-                        href={`/inventory-manager/parts/${order.id}`}
+                        href={`/inventory-manager/inventory/edit/${order.partId}`}
                         className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                       >
                         <IconEdit />
@@ -124,7 +181,17 @@ const Parts = () => {
         </div>
       </div>
       {/* Pagination */}
-      <Pagination totalPage={3} />
+      {pagination.totalItems > 0 && sortedData.length > 0 && (
+        <Pagination
+          totalPage={pagination.totalPages}
+          currentPage={pagination.currentPage}
+          totalItems={pagination.totalItems}
+          pageSize={pagination.pageSize}
+          onPageChange={(page) =>
+            setPagination((prev) => ({ ...prev, currentPage: page }))
+          }
+        />
+      )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import Pagination from '@/components/common/pagination';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -424,26 +425,7 @@ export default function HistoryPage() {
           </div>
 
           {/* Pagination */}
-          <div className="mt-6 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Hiển thị <span className="font-medium">{filteredHistory.length}</span> trong tổng số <span className="font-medium">{mockHistoryData.length}</span> giao dịch
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="button button-sm">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Trước
-              </button>
-              <span className="px-3 py-2 text-sm text-gray-700">1</span>
-              <button className="button button-sm">
-                Sau
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
+          {filteredHistory.length > 0 && <Pagination totalPage={1} />}
         </div>
       </div>
   );

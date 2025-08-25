@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCar, FaHistory } from 'react-icons/fa';
+import axios from 'axios';
+
+const ENV = import.meta.env.VITE_API_BASE_URL
 
 // Mock data for demonstration
 const mockCustomer = {
@@ -23,17 +26,30 @@ const ProfileInfoRow = ({ icon, label, value }) => (
 );
 
 export default function ProfilePage() {
+    const [customer, setCustomer] = useState(null)
+
+    useEffect(() => {
+        const storedProfile = localStorage.getItem("carserv-profile");
+        if (!storedProfile) return;
+
+        try {
+            const profile = JSON.parse(storedProfile);
+            setCustomer(profile);
+        } catch (error) {
+            console.error("Lấy profile từ localStorage thất bại", error);
+        }
+    }, [])
     return (
         <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div className="p-8">
                     <div className="flex flex-col md:flex-row items-center gap-8">
                         <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-4xl font-bold">
-                            {mockCustomer.name.charAt(0)}
+                            {customer?.fullName?.charAt(0)}
                         </div>
                         <div>
-                            <h1 className='text-3xl font-bold'>{mockCustomer.name}</h1>
-                            <p className="text-gray-500">{mockCustomer.email}</p>
+                            <h1 className='text-3xl font-bold'>{customer?.fullName}</h1>
+                            <p className="text-gray-500">{customer?.email}</p>
                         </div>
                         <div className="md:ml-auto">
                             <Link
@@ -49,10 +65,10 @@ export default function ProfilePage() {
                 <div className="px-8 pb-8">
                     <h2 className="text-xl font-bold mb-4 text-gray-800">Thông Tin Cá Nhân</h2>
                     <div className="flex flex-col">
-                        <ProfileInfoRow icon={<FaUser />} label="Họ và Tên" value={mockCustomer.name} />
-                        <ProfileInfoRow icon={<FaEnvelope />} label="Email" value={mockCustomer.email} />
-                        <ProfileInfoRow icon={<FaPhone />} label="Số điện thoại" value={mockCustomer.phoneNumber} />
-                        <ProfileInfoRow icon={<FaMapMarkerAlt />} label="Địa chỉ" value={mockCustomer.address} />
+                        <ProfileInfoRow icon={<FaUser />} label="Họ và Tên" value={customer?.fullName} />
+                        <ProfileInfoRow icon={<FaEnvelope />} label="Email" value={customer?.email} />
+                        <ProfileInfoRow icon={<FaPhone />} label="Số điện thoại" value={customer?.phoneNumber} />
+                        <ProfileInfoRow icon={<FaMapMarkerAlt />} label="Địa chỉ" value={customer?.address} />
                     </div>
 
                     <h2 className="text-xl font-bold mt-10 mb-4 text-gray-800">Thông Tin Xe & Dịch Vụ</h2>
@@ -60,7 +76,7 @@ export default function ProfilePage() {
                         <ProfileInfoRow
                             icon={<FaCar />}
                             label="Số xe đã đăng ký"
-                            value={`${mockCustomer.vehicles.length} xe`}
+                            value={`${customer?.vehicles ? customer.vehicles.length : 0} xe`}
                         />
                         <div className="flex items-center border-b py-4">
                             <div className="w-8 text-primary"><FaHistory /></div>

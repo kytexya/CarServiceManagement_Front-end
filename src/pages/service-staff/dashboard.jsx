@@ -1,6 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from "axios";
 
+const ENV = import.meta.env.VITE_API_BASE_URL;
 const Dashboard = () => {
+  const [summary, setSummary] = useState(null);
+  const [statusStats, setStatusStats] = useState([]);
+  const [topServices, setTopServices] = useState([]);
+  const [recentServices, setRecentServices] = useState([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("carserv-token");
+
+    const fetchData = async () => {
+      try {
+        const [summaryRes, statusRes, topRes, recentRes] = await Promise.all([
+          axios.get(`/api/Dashboard/summary`, {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true,
+          }),
+          axios.get(`/api/Dashboard/services-by-status`, {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true,
+          }),
+          axios.get(`/api/Dashboard/top-services`, {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true,
+          }),
+          axios.get(`/api/Dashboard/recent-services`, {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true,
+          }),
+        ]);
+
+        setSummary(summaryRes.data);
+        setStatusStats(statusRes.data);
+        setTopServices(topRes.data);
+        setRecentServices(recentRes.data);
+      } catch (error) {
+        console.error("Lỗi tải dashboard:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>

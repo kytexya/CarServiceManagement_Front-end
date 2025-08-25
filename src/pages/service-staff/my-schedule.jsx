@@ -1,12 +1,65 @@
-import React, { useState } from 'react';
+import { showError, showSuccess } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const MySchedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestType, setRequestType] = useState('leave');
+  const [scheduleData, setScheduleData] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [requestDate, setRequestDate] = useState('');
+  const [reason, setReason] = useState('');
 
-  const scheduleData = [
+  const token = localStorage.getItem("carserv-token");
+  const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
+
+  const fetchSchedule = async () => {
+    try {
+      const res = await axios.get("/api/schedules/my", {
+        headers
+      });
+      setScheduleData(res.data || []);
+    } catch (err) {
+      // showError("Không tải được lịch làm việc");
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      const res = await axios.get("/api/schedule-requests/my", {
+        headers
+      });
+      setRequests(res.data || []);
+    } catch (err) {
+      // showError("Không tải được danh sách yêu cầu");
+    }
+  };
+
+  const handleSendRequest = async () => {
+    try {
+      await axios.post("/api/schedule-requests", {
+        type: requestType,
+        date: requestDate,
+        reason: reason
+      }, {
+        headers
+      });
+      showSuccess("Gửi yêu cầu thành công!");
+      setShowRequestModal(false);
+      fetchRequests();
+    } catch (err) {
+      showError(err.response?.data?.message || "Không thể gửi yêu cầu");
+    }
+  };
+
+  useEffect(() => {
+    fetchSchedule();
+    fetchRequests();
+  }, []);
+
+  const scheduleDataMock = [
     {
       id: 1,
       date: '2024-01-15',
@@ -69,7 +122,7 @@ const MySchedule = () => {
 
   const getScheduleForDate = (date) => {
     const dateStr = date.toISOString().slice(0, 10);
-    return scheduleData.find(schedule => schedule.date === dateStr);
+    return scheduleDataMock.find(schedule => schedule.date === dateStr);
   };
 
   return (

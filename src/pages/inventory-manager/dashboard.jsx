@@ -1,5 +1,6 @@
 import IconPackage from "@/components/icons/IconPackage";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Link } from "react-router-dom";
 
@@ -131,15 +132,14 @@ const BarChart = ({ data, maxValue }) => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === 0
-                    ? "bg-yellow-500"
-                    : index === 1
+                className={`h-2 rounded-full transition-all duration-300 ${index === 0
+                  ? "bg-yellow-500"
+                  : index === 1
                     ? "bg-gray-400"
                     : index === 2
-                    ? "bg-orange-500"
-                    : "bg-blue-500"
-                }`}
+                      ? "bg-orange-500"
+                      : "bg-blue-500"
+                  }`}
                 style={{ width: `${(item.monthlyUsage / maxValue) * 100}%` }}
               ></div>
             </div>
@@ -197,6 +197,94 @@ const RevenueLineChart = () => {
 
 export default function DashboardPage() {
   const [dataList] = useState(mockData);
+  const [parts, setParts] = useState([]);
+  const [lowParts, setLowParts] = useState([]);
+  const [outOfStockParts, setOutOfStockParts] = useState([]);
+  const token = localStorage.getItem("carserv-token");
+
+  useEffect(() => {
+    fetchParts()
+    fetchLowParts()
+    fetchOutOfStockParts()
+  }, []);
+
+
+  const fetchParts = async () => {
+    try {
+      const res = await axios.get("/api/Parts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+      setParts(res.data.items || []);
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
+  const fetchLowParts = async () => {
+    try {
+      const res = await axios.get("/api/Parts/get-low-parts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+      setLowParts(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
+  const fetchOutOfStockParts = async () => {
+    try {
+      const res = await axios.get("/api/Parts/get-out-of-stock-parts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+      setOutOfStockParts(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
+
+  const inventoryStats = useMemo(() => {
+    if (!parts || parts.length === 0) {
+      return {
+        totalItems: 0,
+        lowStock: 0,
+        outOfStock: 0,
+        expiringSoon: 0,
+        totalValue: "0 VND"
+      };
+    }
+
+    const soonThreshold = new Date();
+    soonThreshold.setMonth(soonThreshold.getMonth() + 1);
+
+    let expiringSoon = 0;
+    let totalValue = 0;
+
+    parts.forEach(part => {
+      totalValue += (part.unitPrice || 0) * (part.quantity || 0);
+
+      if (part.expiryDate && new Date(part.expiryDate) <= soonThreshold) {
+        expiringSoon++;
+      }
+    });
+
+    return {
+      totalItems: parts.length,
+      lowStock: lowParts.length,
+      outOfStock: outOfStockParts.length,
+      expiringSoon,
+      totalValue: totalValue.toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+    };
+  }, [parts, lowParts, outOfStockParts]);
 
   // Count different stock statuses
   const lowStockCount = dataList.filter(
@@ -288,38 +376,38 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="p-8">
         {/* Alerts */}
-        {(lowStockCount > 0 ||
-          outOfStockCount > 0 ||
-          warrantyWarnings.length > 0) && (
-          <div className="mb-6">
-            <div className="flex items-center gap-3 flex-wrap">
-              {lowStockCount > 0 && (
-                <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                  <LowStockIcon />
-                  <span className="text-amber-700 font-semibold text-sm">
-                    {lowStockCount} phụ tùng sắp hết hàng
-                  </span>
-                </div>
-              )}
-              {outOfStockCount > 0 && (
-                <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                  <OutOfStockIcon />
-                  <span className="text-red-700 font-semibold text-sm">
-                    {outOfStockCount} phụ tùng hết hàng
-                  </span>
-                </div>
-              )}
-              {warrantyWarnings.length > 0 && (
-                <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-                  <WarrantyIcon />
-                  <span className="text-orange-700 font-semibold text-sm">
-                    {warrantyWarnings.length} phụ tùng sắp hết hạn bảo hành
-                  </span>
-                </div>
-              )}
+        {(inventoryStats.lowStock > 0 ||
+          inventoryStats.outOfStock > 0 ||
+          inventoryStats.expiringSoon > 0) && (
+            <div className="mb-6">
+              <div className="flex items-center gap-3 flex-wrap">
+                {inventoryStats.lowStock > 0 && (
+                  <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    <LowStockIcon />
+                    <span className="text-amber-700 font-semibold text-sm">
+                      {inventoryStats.lowStock} phụ tùng sắp hết hàng
+                    </span>
+                  </div>
+                )}
+                {inventoryStats.outOfStock > 0 && (
+                  <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    <OutOfStockIcon />
+                    <span className="text-red-700 font-semibold text-sm">
+                      {inventoryStats.outOfStock} phụ tùng hết hàng
+                    </span>
+                  </div>
+                )}
+                {inventoryStats.expiringSoon > 0 && (
+                  <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                    <WarrantyIcon />
+                    <span className="text-orange-700 font-semibold text-sm">
+                      {inventoryStats.expiringSoon} phụ tùng sắp hết hạn bảo hành
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
@@ -328,7 +416,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-gray-600">Tổng phụ tùng</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {dataList.length}
+                  {parts.length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -341,7 +429,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-gray-600">Còn hàng</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {dataList.filter((item) => item.status === "Còn hàng").length}
+                  {parts.filter((item) => item.quantity > 0).length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -366,7 +454,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-gray-600">Sắp hết</p>
                 <p className="text-2xl font-bold text-amber-600">
-                  {dataList.filter((item) => item.status === "Sắp hết").length}
+                  {lowParts.length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
@@ -391,7 +479,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-gray-600">Hết hàng</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {dataList.filter((item) => item.status === "Hết hàng").length}
+                  {outOfStockParts.length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -427,7 +515,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-gray-600">Tổng giá trị</p>
                 <p className="text-2xl font-bold text-indigo-600">
-                  {(totalInventoryValue / 1000000).toFixed(1)}M
+                  {inventoryStats.totalValue}
                 </p>
               </div>
               <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">

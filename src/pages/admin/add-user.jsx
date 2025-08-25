@@ -3,6 +3,48 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError, showSuccess } from '@/utils';
+import * as yup from "yup";
+import { yupResolver } from '@hookform/resolvers/yup';
+import TextInput from '@/components/form/input';
+import TextArea from '@/components/form/textarea';
+import Select from '@/components/form/select';
+import axios from 'axios';
+
+const schema = yup.object().shape({
+    fullName: yup
+    .string()
+    .required("Họ và tên là bắt buộc")
+    .min(2, "Tên phải có ít nhất 2 ký tự"),
+
+    email: yup
+    .string()
+    .required("Email là bắt buộc")
+    .email("Email không hợp lệ"),
+
+    PhoneNumber: yup
+    .string()
+    .required("Số điện thoại là bắt buộc")
+    .matches(/^[0-9]{10,11}$/, "Số điện thoại không hợp lệ"),
+
+    username: yup
+    .string()
+    .required("Tên đăng nhập là bắt buộc")
+    .min(2, "Tên đăng nhập phải có ít nhất 3 ký tự"),
+
+    RoleName: yup
+    .string()
+    .required("Vai trò là bắt buộc"),
+
+    password: yup
+    .string()
+    .required("Mật khẩu là bắt buộc")
+    .min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+
+    confirmPassword: yup
+    .string()
+    .required("Xác nhận mật khẩu là bắt buộc")
+    .oneOf([yup.ref('password')], "Mật khẩu không khớp"),
+});
 
 export default function AddUserPage() {
     const navigate = useNavigate();
@@ -14,9 +56,11 @@ export default function AddUserPage() {
         formState: { errors },
         reset,
         watch
-    } = useForm();
+    } = useForm({
+        resolver: yupResolver(schema),
+    });
 
-    const selectedRole = watch('role');
+    const selectedRole = watch('RoleName');
 
     const roles = [
         { value: 'admin', label: 'Admin', description: 'Quản trị viên hệ thống' },
@@ -29,19 +73,22 @@ export default function AddUserPage() {
     const onSubmit = async (data) => {
         setIsLoading(true);
         try {
-            // Mock API call
-            console.log('Form data:', data);
-            
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            showSuccess('Thêm người dùng thành công!');
-            reset();
-            navigate('/admin/user-management');
+        const token = localStorage.getItem("carserv-token");
+        const res = await axios.post(`/api/Account/create-new-account`, data, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+            },
+        });
+
+        showSuccess("Thêm người dùng thành công!");
+        reset();
+        navigate("/admin/user-management");
         } catch (error) {
-            showError('Có lỗi xảy ra khi thêm người dùng.');
+        console.error("Thêm người dùng thất bại:", error);
+        showError(error.response?.data?.message || "Có lỗi xảy ra khi thêm người dùng!");
         } finally {
-            setIsLoading(false);
+        setIsLoading(false);
         }
     };
 
@@ -97,96 +144,60 @@ export default function AddUserPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Full Name */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Họ và tên <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                {...register('fullName', { 
-                                                    required: 'Họ và tên là bắt buộc',
-                                                    minLength: { value: 2, message: 'Tên phải có ít nhất 2 ký tự' }
-                                                })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.fullName ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập họ và tên"
+                                            <TextInput
+                                                isRequired
+                                                label={"Họ và tên"}
+                                                placeholder={"Nhập họ và tên"}
+                                                register={register}
+                                                name={"fullName"}
+                                                error={errors?.fullName}
                                             />
-                                            {errors.fullName && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.fullName.message}</p>
-                                            )}
                                         </div>
 
                                         {/* Email */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Email <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="email"
-                                                {...register('email', { 
-                                                    required: 'Email là bắt buộc',
-                                                    pattern: { 
-                                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                                        message: 'Email không hợp lệ'
-                                                    }
-                                                })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.email ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                                placeholder="example@email.com"
+                                            <TextInput
+                                                type={"email"}
+                                                isRequired
+                                                label={"Email"}
+                                                placeholder={"example@email.com"}
+                                                register={register}
+                                                name={"email"}
+                                                error={errors?.email}
                                             />
-                                            {errors.email && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                                            )}
                                         </div>
 
                                         {/* Phone */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Số điện thoại <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                {...register('phone', { 
-                                                    required: 'Số điện thoại là bắt buộc',
-                                                    pattern: { 
-                                                        value: /^[0-9]{10,11}$/,
-                                                        message: 'Số điện thoại không hợp lệ'
-                                                    }
-                                                })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.phone ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                                placeholder="0123456789"
+                                            <TextInput
+                                                type={"tel"}
+                                                isRequired
+                                                label={"Số điện thoại"}
+                                                placeholder={"0123456789"}
+                                                register={register}
+                                                name={"PhoneNumber"}
+                                                error={errors?.PhoneNumber}
                                             />
-                                            {errors.phone && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                                            )}
                                         </div>
 
                                         {/* Date of Birth */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Ngày sinh
-                                            </label>
-                                            <input
-                                                type="date"
-                                                {...register('dateOfBirth')}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            <TextInput
+                                                type={"date"}
+                                                label={"Ngày sinh"}
+                                                register={register}
+                                                name={"dateOfBirth"}
                                             />
                                         </div>
                                     </div>
 
                                     {/* Address */}
                                     <div className="mt-4">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Địa chỉ
-                                        </label>
-                                        <textarea
-                                            {...register('address')}
-                                            rows={3}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Nhập địa chỉ chi tiết"
+                                        <TextArea
+                                            label={"Địa chỉ"}
+                                            register={register}
+                                            name={"address"}
+                                            placeholder={"Nhập địa chỉ chi tiết"}
                                         />
                                     </div>
                                 </div>
@@ -198,46 +209,27 @@ export default function AddUserPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Username */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Tên đăng nhập <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                {...register('username', { 
-                                                    required: 'Tên đăng nhập là bắt buộc',
-                                                    minLength: { value: 3, message: 'Tên đăng nhập phải có ít nhất 3 ký tự' }
-                                                })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.username ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập tên đăng nhập"
+                                            <TextInput
+                                                isRequired
+                                                label={"Tên đăng nhập"}
+                                                placeholder={"Nhập tên đăng nhập"}
+                                                register={register}
+                                                name={"username"}
+                                                error={errors?.username}
                                             />
-                                            {errors.username && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
-                                            )}
                                         </div>
 
                                         {/* Role */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Vai trò <span className="text-red-500">*</span>
-                                            </label>
-                                            <select
-                                                {...register('role', { required: 'Vai trò là bắt buộc' })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.role ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                            >
-                                                <option value="">Chọn vai trò</option>
-                                                {roles.map((role) => (
-                                                    <option key={role.value} value={role.value}>
-                                                        {role.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {errors.role && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
-                                            )}
+                                            <Select
+                                                isRequired
+                                                label={"Vai trò"}
+                                                placeholder={"Chọn vai trò"}
+                                                register={register}
+                                                name={"RoleName"}
+                                                error={errors?.RoleName}
+                                                options={roles}
+                                            />
                                             {selectedRole && (
                                                 <p className="mt-1 text-sm text-gray-500">
                                                     {roles.find(r => r.value === selectedRole)?.description}
@@ -247,44 +239,26 @@ export default function AddUserPage() {
 
                                         {/* Password */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Mật khẩu <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="password"
-                                                {...register('password', { 
-                                                    required: 'Mật khẩu là bắt buộc',
-                                                    minLength: { value: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' }
-                                                })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.password ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập mật khẩu"
+                                            <TextInput
+                                                type={"password"}
+                                                label={"Mật khẩu"}
+                                                placeholder={"Nhập mật khẩu"}
+                                                register={register}
+                                                name={"password"}
+                                                error={errors?.password}
                                             />
-                                            {errors.password && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                                            )}
                                         </div>
 
                                         {/* Confirm Password */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Xác nhận mật khẩu <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="password"
-                                                {...register('confirmPassword', { 
-                                                    required: 'Xác nhận mật khẩu là bắt buộc',
-                                                    validate: value => value === watch('password') || 'Mật khẩu không khớp'
-                                                })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập lại mật khẩu"
+                                            <TextInput
+                                                type={"password"}
+                                                label={"Xác nhận mật khẩu"}
+                                                placeholder={"Nhập lại mật khẩu"}
+                                                register={register}
+                                                name={"confirmPassword"}
+                                                error={errors?.confirmPassword}
                                             />
-                                            {errors.confirmPassword && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -299,40 +273,31 @@ export default function AddUserPage() {
                                     <div className="space-y-4">
                                         {/* Department */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Phòng ban
-                                            </label>
-                                            <input
-                                                type="text"
-                                                {...register('department')}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Nhập phòng ban"
+                                            <TextInput
+                                                label={"Phòng ban"}
+                                                placeholder={"Nhập phòng ban"}
+                                                register={register}
+                                                name={"department"}
                                             />
                                         </div>
 
                                         {/* Position */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Chức vụ
-                                            </label>
-                                            <input
-                                                type="text"
-                                                {...register('position')}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Nhập chức vụ"
+                                            <TextInput
+                                                label={"Chức vụ"}
+                                                placeholder={"Nhập chức vụ"}
+                                                register={register}
+                                                name={"position"}
                                             />
                                         </div>
 
                                         {/* Notes */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Ghi chú
-                                            </label>
-                                            <textarea
-                                                {...register('notes')}
-                                                rows={6}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Ghi chú thêm về người dùng"
+                                            <TextArea
+                                                label={"Ghi chú"}
+                                                placeholder={"Ghi chú thêm về người dùng"}
+                                                register={register}
+                                                name={"notes"}
                                             />
                                         </div>
                                     </div>

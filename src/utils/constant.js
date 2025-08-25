@@ -31,9 +31,10 @@ export const UNITS = [
 ]
 
 export const SERVICES = [
-  {id: 1, title: "Rửa xe"},
-  {id: 2, title: "Đánh bóng"},
-  {id: 3, title: "Vệ sinh toàn bộ "},
+  {id: 1, title: "Oil Change"},
+  {id: 2, title: "Brake Inspection"},
+  {id: 3, title: "Air filter change"},
+  {id: 4, title: "Fuel filter (diesel)"},
 ]
 
 export const CATEGORIES = [

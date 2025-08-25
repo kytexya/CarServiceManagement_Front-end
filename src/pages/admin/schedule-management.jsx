@@ -1,14 +1,71 @@
+import Pagination from "@/components/common/pagination";
 import SidebarAdmin from "@/components/common/sidebar-admin";
 import { showError } from "@/utils";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function ScheduleManagementPage() {
     const [activeTab, setActiveTab] = useState('appointments');
-    const [selectedDate, setSelectedDate] = useState('2024-01-15');
+    const [selectedDate, setSelectedDate] = useState('2025-08-01');
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [selectedStaff, setSelectedStaff] = useState("");
+    const [appointments, setAppointments] = useState(null);
+    const [pagination, setPagination] = useState({
+        totalItems: 0,
+        totalPages: 1,
+        currentPage: 1,
+        pageSize: 10,
+    });
+    const token = localStorage.getItem("carserv-token");
+
+    useEffect(() => {
+        if (activeTab === "appointments") {
+          fetchAppointments(pagination.currentPage);
+        } else {
+          fetchWokingHours();
+        }
+    }, [activeTab, pagination.currentPage]);
+
+    const fetchAppointments = async (page = 1) => {
+        try {
+        const res = await axios.get(`/api/Appointment?currentPage=${page}&pageSize=${pagination.pageSize}`, { 
+            headers: {
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true
+        });
+        setAppointments(res.data.items || []);
+        setPagination((prev) => ({
+            ...prev,
+            totalItems: res.data.totalItems,
+            totalPages: res.data.totalPages,
+            currentPage: res.data.currentPage,
+            pageSize: res.data.pageSize,
+        }));
+        } catch (err) {
+        console.log(err);
+        showError("Không tải được");
+        }
+    };
+
+    const fetchWokingHours = async () => {
+        try {
+        const res = await axios.get("/api/Appointment", { 
+            headers: {
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true
+        });
+        // setAppointments(res.data || []);
+        } catch (err) {
+        console.log(err);
+        showError("Không tải được");
+        }
+    };
 
     // Mock data
     const workingHours = {
@@ -21,7 +78,7 @@ export default function ScheduleManagementPage() {
         sunday: { start: "09:00", end: "15:00", isOpen: false },
     };
 
-    const appointments = [
+    const appointmentsMock = [
         {
             id: 1,
             customerName: "Nguyễn Văn A",
@@ -113,8 +170,38 @@ export default function ScheduleManagementPage() {
         showError("Chức năng cập nhật giờ làm việc chưa được kết nối API.");
     };
 
-    const handleConfirmAppointment = (appointmentId) => {
-        showError("Chức năng xác nhận lịch hẹn chưa được kết nối API.");
+    const handleConfirmAppointment = async (appointment) => {
+        showError("Chức năng cập nhật giờ làm việc chưa được kết nối API.");
+        // try {
+        //     const token = localStorage.getItem("carserv-token");
+        //     const response = await axios.post(
+        //         `/api/Appointment/schedule`,
+        //         {
+        //             vehicleId: appointment.vehicleId,
+        //             packageId: appointment.packageId,
+        //             promotionId: appointment.promotionId,
+        //             appointmentDate: appointment.appointmentDate,
+        //             serviceIds: appointment.appointmentServices,
+        //         },
+        //         {
+        //             headers: {
+        //                 Authorization: `Bearer ${token}`,
+        //                 "ngrok-skip-browser-warning": "anyvalue",
+        //             },
+        //             params: {
+        //                 customerId: appointment.customerId
+        //             }
+        //         }
+        //     );
+        //     showSuccess("Xác nhận lịch hẹn thành công!");
+
+        //     navigate('/admin/service-management')
+        // } catch (error) {
+        //     console.error("Error:", error);
+        //     showError(
+        //         error.response?.data?.message || "Xác nhận lịch hẹn thất bại!"
+        //     );
+        // }
     };
 
     const handleAssignStaff = (appointment) => {
@@ -122,6 +209,21 @@ export default function ScheduleManagementPage() {
         setSelectedStaff(appointment.assignedStaff);
         setShowAssignModal(true);
     };
+
+    const roundToNearest30 = (dateString) => {
+        const d = new Date(dateString);
+
+        let hours = d.getHours();
+        let minutes = d.getMinutes();
+
+        minutes = minutes < 15 ? 0 : minutes < 45 ? 30 : 0;
+        if (minutes === 0 && d.getMinutes() >= 45) {
+            hours = (hours + 1) % 24;
+        }
+
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+        }
+
 
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
@@ -191,7 +293,11 @@ export default function ScheduleManagementPage() {
                                 {/* Time Slots */}
                                 <div className="grid grid-cols-6 gap-2">
                                     {timeSlots.map((time) => {
-                                        const appointment = appointments.find(apt => apt.date === selectedDate && apt.time === time);
+                                        const appointment = appointments?.find(apt => {
+                                            const datePart = apt.appointmentDate.split("T")[0];
+                                            const timePart = roundToNearest30(apt.appointmentDate);
+                                            return datePart === selectedDate && timePart.slice(0, 5) === time;
+                                        });
                                         return (
                                             <div key={time} className="relative">
                                                 <div className={`p-3 rounded-lg border text-center text-sm ${
@@ -232,25 +338,34 @@ export default function ScheduleManagementPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {appointments.map((appointment) => (
-                                                <tr key={appointment.id} className="hover:bg-gray-50">
+                                            {appointments?.map((appointment) => (
+                                                <tr key={appointment.appointmentId} className="hover:bg-gray-50">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
-                                                            <div className="text-sm font-medium text-gray-900">{appointment.customerName}</div>
-                                                            <div className="text-sm text-gray-500">{appointment.customerPhone}</div>
-                                                            <div className="text-xs text-gray-400">{appointment.vehicleInfo}</div>
+                                                            <div className="text-sm font-medium text-gray-900">{appointment?.customerName}</div>
+                                                            <div className="text-sm text-gray-500">{appointment?.customerPhone}</div>
+                                                            <div className="text-xs text-gray-400">{appointment?.vehicleMake + ' ' + appointment?.vehicleModel}</div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
-                                                            <div className="text-sm text-gray-900">{appointment.service}</div>
-                                                            <div className="text-xs text-gray-500">{appointment.duration} phút</div>
+                                                            <div className="text-sm text-gray-900">
+                                                                {appointment.services.length <= 2 
+                                                                    ? appointment.services.join(", ") 
+                                                                    : `${appointment.services.slice(0, 2).join(", ")}, ...`}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">{appointment.duration} giờ</div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900">{appointment.date}</div>
-                                                        <div className="text-sm text-gray-500">{appointment.time}</div>
+                                                        <div className="text-sm text-gray-900">
+                                                            {new Date(appointment.appointmentDate).toLocaleDateString("vi-VN", { year: "numeric", month: "2-digit", day: "2-digit" })}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {new Date(appointment.appointmentDate).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                                        </div>
                                                     </td>
+
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm text-gray-900">{appointment.assignedStaff || 'Chưa gán'}</div>
                                                     </td>
@@ -262,7 +377,7 @@ export default function ScheduleManagementPage() {
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <div className="flex gap-2">
                                                             <button
-                                                                onClick={() => handleConfirmAppointment(appointment.id)}
+                                                                onClick={() => handleConfirmAppointment(appointment)}
                                                                 className="text-blue-600 hover:text-blue-900"
                                                             >
                                                                 Xác nhận
@@ -280,6 +395,17 @@ export default function ScheduleManagementPage() {
                                         </tbody>
                                     </table>
                                 </div>
+                                {pagination.totalItems > 0 && (
+                                    <Pagination
+                                        totalPage={pagination.totalPages}
+                                        currentPage={pagination.currentPage}
+                                        totalItems={pagination.totalItems}
+                                        pageSize={pagination.pageSize}
+                                        onPageChange={(page) =>
+                                        setPagination((prev) => ({ ...prev, currentPage: page }))
+                                        }
+                                    />
+                                )}
                             </div>
                         </div>
                     )}
@@ -326,6 +452,7 @@ export default function ScheduleManagementPage() {
                                                         value={hours.start}
                                                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                                         disabled={!hours.isOpen}
+                                                        readOnly
                                                     />
                                                     <span className="text-gray-500">-</span>
                                                     <input
@@ -333,6 +460,7 @@ export default function ScheduleManagementPage() {
                                                         value={hours.end}
                                                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                                         disabled={!hours.isOpen}
+                                                        readOnly
                                                     />
                                                 </div>
                                             </div>
@@ -342,6 +470,7 @@ export default function ScheduleManagementPage() {
                                                         type="checkbox"
                                                         checked={hours.isOpen}
                                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        readOnly
                                                     />
                                                     <span className="ml-2 text-sm text-gray-700">Mở cửa</span>
                                                 </label>

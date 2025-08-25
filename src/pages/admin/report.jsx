@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import {
     Chart as ChartJS,
@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { showError } from '@/utils';
+import axios from 'axios';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
 
 const StatCard = ({ title, value, icon, color = "blue", trend = null }) => (
@@ -68,7 +69,7 @@ const AlertCard = ({ title, message, type = "warning" }) => {
 };
 
 // Mock data for charts
-const revenueData = {
+const revenueDataMock = {
     labels: ['Hôm nay', 'Tuần này', 'Tháng này'],
     datasets: [
         {
@@ -95,7 +96,7 @@ const employeePerformanceData = {
     ],
 };
 
-const sparePartsUsageData = {
+const sparePartsUsageDataMock = {
     labels: ['Dầu nhớt', 'Lọc gió', 'Phanh', 'Lốp xe', 'Bugi', 'Bình ắc quy'],
     datasets: [
         {
@@ -146,7 +147,7 @@ export default function AdminReportPage() {
     const [year, setYear] = useState(new Date().getFullYear());
 
     // Mock data
-    const alerts = [
+    const alertsMock = [
         {
             title: "Tồn kho thấp",
             message: "Dầu nhớt Mobil 1 chỉ còn 5 lít, cần nhập thêm",
@@ -165,8 +166,97 @@ export default function AdminReportPage() {
     ];
 
     const handleFilterChange = () => {
-        showError("Chức năng lọc chưa được kết nối API.");
+        fetchDashboardSummary();
+        fetchAlert();
+        fetchRevenue();
+        fetchEmployeePerformace();
+        fetchSparePartsUsage();
     };
+    const [summary, setSummary] = useState(null);
+    const [alerts, setAlerts] = useState(null);
+    const [revenueData, setRevenueData] = useState(null);
+    const [emplouyee, setEmployee] = useState(null);
+    const [sparePartsUsageData, setSparePartsUsageData] = useState(null);
+
+    useEffect(() => {
+        fetchDashboardSummary();
+        fetchAlert();
+        fetchRevenue();
+        fetchEmployeePerformace();
+        fetchSparePartsUsage();
+    }, []);
+
+    const fetchDashboardSummary = async () => {
+        try {
+            const res = await axios.get(`/api/Admin/dashboard-summary?month=${month}&year=${year}`, {
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                }
+            });
+            setSummary(res.data);
+        } catch (err) {
+            // showError("Không tải được dữ liệu thống kê");
+        }
+    };
+
+    const fetchAlert = async () => {
+        try {
+            const res = await axios.get(`/api/Admin/alerts`, {
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                }
+            });
+            setAlerts(res.data);
+        } catch (err) {
+            // showError("Không tải được dữ liệu thống kê");
+        }
+    };
+
+    const fetchRevenue = async () => {
+        try {
+            const res = await axios.get(`/api/Admin/revenue?month=${month}&year=${year}`, {
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                }
+            });
+            setRevenueData(res.data);
+        } catch (err) {
+            // showError("Không tải được dữ liệu thống kê");
+        }
+    };
+
+    const fetchEmployeePerformace = async () => {
+        try {
+            const res = await axios.get(`/api/Admin/employee-performance?month=${month}&year=${year}`, {
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                }
+            });
+            setEmployee(res.data);
+        } catch (err) {
+            // showError("Không tải được dữ liệu thống kê");
+        }
+    };
+
+    const fetchSparePartsUsage = async () => {
+        try {
+            const res = await axios.get(`/api/Admin/spare-parts-usage?month=${month}&year=${year}`, {
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                }
+            });
+            setSparePartsUsageData(res.data);
+        } catch (err) {
+            // showError("Không tải được dữ liệu thống kê");
+        }
+    };
+
+
 
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
@@ -244,7 +334,7 @@ export default function AdminReportPage() {
                     <div className="mb-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-3">Cảnh báo & Thông báo</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            {alerts.map((alert, index) => (
+                            {alertsMock.map((alert, index) => (
                                 <AlertCard 
                                     key={index}
                                     title={alert.title}
@@ -261,7 +351,7 @@ export default function AdminReportPage() {
                         <div className="lg:col-span-2 bg-white p-4 shadow-sm rounded-lg">
                             <h2 className="text-lg font-bold text-gray-900 mb-3">Doanh thu theo thời gian</h2>
                             <div className="h-64">
-                                <Line data={revenueData} options={chartOptions} />
+                                <Line data={revenueDataMock} options={chartOptions} />
                             </div>
                         </div>
 
@@ -279,7 +369,7 @@ export default function AdminReportPage() {
                         <div className="bg-white p-4 shadow-sm rounded-lg">
                             <h2 className="text-lg font-bold text-gray-900 mb-3">Sử dụng phụ tùng</h2>
                             <div className="h-48">
-                                <Bar data={sparePartsUsageData} options={chartOptions} />
+                                <Bar data={sparePartsUsageDataMock} options={chartOptions} />
                             </div>
                         </div>
                     </div>

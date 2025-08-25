@@ -52,7 +52,7 @@ export default function ServiceRequestPage() {
 
         } else {
             // Redirect to login if not logged in
-            navigate('/login');
+            navigate('/');
         }
     }, [navigate]);
 

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { showError } from '@/utils';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const UsedPartsManagement = () => {
   const [parts, setParts] = useState([
@@ -35,6 +37,41 @@ const UsedPartsManagement = () => {
       });
     }
   };
+
+  const token = localStorage.getItem("carserv-token");
+  const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
+
+  const onAddPart = async () => {
+    if (newPart.name && newPart.code && newPart.quantityUsed && newPart.unit && newPart.serviceOrder) {
+      try {
+        const res = await axios.post("/api/used-parts", newPart, { headers });
+        setParts([...parts, res.data]); // res.data là object phụ tùng vừa thêm
+        showSuccess("Thêm phụ tùng thành công");
+        setNewPart({
+          name: '',
+          code: '',
+          quantityUsed: '',
+          unit: '',
+          serviceOrder: '',
+          date: new Date().toISOString().slice(0, 10),
+        });
+      } catch (err) {
+        showError("Không thể thêm phụ tùng");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchParts = async () => {
+      try {
+        const res = await axios.get(`/api/Parts?CurrentPage=1&pageSize=100`, { headers });
+        setParts(res.data.items || []);
+      } catch (err) {
+        showError("Không tải được danh sách phụ tùng đã sử dụng");
+      }
+    };
+    fetchParts();
+  }, []);
 
   return (
     <div className="p-6">
@@ -130,10 +167,10 @@ const UsedPartsManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {parts.map((part) => (
-                <tr key={part.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{part.name}</td>
+                <tr key={part.partId}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{part.partName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.code}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.quantityUsed}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.quantity}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.unit}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.serviceOrder}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.date}</td>

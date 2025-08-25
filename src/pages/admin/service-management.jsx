@@ -4,15 +4,32 @@ import IconBin from "@/components/icons/IconBin";
 import IconEdit from "@/components/icons/IconEdit";
 import IconPackage from "@/components/icons/IconPackage";
 import IconPlus from "@/components/icons/IconPlus";
-import { showError } from "@/utils";
-import React, { useState } from "react";
+import { showError, showSuccess } from "@/utils";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function ServiceManagementPage() {
   const [activeTab, setActiveTab] = useState("services");
+  const [serviceTypes, setServiceTypes] = useState([]);
+  const [comboPackages, setComboPackages] = useState([]);
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
+  const [paginationCombo, setPaginationCombo] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
+  const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem("carserv-token");
 
   // Mock data
-  const serviceTypes = [
+  const serviceTypesMock = [
     {
       id: 1,
       name: "Bảo trì định kỳ",
@@ -47,7 +64,7 @@ export default function ServiceManagementPage() {
     },
   ];
 
-  const comboPackages = [
+  const comboPackagesMock = [
     {
       id: 1,
       name: "Gói Bảo Dưỡng Cơ Bản",
@@ -64,12 +81,96 @@ export default function ServiceManagementPage() {
     },
   ];
 
-  const handleAddService = () => {
-    showError("Chức năng thêm loại dịch vụ chưa được kết nối API.");
+  useEffect(() => {
+    if (activeTab === "services") {
+      fetchServiceTypes(pagination.currentPage);
+    } else {
+      fetchCombos(paginationCombo.currentPage);
+    }
+  }, [activeTab, pagination.currentPage, paginationCombo.currentPage]);
+
+  const fetchServiceTypes = async (page = 1) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`/api/services/get-all-services?currentPage=${page}&pageSize=${pagination.pageSize}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      setServiceTypes(res.data?.items || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems || res.data?.items.length,
+        totalPages: res.data.totalPages || 1,
+        currentPage: res.data.currentPage || 1,
+        pageSize: res.data.pageSize || 1,
+      }));
+    } catch (err) {
+      showError("Không tải được danh sách dịch vụ");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAddCombo = () => {
-    showError("Chức năng thêm gói combo chưa được kết nối API.");
+  const fetchCombos = async (page = 1) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`/api/services/get-all-service-packages?currentPage=${page}&pageSize=${paginationCombo.pageSize}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      setComboPackages(res.data.items || []);
+      setPaginationCombo((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems || res.data.items.length,
+        totalPages: res.data.totalPages || 1,
+        currentPage: res.data.currentPage || 1,
+        pageSize: res.data.pageSize || 1,
+      }));
+    } catch (err) {
+      showError("Không tải được danh sách combo");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteService = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa dịch vụ này?")) return;
+    try {
+      const res = await axios.delete(`/api/services/delete-service/${id}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      showSuccess("Xóa dịch vụ thành công");
+      fetchServiceTypes();
+    } catch (err) {
+      showError("Xóa thất bại");
+    }
+  };
+
+  const handleDeleteCombo = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa combo này?")) return;
+    try {
+      const res = await axios.delete(`/api/services/delete-service-package/${id}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          },
+        withCredentials: true
+      });
+      showSuccess("Xóa combo thành công");
+      fetchCombos();
+    } catch (err) {
+      showError("Xóa thất bại");
+    }
   };
 
   return (
@@ -202,7 +303,7 @@ export default function ServiceManagementPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {serviceTypes.map((service) => (
-                      <tr key={service.id} className="hover:bg-gray-50">
+                      <tr key={service.serviceId} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {service.name}
@@ -210,11 +311,11 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                            {service.category}
+                            {service?.description}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {service.duration} phút
+                          {service.estimatedLaborHours} phút
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {service.price.toLocaleString()} VND
@@ -222,26 +323,30 @@ export default function ServiceManagementPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              service.status === "Active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
+                              // service?.status === "Active"
+                              //   ? "bg-green-100 text-green-800"
+                              //   : "bg-red-100 text-red-800"
+                              // todo
+                              'bg-green-100 text-green-800'
                             }`}
                           >
-                            {service.status === "Active"
+                            {/* {service?.status === "Active"
                               ? "Hoạt động"
-                              : "Không hoạt động"}
+                              : "Không hoạt động"} */}
+                            {/* todo */}
+                            Hoạt động
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center gap-2">
                             <a
-                              href={`/admin/service/${service.id}`}
+                              href={`/admin/service/${service.serviceId}`}
                               className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                             >
                               <IconEdit />
                             </a>
                             <button
-                              onClick={console.log}
+                              onClick={() => handleDeleteService(service.serviceId)}
                               className="text-red-600 hover:text-red-900"
                             >
                               <IconBin />
@@ -299,7 +404,7 @@ export default function ServiceManagementPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {comboPackages.map((combo) => (
-                      <tr key={combo.id} className="hover:bg-gray-50">
+                      <tr key={combo.packageId} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {combo.name}
@@ -312,7 +417,7 @@ export default function ServiceManagementPage() {
                                 key={index}
                                 className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs mr-1 mb-1"
                               >
-                                {service}
+                                {service.description}
                               </span>
                             ))}
                           </div>
@@ -322,19 +427,19 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            {combo.discount}%
+                            {combo.discount ? combo.discount : 0} VND
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center gap-2">
                             <a
-                              href={`/admin/service/combo/${combo.id}`}
+                              href={`/admin/service/combo/${combo.packageId}`}
                               className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                             >
                               <IconEdit />
                             </a>
                             <button
-                              onClick={console.log}
+                              onClick={() => handleDeleteCombo(combo.packageId)}
                               className="text-red-600 hover:text-red-900"
                             >
                               <IconBin />
@@ -348,7 +453,28 @@ export default function ServiceManagementPage() {
               </div>
             </div>
           )}
-          {<Pagination totalPage={3} />}
+          {activeTab === 'services' && pagination.totalItems > 0 && serviceTypes.length > 0 && (
+            <Pagination
+              totalPage={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              totalItems={pagination.totalItems}
+              pageSize={pagination.pageSize}
+              onPageChange={(page) =>
+                setPagination((prev) => ({ ...prev, currentPage: page }))
+              }
+            />
+          )}
+          {activeTab === 'combos' && paginationCombo.totalItems > 0 && comboPackages.length > 0 && (
+            <Pagination
+              totalPage={paginationCombo.totalPages}
+              currentPage={paginationCombo.currentPage}
+              totalItems={paginationCombo.totalItems}
+              pageSize={paginationCombo.pageSize}
+              onPageChange={(page) =>
+                setPaginationCombo((prev) => ({ ...prev, currentPage: page }))
+              }
+            />
+          )}
         </div>
       </div>
     </div>

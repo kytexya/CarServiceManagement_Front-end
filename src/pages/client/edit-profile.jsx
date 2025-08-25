@@ -1,15 +1,24 @@
-import { showError } from '@/utils';
-import React, { useEffect } from 'react';
+import TextInput from '@/components/form/input';
+import { showError, showSuccess } from '@/utils';
+import { yupResolver } from '@hookform/resolvers/yup';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import * as yup from "yup";
 
-// Mock data for demonstration, should be consistent with the profile page
-const mockCustomer = {
-    name: "Trần Văn Khách",
-    email: "tvkhach@example.com",
-    phoneNumber: "0909123456",
-    address: "456 Đường XYZ, Quận 2, TP. HCM",
-};
+const ENV = import.meta.env.VITE_API_BASE_URL
+
+const schema = yup.object().shape({
+  fullName: yup
+    .string()
+    .required("Vui lòng nhập họ tên"),
+
+  email: yup
+    .string()
+    .required("Vui lòng nhập email")
+    .email("Địa chỉ email không hợp lệ"),
+});
 
 export default function EditProfilePage() {
     const {
@@ -17,19 +26,62 @@ export default function EditProfilePage() {
         setValue,
         handleSubmit,
         formState: { errors },
-    } = useForm();
+    } = useForm({
+        resolver: yupResolver(schema),
+    });
+    const [customer, setCustomer] = useState(null)
+    const navigate = useNavigate();
 
     useEffect(() => {
+        const storedProfile = localStorage.getItem("carserv-profile");
+        if (!storedProfile) return;
+
+        try {
+            const profile = JSON.parse(storedProfile);
+            setCustomer(profile);
+            setValue('fullName', profile?.fullName);
+            setValue('email', profile?.email);
+            setValue('phoneNumber', profile?.phoneNumber);
+            setValue('Address', profile?.address);
+        } catch (error) {
+            console.error("Lấy profile từ localStorage thất bại", error);
+        }
         // Populate form with mock data
-        setValue('name', mockCustomer.name);
-        setValue('email', mockCustomer.email);
-        setValue('phoneNumber', mockCustomer.phoneNumber);
-        setValue('address', mockCustomer.address);
     }, [setValue]);
 
-    const onSubmit = (data) => {
-        console.log("Updated Profile Data:", data);
-        showError("Chức năng cập nhật thông tin chưa được kết nối API.");
+    const onSubmit = async (data) => {
+        try {
+            const token = localStorage.getItem("carserv-token");
+            const res = await axios.put(`/api/Account/update-profile/${customer.userID}`, data, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                // withCredentials: true,
+            });
+
+            console.log("Profile updated:", res.data);
+            setCustomer(res.data);
+            setValue('fullName', res.data?.fullName);
+            setValue('email', res.data?.email);
+            setValue('phoneNumber', res.data?.phoneNumber);
+            setValue('Address', res.data?.address);
+
+            const storedProfile = localStorage.getItem("carserv-profile");
+            if (storedProfile) {
+                const profileObj = JSON.parse(storedProfile);
+                profileObj.fullName = res.data?.fullName;
+                profileObj.email = res.data?.email;
+                profileObj.phoneNumber = res.data?.phoneNumber;
+                profileObj.address = res.data?.address;
+                localStorage.setItem("carserv-profile", JSON.stringify(profileObj));
+            }
+
+            showSuccess("Cập nhật thông tin thành công!");
+        } catch (error) {
+            console.error("Cập nhật thất bại:", error);
+            showError(error.response?.data?.message || "Cập nhật thất bại!");
+        }
     };
 
     return (
@@ -38,41 +90,35 @@ export default function EditProfilePage() {
                 <h1 className='text-3xl font-bold text-center mb-8'>Cập Nhật Thông Tin</h1>
                 <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                     <div>
-                        <label className="font-semibold text-sm">Họ và tên</label>
-                        <input
-                            type="text"
-                            className={`input-field mt-1 ${errors.name ? "border-red-500" : "border-gray-300"}`}
-                            {...register("name", { required: "Vui lòng nhập họ tên" })}
-                        />
-                        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
-                    </div>
-                    <div>
-                        <label className="font-semibold text-sm">Email</label>
-                        <input
-                            type="email"
-                            className={`input-field mt-1 ${errors.email ? "border-red-500" : "border-gray-300"}`}
-                            {...register("email", {
-                                required: "Vui lòng nhập email",
-                                pattern: { value: /^\S+@\S+$/i, message: "Địa chỉ email không hợp lệ" }
-                            })}
-                        />
-                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-                    </div>
-                    <div>
-                        <label className="font-semibold text-sm">Địa chỉ</label>
-                        <input
-                            type="text"
-                            className={`input-field mt-1 ${errors.address ? "border-red-500" : "border-gray-300"}`}
-                            {...register("address")}
+                        <TextInput
+                            label={"Họ và tên"}
+                            register={register}
+                            name={"fullName"}
+                            error={errors?.name}
                         />
                     </div>
                     <div>
-                        <label className="font-semibold text-sm">Số điện thoại</label>
-                        <input
-                            type="text"
+                        <TextInput
+                            type={'email'}
+                            label={"Email"}
+                            register={register}
+                            name={"email"}
+                            error={errors?.email}
+                        />
+                    </div>
+                    <div>
+                        <TextInput
+                            label={"Địa chỉ"}
+                            register={register}
+                            name={"Address"}
+                        />
+                    </div>
+                    <div>
+                        <TextInput
+                            label={"Số điện thoại"}
+                            register={register}
+                            name={"phoneNumber"}
                             readOnly
-                            className={`input-field mt-1 bg-gray-100 cursor-not-allowed`}
-                            {...register("phoneNumber")}
                         />
                         <p className="text-xs text-gray-500 mt-1">Số điện thoại không thể thay đổi.</p>
                     </div>

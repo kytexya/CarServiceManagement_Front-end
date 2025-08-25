@@ -1,14 +1,12 @@
 import IconBin from '@/components/icons/IconBin';
+import { showError, showSuccess } from '@/utils';
 import { STATUS_CONFIG } from '@/utils/constant';
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const UpdateServiceHistory = () => {
   const [selectedVehicle, setSelectedVehicle] = useState('');
-  const [serviceItems, setServiceItems] = useState([
-    { id: 1, name: 'Thay dầu nhớt', status: 'completed', time: '30 phút', parts: ['Dầu nhớt 5W-30', 'Lọc dầu'], notes: 'Đã thay dầu và lọc dầu theo định kỳ' },
-    { id: 2, name: 'Kiểm tra phanh', status: 'completed', time: '45 phút', parts: ['Má phanh'], notes: 'Phanh hoạt động tốt, đã thay má phanh mới' },
-    { id: 3, name: 'Thay lốp xe', status: 'in-progress', time: '60 phút', parts: ['Lốp xe 205/55R16'], notes: 'Đang thay lốp xe trước bên phải' }
-  ]);
+  const [serviceItems, setServiceItems] = useState([]);
 
   const [newItem, setNewItem] = useState({
     name: '',
@@ -18,7 +16,7 @@ const UpdateServiceHistory = () => {
     notes: ''
   });
 
-  const vehicles = [
+  const vehiclesMock = [
     { id: 1, plateNumber: '30A-12345', customerName: 'Nguyễn Văn A', model: 'Toyota Vios 2020' },
     { id: 2, plateNumber: '51B-67890', customerName: 'Trần Thị B', model: 'Honda City 2021' },
     { id: 3, plateNumber: '29C-11111', customerName: 'Lê Văn C', model: 'Ford Ranger 2019' }
@@ -34,8 +32,42 @@ const UpdateServiceHistory = () => {
     );
   };
 
+  const [vehicles, setVehicles] = useState([]);
+  const token = localStorage.getItem("carserv-token");
+  const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const res = await axios.get("/api/vehicle", { headers });
+        setVehicles(res.data || []);
+      } catch (err) {
+        showError("Không tải được danh sách xe");
+      }
+    };
+    fetchVehicles();
+  }, []);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!selectedVehicle) return;
+      try {
+        const res = await axios.get(`/api/service-history/${selectedVehicle}`, { headers });
+        setServiceItems(res.data?.items || []);
+      } catch (err) {
+        // showError("Không tải được lịch sử sửa chữa");
+        setServiceItems([
+        { id: 1, name: 'Thay dầu nhớt', status: 'completed', time: '30 phút', parts: ['Dầu nhớt 5W-30', 'Lọc dầu'], notes: 'Đã thay dầu và lọc dầu theo định kỳ' },
+        { id: 2, name: 'Kiểm tra phanh', status: 'completed', time: '45 phút', parts: ['Má phanh'], notes: 'Phanh hoạt động tốt, đã thay má phanh mới' },
+        { id: 3, name: 'Thay lốp xe', status: 'in-progress', time: '60 phút', parts: ['Lốp xe 205/55R16'], notes: 'Đang thay lốp xe trước bên phải' }
+      ])
+      }
+    };
+    fetchHistory();
+  }, [selectedVehicle]);
+
   const addServiceItem = () => {
-    if (newItem.name && newItem.time) {
+    if (newItem.name && newItem.time && selectedVehicle) {
       const item = {
         id: Date.now(),
         ...newItem,
@@ -50,6 +82,23 @@ const UpdateServiceHistory = () => {
     setServiceItems(serviceItems.map(item => 
       item.id === id ? { ...item, status } : item
     ));
+  };
+
+  const deleteServiceItem = (id) => {
+    setServiceItems(serviceItems.filter(item => item.id !== id));
+  };
+
+  const saveToVehicle = async () => {
+    try {
+      await axios.put(`/api/service-history/${selectedVehicle}/save`, { items: serviceItems }, { headers });
+      showSuccess("Lưu hồ sơ thành công");
+    } catch (err) {
+      showError("Không thể lưu hồ sơ");
+    }
+  };
+
+  const handleCancel = () => {
+    window.location.reload();
   };
 
   return (
@@ -69,8 +118,8 @@ const UpdateServiceHistory = () => {
             >
               <option value="">Chọn biển số xe</option>
               {vehicles.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.id}>
-                  {vehicle.plateNumber} - {vehicle.customerName}
+                <option key={vehicle.vehicleId} value={vehicle.vehicleId}>
+                  {vehicle.licensePlate} - {vehicle.customerName}
                 </option>
               ))}
             </select>
@@ -82,7 +131,7 @@ const UpdateServiceHistory = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Khách hàng</label>
                 <input
                   type="text"
-                  value={vehicles.find(v => v.id == selectedVehicle)?.customerName || ''}
+                  value={vehicles.find(v => v.vehicleId == selectedVehicle)?.customerName || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
                   readOnly
                 />
@@ -91,7 +140,10 @@ const UpdateServiceHistory = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Model xe</label>
                 <input
                   type="text"
-                  value={vehicles.find(v => v.id == selectedVehicle)?.model || ''}
+                  value={
+                    vehicles.find(v => v.vehicleId == selectedVehicle)?.make + ' ' + 
+                    vehicles.find(v => v.vehicleId == selectedVehicle)?.model + ' ' + 
+                    vehicles.find(v => v.vehicleId == selectedVehicle)?.year || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
                   readOnly
                 />
@@ -183,7 +235,7 @@ const UpdateServiceHistory = () => {
                     <option value="completed">Hoàn thành</option>
                     <option value="cancelled">Đã hủy</option>
                   </select>
-                  <button className="text-red-600 hover:text-red-900">
+                  <button className="text-red-600 hover:text-red-900" onClick={() => deleteServiceItem(item.id)}>
                     <IconBin />
                   </button>
                 </div>
@@ -216,10 +268,10 @@ const UpdateServiceHistory = () => {
 
       {/* Nút lưu */}
       <div className="mt-6 flex justify-end space-x-4">
-        <button className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        <button className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" onClick={handleCancel}>
           Hủy
         </button>
-        <button className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg">
+        <button className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg" onClick={saveToVehicle}>
           Lưu vào hồ sơ xe
         </button>
       </div>

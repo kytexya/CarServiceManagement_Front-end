@@ -1,50 +1,107 @@
 import { showError, showSuccess } from "@/utils";
 import { useForm } from "react-hook-form";
 import LogoCar from '@/assets/images/logo-car.png';
+import TextInput from "@/components/form/input";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import axios from "axios";
+import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+const schema = yup.object().shape({
+  username: yup
+    .string()
+    .required("Vui lòng nhập tên tài khoản")
+    .min(6, "Tên tài khoản phải từ 6 ký tự trở lên"),
+
+  password: yup
+    .string()
+    .required("Vui lòng nhập mật khẩu")
+    .min(3, "Mật khẩu cần ít nhất 3 ký tự"),
+});
 
 export default function LoginPage() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
-  const onSubmit = (data) => {
-    const payload = {
-      username: data.username,
-      password: data.password,
+  useEffect(() => {
+    const token = localStorage.getItem("carserv-token");
+    const profile = localStorage.getItem("carserv-profile");
+    if (token && profile) {
+      const decoded = jwtDecode(token);
+      const now = Date.now() / 1000;
+
+      if (decoded.exp < now) {
+        localStorage.removeItem("carserv-token");
+        localStorage.removeItem("carserv-profile");
+        window.location.href = "/";
+        return;
+      }
+      const parsedProfile = JSON.parse(profile);
+      if (parsedProfile?.roleName === 'Admin') {
+        window.location.href = "/admin";
+      } else if (parsedProfile?.roleName === 'Staff') {
+        window.location.href = "/service-staff";
+      } else if (parsedProfile?.roleName === 'Inventory manager') {
+        window.location.href = "/inventory-manager";
+      } else {
+        window.location.href = "/service-staff";
+      }
     };
-    fetch(`${baseURL}/api/Staff/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then(async (res) => {
-        const result = await res.json();
-        if (res.status === 200) {
-          localStorage.setItem("carserv-profile", JSON.stringify(result));
-          // Redirect based on role
-          const role = result.role;
-          if (role === 1) {
-            window.location.href = "/admin";
-          } else if (role === 2) {
-            window.location.href = "/service-staff";
-          } else if (role === 3) {
-            window.location.href = "/inventory-manager";
-          } else {
-            window.location.href = "/";
-          }
-        } else {
-          showError(result.message || "Đăng nhập thất bại");
+
+  }, [])
+
+  const onSubmit = async (data) => {
+    try {
+      const res = await axios.post(
+        `/api/Home/login`,
+        {
+          username: data.username,
+          password: data.password,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          'ngrok-skip-browser-warning': 'anyvalue',
         }
-      })
-      .catch(() => {
-        showError();
-      });
+      );
+
+      const result = res.data;
+
+      if (res.status === 200 && result) {
+        localStorage.setItem("carserv-token", result);
+        const profileRes = await axios.get(`/api/Account/by-mail/${encodeURIComponent(data.username)}`, {
+          headers: {
+            Authorization: `Bearer ${result}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+          },
+          withCredentials: true,
+        });
+        localStorage.setItem("carserv-profile", JSON.stringify(profileRes.data));
+
+        const role = profileRes.data.roleName;
+        if (role === 'Admin') {
+          window.location.href = "/admin";
+        } else if (role === 'Staff') {
+          window.location.href = "/service-staff";
+        } else if (role === 'Inventory manager') {
+          window.location.href = "/inventory-manager";
+        } else {
+          window.location.href = "/service-staff";
+        }
+      } else {
+        showError(result.message || "Đăng nhập thất bại");
+      }
+    } catch (err) {
+      console.error(err);
+      showError(err?.response?.data?.message || "Đăng nhập thất bại");
+    }
   };
 
   return (
@@ -57,40 +114,24 @@ export default function LoginPage() {
         </div>
         <form className="w-full text-base" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2 mb-5">
-            <label className="text-sm font-medium">Tên tài khoản</label>
-            <input
-              type="text"
-              placeholder="Nhập tên tài khoản"
-              className={`border px-5 py-2 rounded-lg ${errors.username ? "border-red-500" : "border-gray-300"}`}
-              {...register("username", {
-                required: "Vui lòng nhập tên tài khoản",
-                minLength: {
-                  value: 6,
-                  message: "Tên tài khoản phải từ 6 ký tự trở lên",
-                },
-              })}
+            <TextInput
+              label={"Tên tài khoản"}
+              placeholder={"Nhập tên tài khoản"}
+              register={register}
+              name={"username"}
+              error={errors?.username}
             />
-            {errors.username && (
-              <p className="text-red-500 text-xs">{errors.username.message}</p>
-            )}
           </div>
           <div className="flex flex-col gap-2 mb-6">
-            <label className="text-sm font-medium">Mật khẩu</label>
-            <input
-              type='password'
-              placeholder="Nhập mật khẩu..."
-              className={`border px-5 py-2 rounded-lg ${errors.password ? "border-red-500" : "border-gray-300"}`}
-              {...register("password", {
-                required: "Vui lòng nhập mật khẩu",
-                minLength: {
-                  value: 6,
-                  message: "Mật khẩu cần ít nhất 6 ký tự",
-                },
-              })}
+            <TextInput
+              type={"password"}
+              label={"Mật khẩu"}
+              placeholder={"Nhập mật khẩu..."}
+              register={register}
+              name={"password"}
+              error={errors?.password}
             />
-            {errors.password && (
-              <p className="text-red-500 text-xs">{errors.password.message}</p>
-            )}
+            <label className="text-sm font-medium">Mật khẩu</label>
           </div>
           <button
             type="submit"
@@ -98,7 +139,7 @@ export default function LoginPage() {
           >
             Đăng nhập
           </button>
-          <a href="/register" className="w-full block mt-2 text-center text-blue-600 hover:underline text-sm">
+          <a href="/signup" className="w-full block mt-2 text-center text-blue-600 hover:underline text-sm">
             Đăng ký tài khoản mới
           </a>
         </form>

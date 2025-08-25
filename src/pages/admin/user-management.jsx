@@ -3,16 +3,26 @@ import IconEdit from "@/components/icons/IconEdit";
 import IconEmail from "@/components/icons/IconEmail";
 import IconLock from "@/components/icons/IconLock";
 import IconUnlock from "@/components/icons/IconUnlock";
-import { showError } from "@/utils";
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { showError, showSuccess } from "@/utils";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";import axios from "axios";
+import IconNotFound from "@/components/icons/IconNotFound";
+import Pagination from "@/components/common/pagination";
+const ENV = import.meta.env.VITE_API_BASE_URL;
 
 export default function UserManagementPage() {
+  const [users, setUsers] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
 
   // Mock data
-  const users = [
+  const usersMock = [
     {
       id: 1,
       username: "admin001",
@@ -25,65 +35,49 @@ export default function UserManagementPage() {
       createdAt: "2024-01-01",
       department: "Quản lý",
     },
-    {
-      id: 2,
-      username: "staff001",
-      fullName: "Trần Thị Staff",
-      email: "staff@carservice.com",
-      phone: "0987654321",
-      role: "staff",
-      status: "active",
-      lastLogin: "2024-01-15 08:15",
-      createdAt: "2024-01-05",
-      department: "Dịch vụ",
-    },
-    {
-      id: 3,
-      username: "inventory001",
-      fullName: "Lê Văn Inventory",
-      email: "inventory@carservice.com",
-      phone: "0555666777",
-      role: "inventory_manager",
-      status: "active",
-      lastLogin: "2024-01-14 16:45",
-      createdAt: "2024-01-10",
-      department: "Kho",
-    },
-    {
-      id: 4,
-      username: "customer001",
-      fullName: "Phạm Văn Customer",
-      email: "customer@email.com",
-      phone: "0333444555",
-      role: "customer",
-      status: "active",
-      lastLogin: "2024-01-15 10:20",
-      createdAt: "2024-01-12",
-      department: "Khách hàng",
-    },
-    {
-      id: 5,
-      username: "staff002",
-      fullName: "Hoàng Thị Staff",
-      email: "staff2@carservice.com",
-      phone: "0222333444",
-      role: "staff",
-      status: "inactive",
-      lastLogin: "2024-01-10 14:30",
-      createdAt: "2024-01-08",
-      department: "Dịch vụ",
-    },
   ];
+
+  const fetchUsers = async (page = 1) => {
+    try {
+      const res = await axios.get(`/api/Account?currentPage=${page}&pageSize=${pagination.pageSize}`, {
+        params: {
+          currentPage: 1,
+          pageSize: 10
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        // withCredentials: true,
+      });
+      setUsers(res?.data?.items);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
+    } catch (err) {
+      console.error(err);
+      showError("Lấy danh sách người dùng thất bại");
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers(pagination.currentPage);
+  }, [pagination.currentPage]);
 
   const getRoleColor = (role) => {
     switch (role) {
-      case "admin":
+      case "Admin":
         return "bg-red-100 text-red-800";
-      case "staff":
+      case "ServiceStaff":
         return "bg-blue-100 text-blue-800";
-      case "inventory_manager":
+      case "InventoryManager":
         return "bg-green-100 text-green-800";
-      case "customer":
+      case "Customer":
         return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -92,13 +86,13 @@ export default function UserManagementPage() {
 
   const getRoleText = (role) => {
     switch (role) {
-      case "admin":
+      case "Admin":
         return "Admin";
-      case "staff":
+      case "ServiceStaff":
         return "Nhân viên";
-      case "inventory_manager":
+      case "InventoryManager":
         return "Quản lý kho";
-      case "customer":
+      case "Customer":
         return "Khách hàng";
       default:
         return role;
@@ -115,21 +109,41 @@ export default function UserManagementPage() {
     return status === "active" ? "Hoạt động" : "Không hoạt động";
   };
 
-  const filteredUsers = users.filter((user) => {
-    const matchesFilter = activeFilter === "all" || user.role === activeFilter;
+  const filteredUsers = users?.filter((user) => {
+    const matchesFilter = activeFilter === "all" || user.roleName === activeFilter;
     const matchesSearch =
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const handleToggleStatus = (userId) => {
-    showError("Chức năng khoá/mở khoá tài khoản chưa được kết nối API.");
+  const handleToggleStatus = async (userId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === true ? false : true;
+      await axios.put(`/api/Account/account-status/${userId}`, newStatus, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+          "Content-Type": "application/json",
+        },
+      });
+      showSuccess("Cập nhật trạng thái thành công");
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      showError("Cập nhật trạng thái thất bại");
+    }
   };
 
-  const handleSendActivation = (userId) => {
-    showError("Chức năng gửi email kích hoạt chưa được kết nối API.");
+  const handleSendActivation = async (userId) => {
+    try {
+      await axios.post(`${ENV}/api/users/${userId}/send-activation`);
+      showSuccess("Đã gửi email kích hoạt");
+    } catch (err) {
+      console.error(err);
+      showError("Gửi email thất bại");
+    }
   };
 
   return (
@@ -223,45 +237,45 @@ export default function UserManagementPage() {
                 Tất cả ({users.length})
               </button>
               <button
-                onClick={() => setActiveFilter("admin")}
+                onClick={() => setActiveFilter("Admin")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "admin"
+                  activeFilter === "Admin"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                Admin ({users.filter((u) => u.role === "admin").length})
+                Admin ({users.filter((u) => u.roleName === "Admin").length})
               </button>
               <button
-                onClick={() => setActiveFilter("staff")}
+                onClick={() => setActiveFilter("ServiceStaff")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "staff"
+                  activeFilter === "ServiceStaff"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                Nhân viên ({users.filter((u) => u.role === "staff").length})
+                Nhân viên ({users.filter((u) => u.roleName === "ServiceStaff").length})
               </button>
               <button
-                onClick={() => setActiveFilter("inventory_manager")}
+                onClick={() => setActiveFilter("InventoryManager")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "inventory_manager"
+                  activeFilter === "InventoryManager"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
                 Quản lý kho (
-                {users.filter((u) => u.role === "inventory_manager").length})
+                {users.filter((u) => u.roleName === "InventoryManager").length})
               </button>
               <button
-                onClick={() => setActiveFilter("customer")}
+                onClick={() => setActiveFilter("Customer")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "customer"
+                  activeFilter === "Customer"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                Khách hàng ({users.filter((u) => u.role === "customer").length})
+                Khách hàng ({users.filter((u) => u.roleName === "Customer").length})
               </button>
             </div>
           </div>
@@ -300,7 +314,7 @@ export default function UserManagementPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr key={user.userID} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
@@ -313,7 +327,7 @@ export default function UserManagementPage() {
                             {user.email}
                           </div>
                           <div className="text-xs text-gray-400">
-                            {user.phone}
+                            {user.phoneNumber}
                           </div>
                         </div>
                       </td>
@@ -321,10 +335,10 @@ export default function UserManagementPage() {
                         <div>
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
-                              user.role
+                              user.roleName
                             )}`}
                           >
-                            {getRoleText(user.role)}
+                            {getRoleText(user.roleName)}
                           </span>
                           <div className="text-xs text-gray-500 mt-1">
                             {user.department}
@@ -351,14 +365,14 @@ export default function UserManagementPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex flex-wrap gap-2">
-                          <a
-                            href={`/admin/user-management/${user.id}`}
+                          {/* <a
+                            href={`/admin/user-management/${user.userID}`}
                             className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                           >
                             <IconEdit />
-                          </a>
+                          </a> */}
                           <button
-                            onClick={() => handleToggleStatus(user.id)}
+                            onClick={() => handleToggleStatus(user.userID)}
                             className={`text-xs  rounded-full hover:bg-slate-300 transition-all duration-100 px-2 ${
                               user.status === "active"
                                 ? "text-red-600 hover:text-red-900"
@@ -371,12 +385,12 @@ export default function UserManagementPage() {
                               <IconUnlock />
                             )}
                           </button>
-                          <button
-                            onClick={() => handleSendActivation(user.id)}
+                          {/* <button
+                            onClick={() => handleSendActivation(user.userID)}
                             className="text-purple-600 hover:text-purple-900 text-xs rounded-full hover:bg-slate-300 transition-all duration-100 px-2"
                           >
                             <IconEmail />
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -392,6 +406,17 @@ export default function UserManagementPage() {
               </div>
             )}
           </div>
+          {pagination.totalItems > 0 && filteredUsers.length > 0 && (
+            <Pagination
+              totalPage={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              totalItems={pagination.totalItems}
+              pageSize={pagination.pageSize}
+              onPageChange={(page) =>
+                setPagination((prev) => ({ ...prev, currentPage: page }))
+              }
+            />
+          )}
         </div>
       </div>
     </div>

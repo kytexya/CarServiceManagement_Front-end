@@ -6,13 +6,14 @@ function Select({
   error,
   fieldValue = "value",
   fieldName = "label",
-  placeholder = 'Nhấn để chọn...'
+  placeholder = 'Nhấn để chọn...',
+  isRequired = false
 }) {
   return (
     <div>
       {label && (
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          {label}
+          {label} {isRequired && <span className="text-red-500">*</span>}
         </label>
       )}
       <select

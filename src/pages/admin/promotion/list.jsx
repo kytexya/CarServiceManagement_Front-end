@@ -5,15 +5,51 @@ import IconBin from "@/components/icons/IconBin";
 import IconEdit from "@/components/icons/IconEdit";
 import IconEmail from "@/components/icons/IconEmail";
 import IconLock from "@/components/icons/IconLock";
+import IconNotFound from "@/components/icons/IconNotFound";
 import IconPlus from "@/components/icons/IconPlus";
 import IconUnlock from "@/components/icons/IconUnlock";
 import { showError } from "@/utils";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function PromotionPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [promotions, setPromotions] = useState([]);
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
+  const token = localStorage.getItem("carserv-token");
+
+  const fetchPromotions = async (page = 1) => {
+    try {
+      const res = await axios.get(`/api/Promotion/retrieve-all-promotion?currentPage=${page}&pageSize=${pagination.pageSize}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "anyvalue",
+        },
+      });
+      setPromotions(res.data.items || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
+    } catch (err) {
+      console.error(err);
+      showError("Không tải được danh sách khuyến mãi");
+    }
+  };
+
+  useEffect(() => {
+    fetchPromotions(pagination.currentPage);
+  }, [pagination.currentPage]);
 
   const data = [
     {
@@ -88,29 +124,57 @@ export default function PromotionPage() {
     },
   ];
 
-  const filteredData = data.filter((user) => {
+  const filteredData = promotions.filter((user) => {
     const matchesFilter = activeFilter === "all" || user.role === activeFilter;
-    const matchesSearch = user.name
+    const matchesSearch = user.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
     return matchesFilter && matchesSearch;
   });
 
-  const handleToggleStatus = (userId) => {
-    showError("Chức năng khoá/mở khoá tài khoản chưa được kết nối API.");
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      await axios.put(
+        `/api/Promotion/${id}/status`,
+        `"${currentStatus === "active" ? "inactive" : "active"}"`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "anyvalue",
+          },
+        }
+      );
+      showSuccess("Cập nhật trạng thái thành công");
+      fetchPromotions();
+    } catch (err) {
+      console.error(err);
+      showError("Cập nhật trạng thái thất bại");
+    }
+  };
+
+   const handleDelete = async (id) => {
+    if (confirm(`Bạn có chắc chắn muốn xoá khuyến mãi #${id}?`)) {
+      try {
+        await axios.delete(`/api/Promotion/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "anyvalue",
+          },
+        });
+        showSuccess("Xoá khuyến mãi thành công");
+        fetchPromotions();
+      } catch (err) {
+        console.error(err);
+        showError("Xoá khuyến mãi thất bại");
+      }
+    }
   };
 
   const handleSendActivation = (userId) => {
     showError("Chức năng gửi email kích hoạt chưa được kết nối API.");
   };
-
-  const handleDelete = (id) => {
-    const res = confirm(`Bạn có chắc chắn muốn xoá khuyến mãi ${id} ?`);
-    if (res) {
-        showError("Chức năng xoá chưa được kết nối API.");
-    }    
-  }
 
   return (
     <div className="flex flex-row w-full h-screen bg-gray-50">
@@ -213,34 +277,36 @@ export default function PromotionPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredData.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
+                    <tr key={item.promotionId} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {item.name}
+                          {item.title}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {item.percent}%
+                          {item.discountPercentage}%
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center flex-wrap gap-1">
-                          {item.services.map(item => <div className="bg-gray-100 text-xs px-2 rounded-full w-fit">{item}</div>)}
+                          {item.services?.map(item => <div className="bg-gray-100 text-xs px-2 rounded-full w-fit">{item}</div>)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Toggle isActive={item.status === "active"} />
+                        {/* todo */}
+                        {/* <Toggle isActive={item.status === "active"} onClick={() => handleToggleStatus(item.promotionId, item.status)}  /> */}
+                        <Toggle isActive={true} onClick={() => handleToggleStatus(item.promotionId, item.status)}  />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex flex-wrap gap-2">
                           <a
-                            href={`/admin/promotion/${item.id}`}
+                            href={`/admin/promotion/${item.promotionId}`}
                             className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                           >
                             <IconEdit />
                           </a>
-                          <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900">
+                          <button onClick={() => handleDelete(item.promotionId)} className="text-red-600 hover:text-red-900">
                             <IconBin />
                           </button>
                         </div>
@@ -250,7 +316,17 @@ export default function PromotionPage() {
                 </tbody>
               </table>
             </div>
-            {filteredData.length > 0 && <Pagination totalPage={3} />}
+            {pagination.totalItems > 0 && filteredData.length > 0 && (
+              <Pagination
+                totalPage={pagination.totalPages}
+                currentPage={pagination.currentPage}
+                totalItems={pagination.totalItems}
+                pageSize={pagination.pageSize}
+                onPageChange={(page) =>
+                  setPagination((prev) => ({ ...prev, currentPage: page }))
+                }
+              />
+            )}
 
             {filteredData.length === 0 && (
               <div className="text-center py-12">
