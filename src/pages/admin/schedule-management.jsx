@@ -60,7 +60,7 @@ export default function ScheduleManagementPage() {
             },
             withCredentials: true
         });
-        setAppointments(res.data || []);
+        // setAppointments(res.data || []);
         } catch (err) {
         console.log(err);
         showError("Không tải được");
@@ -171,37 +171,37 @@ export default function ScheduleManagementPage() {
     };
 
     const handleConfirmAppointment = async (appointment) => {
-        try {
-            const token = localStorage.getItem("carserv-token");
+        showError("Chức năng cập nhật giờ làm việc chưa được kết nối API.");
+        // try {
+        //     const token = localStorage.getItem("carserv-token");
+        //     const response = await axios.post(
+        //         `/api/Appointment/schedule`,
+        //         {
+        //             vehicleId: appointment.vehicleId,
+        //             packageId: appointment.packageId,
+        //             promotionId: appointment.promotionId,
+        //             appointmentDate: appointment.appointmentDate,
+        //             serviceIds: appointment.appointmentServices,
+        //         },
+        //         {
+        //             headers: {
+        //                 Authorization: `Bearer ${token}`,
+        //                 "ngrok-skip-browser-warning": "anyvalue",
+        //             },
+        //             params: {
+        //                 customerId: appointment.customerId
+        //             }
+        //         }
+        //     );
+        //     showSuccess("Xác nhận lịch hẹn thành công!");
 
-            const response = await axios.post(
-                `/api/Appointment/schedule`,
-                {
-                    vehicleId: appointment.vehicleId,
-                    packageId: appointment.packageId,
-                    promotionId: appointment.promotionId,
-                    appointmentDate: appointment.appointmentDate,
-                    serviceIds: appointment.appointmentServices,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "ngrok-skip-browser-warning": "anyvalue",
-                    },
-                    params: {
-                        customerId: appointment.customerId
-                    }
-                }
-            );
-            showSuccess("Xác nhận lịch hẹn thành công!");
-
-            navigate('/admin/service-management')
-        } catch (error) {
-            console.error("Error:", error);
-            showError(
-                error.response?.data?.message || "Xác nhận lịch hẹn thất bại!"
-            );
-        }
+        //     navigate('/admin/service-management')
+        // } catch (error) {
+        //     console.error("Error:", error);
+        //     showError(
+        //         error.response?.data?.message || "Xác nhận lịch hẹn thất bại!"
+        //     );
+        // }
     };
 
     const handleAssignStaff = (appointment) => {
@@ -349,8 +349,12 @@ export default function ScheduleManagementPage() {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
-                                                            <div className="text-sm text-gray-900">{appointment.serviceProgresses}</div>
-                                                            <div className="text-xs text-gray-500">{appointment.duration} phút</div>
+                                                            <div className="text-sm text-gray-900">
+                                                                {appointment.services.length <= 2 
+                                                                    ? appointment.services.join(", ") 
+                                                                    : `${appointment.services.slice(0, 2).join(", ")}, ...`}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">{appointment.duration} giờ</div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -448,6 +452,7 @@ export default function ScheduleManagementPage() {
                                                         value={hours.start}
                                                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                                         disabled={!hours.isOpen}
+                                                        readOnly
                                                     />
                                                     <span className="text-gray-500">-</span>
                                                     <input
@@ -455,6 +460,7 @@ export default function ScheduleManagementPage() {
                                                         value={hours.end}
                                                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                                         disabled={!hours.isOpen}
+                                                        readOnly
                                                     />
                                                 </div>
                                             </div>
@@ -464,6 +470,7 @@ export default function ScheduleManagementPage() {
                                                         type="checkbox"
                                                         checked={hours.isOpen}
                                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        readOnly
                                                     />
                                                     <span className="ml-2 text-sm text-gray-700">Mở cửa</span>
                                                 </label>

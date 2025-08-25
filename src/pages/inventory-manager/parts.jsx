@@ -81,7 +81,7 @@ const Parts = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Danh sách phiếu dịch vụ</h1>
-        <Link to="/inventory-manager/parts/add" className="button primary">
+        <Link to="/inventory-manager/inventory/add" className="button primary">
           <svg
             className="w-4 h-4 mr-2"
             fill="none"
@@ -159,7 +159,7 @@ const Parts = () => {
                     {order.quantity}
                   </td>
                   <td className="px-4 py-3 text-sm text-center text-gray-900">
-                    {order.unit}
+                    {order.unit || 'Bộ'}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
                     <div className="flex justify-center space-x-2">
@@ -167,7 +167,7 @@ const Parts = () => {
                         <IconEye />
                       </button>
                       <a
-                        href={`/inventory-manager/parts/${order.partId}`}
+                        href={`/inventory-manager/inventory/edit/${order.partId}`}
                         className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
                       >
                         <IconEdit />

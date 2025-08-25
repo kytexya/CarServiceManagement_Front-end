@@ -1,5 +1,6 @@
 import { showError } from '@/utils';
 import axios from 'axios';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 
 const NotifyCustomer = () => {
@@ -7,8 +8,9 @@ const NotifyCustomer = () => {
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [message, setMessage] = useState('');
   const [notificationHistory, setNotificationHistory] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
-  const customers = [
+  const customersMock = [
     { id: 1, name: 'Nguyễn Văn A', phone: '0123456789', plateNumber: '30A-12345' },
     { id: 2, name: 'Trần Thị B', phone: '0987654321', plateNumber: '51B-67890' },
     { id: 3, name: 'Lê Văn C', phone: '0555666777', plateNumber: '29C-11111' }
@@ -69,7 +71,7 @@ const NotifyCustomer = () => {
 
   const handleSendNotification = async () => {
     if (selectedCustomer && message) {
-      const customer = customers.find(c => c.id == selectedCustomer);
+      const customer = customersMock.find(c => c.id == selectedCustomer);
       const template = templates.find(t => t.id === selectedTemplate);
 
       try {
@@ -110,14 +112,14 @@ const NotifyCustomer = () => {
   };
 
   const fetchCustomer = async () => {
-    // try {
-    //   const res = await axios.get("/api/Notification", {
-    //     headers
-    //   });
-    //   setNotificationHistory(res.data || []);
-    // } catch (err) {
-    //   showError("Không tải được danh sách thông báo");
-    // }
+    try {
+      const res = await axios.get("/api/Account/customers", {
+        headers
+      });
+      setCustomers(res.data || []);
+    } catch (err) {
+      showError("Không tải được danh sách thông báo");
+    }
   };
 
   useEffect(() => {
@@ -143,8 +145,8 @@ const NotifyCustomer = () => {
             >
               <option value="">Chọn khách hàng</option>
               {customers.map(customer => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name} - {customer.plateNumber}
+                <option key={customer.customerId} value={customer.customerId}>
+                  {customer.user.fullName} - {customer.user.phoneNumber}
                 </option>
               ))}
             </select>
@@ -227,7 +229,6 @@ const NotifyCustomer = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Biển số xe</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại thông báo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nội dung</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian gửi</th>
@@ -240,9 +241,6 @@ const NotifyCustomer = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {notification?.user?.fullName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {notification.plateNumber}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getTypeBadge(notification.type)}
                   </td>
@@ -250,7 +248,7 @@ const NotifyCustomer = () => {
                     {notification.message}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {notification.sentAt}
+                    {moment(notification.sentAt).format('YYYY-MM-DD')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">

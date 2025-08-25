@@ -22,7 +22,7 @@ const MySchedule = () => {
       });
       setScheduleData(res.data || []);
     } catch (err) {
-      showError("Không tải được lịch làm việc");
+      // showError("Không tải được lịch làm việc");
     }
   };
 
@@ -33,7 +33,7 @@ const MySchedule = () => {
       });
       setRequests(res.data || []);
     } catch (err) {
-      showError("Không tải được danh sách yêu cầu");
+      // showError("Không tải được danh sách yêu cầu");
     }
   };
 

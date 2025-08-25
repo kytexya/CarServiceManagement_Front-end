@@ -1,5 +1,7 @@
+import TextInput from "@/components/form/input";
 import { showError, showSuccess } from "@/utils";
 import axios from "axios";
+import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -20,6 +22,7 @@ export default function EditInventoryPage() {
     const partId = /^\d+$/.test(id) ? id : null;
     const navigate = useNavigate();
     const [partData, setPartData] = useState(null);
+    const [suppliers, setSuppliers] = useState([]);
     const {
         register,
         handleSubmit,
@@ -28,46 +31,80 @@ export default function EditInventoryPage() {
     } = useForm();
 
     useEffect(() => {
-        const fetchPart = async () => {
-        try {
+        const fetchData = async () => {
+            try {
             const token = localStorage.getItem("carserv-token");
-            const res = await axios.get(`/api/Parts/${partId}`, {
-            headers: { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue', },
-            });
-            const part = res.data;
 
+            // load suppliers
+            const suppliersRes = await axios.get("/api/Parts/suppliers?currentPage=1&pageSize=100", {
+                headers: {
+                Authorization: `Bearer ${token}`,
+                "ngrok-skip-browser-warning": "anyvalue",
+                },
+            });
+            const suppliersData = suppliersRes.data.items;
+            setSuppliers(suppliersData);
+
+            // load part
+            const partRes = await axios.get(`/api/Parts/${partId}`, {
+                headers: {
+                Authorization: `Bearer ${token}`,
+                "ngrok-skip-browser-warning": "anyvalue",
+                },
+            });
+            const part = partRes.data;
             setPartData(part);
+
+            // set form values
             setValue("partName", part.partName);
             setValue("partNumber", part.partNumber);
             setValue("quantity", part.quantity);
-            setValue("unitPrice", part.unitPrice);
-            setValue("supplierName", part.supplierName);
+            setValue("unitPrice", part.currentUnitPrice);
+            setValue("supplierName", suppliersData.find(i => i.name === part.supplierName)?.supplierId || "");
             setValue("description", part.description);
-        } catch (error) {
+            setValue("unit", part.unit);
+            } catch (error) {
             console.error(error);
-            showError("Không thể lấy dữ liệu phụ tùng!");
-        }
+            showError("Không thể tải dữ liệu!");
+            }
         };
 
-        fetchPart();
+        fetchData();
     }, [partId, setValue]);
 
     const onSubmit = async (data) => {
         try {
             const token = localStorage.getItem("carserv-token");
-            await axios.put(`/api/parts/update`, {}, {
-                params: {
-                    partId: partId,
-                    partName: data.partName,
-                    quantity: data.quantity,
-                    unitPrice: data.unitPrice,
-                    expiryDate: partData.expiryDate,
-                    warrantyMonths: partData.warrantyMonths,
-                },
+            const now = new Date();
+            const expiryDate = new Date(now.setFullYear(now.getFullYear() + 1))
+                .toISOString()
+                .split("T")[0];
+            const payload = {
+                partName: data.partName,
+                partNumber: data.partNumber,
+                quantity: data.quantity,
+                unitPrice: data.unitPrice,
+                expiryDate: expiryDate,
+                warrantyMonths: 12,
+                unit: data.unit,
+                partPrices: [
+                    {
+                        price: 0,
+                        effectiveFrom: now,
+                    }
+                ],
+                warrantyClaims: [{
+                    supplierId: data.supplierName,
+                    claimDate: moment(new Date(now.setFullYear(now.getFullYear() + 1))).format('YYYY-MM-DD'),
+                    notes: 'notes',
+                }],
+                description: data.description,
+            };
+            await axios.put(`/api/parts/update/${partId}`, payload, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             showSuccess("Cập nhật phụ tùng thành công!");
-            navigate("/inventory-manager/inventory");
+            // navigate("/inventory-manager/inventory");
         } catch (error) {
             console.error(error);
             showError(error.response?.data?.message || "Không thể cập nhật phụ tùng!");
@@ -156,7 +193,7 @@ export default function EditInventoryPage() {
                                         )}
                                     </div>
 
-                                    <div>
+                                    {/* <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                                             <svg className="w-4 h-4 inline mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -170,7 +207,7 @@ export default function EditInventoryPage() {
                                             readOnly
                                         />
                                         <p className="text-xs text-gray-500 mt-1">Mã phụ tùng không thể thay đổi</p>
-                                    </div>
+                                    </div> */}
 
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -200,6 +237,12 @@ export default function EditInventoryPage() {
                                             </p>
                                         )}
                                     </div>
+                                    <TextInput label={
+                                        <><svg className="w-4 h-4 inline mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                            </svg>
+                                            Đơn vị</>
+                                    } register={register} name="unit" error={errors?.unit} placeholder={"Cái"} />
                                 </div>
 
                                 {/* Column 2 */}
@@ -233,28 +276,26 @@ export default function EditInventoryPage() {
                                         )}
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-700">
                                             <svg className="w-4 h-4 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
                                             Nhà cung cấp
                                         </label>
-                                        <input
-                                            type="text"
-                                            className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                errors.supplierName ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-gray-300"
-                                            }`}
-                                            placeholder="Nhập tên nhà cung cấp..."
-                                            {...register("supplierName", { required: "Vui lòng nhập nhà cung cấp" })}
-                                        />
+                                        <select
+                                            {...register("supplierName")}
+                                            className="w-full px-3 py-2 border rounded-lg"
+                                        >
+                                            <option value="">-- Chọn nhà cung cấp --</option>
+                                            {suppliers.map((s, index) => (
+                                                <option key={index} value={s.supplierId}>
+                                                {s.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                         {errors.supplierName && (
-                                            <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                {errors.supplierName.message}
-                                            </p>
+                                            <p className="text-red-500 text-sm">{errors.supplierName.message}</p>
                                         )}
                                     </div>
 

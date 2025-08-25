@@ -66,8 +66,8 @@ const CreateService = () => {
           setValue("description", service.description);
           setValue("price", service.price);
           setValue("estimatedLaborHours", service.estimatedLaborHours);
-          setValue("status", service.status);
-          setValue("ServiceParts", service?.parts?.[0].partId);
+          setValue("status", service?.status);
+          setValue("ServiceParts", service?.parts?.[0]?.partId);
         } catch (error) {
           console.error(error);
           showError("Không thể lấy dữ liệu dịch vụ!");
@@ -149,8 +149,8 @@ const CreateService = () => {
             error={errors?.name}
           />
           <TextInput
-            label={"Danh mục"}
-            placeholder={"Nhập danh mục"}
+            label={"Mô tả"}
+            placeholder={"Nhập mô tả"}
             register={register}
             name={"description"}
             error={errors?.description}

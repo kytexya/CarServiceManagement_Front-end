@@ -99,10 +99,10 @@ export default function ServiceManagementPage() {
           },
         withCredentials: true
       });
-      setServiceTypes(res.data?.services || []);
+      setServiceTypes(res.data?.items || []);
       setPagination((prev) => ({
         ...prev,
-        totalItems: res.data.totalItems || res.data?.services.length,
+        totalItems: res.data.totalItems || res.data?.items.length,
         totalPages: res.data.totalPages || 1,
         currentPage: res.data.currentPage || 1,
         pageSize: res.data.pageSize || 1,
@@ -124,10 +124,10 @@ export default function ServiceManagementPage() {
           },
         withCredentials: true
       });
-      setComboPackages(res.data.packages || []);
+      setComboPackages(res.data.items || []);
       setPaginationCombo((prev) => ({
         ...prev,
-        totalItems: res.data.totalItems || res.data.packages.length,
+        totalItems: res.data.totalItems || res.data.items.length,
         totalPages: res.data.totalPages || 1,
         currentPage: res.data.currentPage || 1,
         pageSize: res.data.pageSize || 1,

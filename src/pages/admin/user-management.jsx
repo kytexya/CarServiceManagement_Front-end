@@ -71,13 +71,13 @@ export default function UserManagementPage() {
 
   const getRoleColor = (role) => {
     switch (role) {
-      case "admin":
+      case "Admin":
         return "bg-red-100 text-red-800";
-      case "staff":
+      case "ServiceStaff":
         return "bg-blue-100 text-blue-800";
-      case "inventory_manager":
+      case "InventoryManager":
         return "bg-green-100 text-green-800";
-      case "customer":
+      case "Customer":
         return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -86,13 +86,13 @@ export default function UserManagementPage() {
 
   const getRoleText = (role) => {
     switch (role) {
-      case "admin":
+      case "Admin":
         return "Admin";
-      case "staff":
+      case "ServiceStaff":
         return "Nhân viên";
-      case "inventory_manager":
+      case "InventoryManager":
         return "Quản lý kho";
-      case "customer":
+      case "Customer":
         return "Khách hàng";
       default:
         return role;
@@ -110,7 +110,7 @@ export default function UserManagementPage() {
   };
 
   const filteredUsers = users?.filter((user) => {
-    const matchesFilter = activeFilter === "all" || user.role === activeFilter;
+    const matchesFilter = activeFilter === "all" || user.roleName === activeFilter;
     const matchesSearch =
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       // user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -237,45 +237,45 @@ export default function UserManagementPage() {
                 Tất cả ({users.length})
               </button>
               <button
-                onClick={() => setActiveFilter("admin")}
+                onClick={() => setActiveFilter("Admin")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "admin"
+                  activeFilter === "Admin"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                Admin ({users.filter((u) => u.role === "admin").length})
+                Admin ({users.filter((u) => u.roleName === "Admin").length})
               </button>
               <button
-                onClick={() => setActiveFilter("staff")}
+                onClick={() => setActiveFilter("ServiceStaff")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "staff"
+                  activeFilter === "ServiceStaff"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                Nhân viên ({users.filter((u) => u.role === "staff").length})
+                Nhân viên ({users.filter((u) => u.roleName === "ServiceStaff").length})
               </button>
               <button
-                onClick={() => setActiveFilter("inventory_manager")}
+                onClick={() => setActiveFilter("InventoryManager")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "inventory_manager"
+                  activeFilter === "InventoryManager"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
                 Quản lý kho (
-                {users.filter((u) => u.role === "inventory_manager").length})
+                {users.filter((u) => u.roleName === "InventoryManager").length})
               </button>
               <button
-                onClick={() => setActiveFilter("customer")}
+                onClick={() => setActiveFilter("Customer")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === "customer"
+                  activeFilter === "Customer"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                Khách hàng ({users.filter((u) => u.role === "customer").length})
+                Khách hàng ({users.filter((u) => u.roleName === "Customer").length})
               </button>
             </div>
           </div>

@@ -88,7 +88,7 @@ const CreateService = () => {
 
       if (comboId) {
         const response = await axios.put(
-          `/api/services/update-service-package`,
+          `/api/services/update-service-package/${comboId}`,
           data,
           {
             headers: {

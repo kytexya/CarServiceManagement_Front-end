@@ -187,6 +187,25 @@ export default function InventoryListPage() {
   const lowStockCount = dataList.filter(item => item.quantity <= item.minThreshold && item.quantity > 0).length;
   const outOfStockCount = dataList.filter(item => item.quantity === 0).length;
 
+  const handleDeletePart = async (partId) => {
+    if (!window.confirm("Bạn có chắc muốn xóa phụ tùng này?")) return;
+
+    try {
+      await axios.delete(`/api/Parts/delete-part/${partId}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        }
+       });
+      fetchParts();
+      showSuccess("Xóa phụ tùng thành công!");
+    } catch (err) {
+      console.error("Lỗi khi xoá:", err);
+      showError("Xóa phụ tùng thất bại!");
+    }
+  };
+
+
   return (
     <div className="flex flex-col w-full">
         <div className="flex justify-between items-center px-8 py-4 border-b">
@@ -341,10 +360,10 @@ export default function InventoryListPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {item.currentUnitPrice.toLocaleString('vi-VN')} ₫
+                          {item.currentUnitPrice?.toLocaleString('vi-VN')} ₫
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {item.currentUnitPrice.toLocaleString('vi-VN')} ₫
+                          {item.currentUnitPrice?.toLocaleString('vi-VN')} ₫
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {item.supplierName}
@@ -369,11 +388,7 @@ export default function InventoryListPage() {
                               Sửa
                             </button>
                             <button
-                              onClick={() => {
-                                if (window.confirm('Bạn có chắc muốn xóa phụ tùng này?')) {
-                                  setDataList(dataList.filter(part => part.partId !== item.partId));
-                                }
-                              }}
+                              onClick={() => handleDeletePart(item.partId)}
                               className="button button-danger button-sm"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
