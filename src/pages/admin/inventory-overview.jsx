@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import { showError } from '@/utils';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const StatCard = ({ title, value, icon, color = "blue", trend = null }) => (
     <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -114,6 +115,7 @@ const HistoryItem = ({ transaction }) => (
 );
 
 export default function InventoryOverviewPage() {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [parts, setParts] = useState([]);
     const [lowParts, setLowParts] = useState([]);
@@ -209,7 +211,7 @@ export default function InventoryOverviewPage() {
     ];
 
     const handleViewDetails = () => {
-        showError("Chức năng xem chi tiết chưa được kết nối API.");
+        navigate('/admin/inventory-details');
     };
 
     const handleExportReport = () => {

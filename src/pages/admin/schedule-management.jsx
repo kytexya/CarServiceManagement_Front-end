@@ -8,6 +8,9 @@ import { Link } from "react-router-dom";
 export default function ScheduleManagementPage() {
     const [activeTab, setActiveTab] = useState('appointments');
     const [selectedDate, setSelectedDate] = useState('2025-08-01');
+    const [showAssignModal, setShowAssignModal] = useState(false);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [selectedStaff, setSelectedStaff] = useState("");
     const [appointments, setAppointments] = useState(null);
     const [pagination, setPagination] = useState({
         totalItems: 0,
@@ -157,6 +160,12 @@ export default function ScheduleManagementPage() {
         }
     };
 
+    const staffList = [
+        { id: 1, name: "Nguyễn Thị B" },
+        { id: 2, name: "Lê Văn D" },
+        { id: 3, name: "Trần Văn F" },
+    ];
+
     const handleUpdateWorkingHours = () => {
         showError("Chức năng cập nhật giờ làm việc chưa được kết nối API.");
     };
@@ -195,8 +204,10 @@ export default function ScheduleManagementPage() {
         }
     };
 
-    const handleAssignStaff = (appointmentId) => {
-        showError("Chức năng gán nhân viên chưa được kết nối API.");
+    const handleAssignStaff = (appointment) => {
+        setSelectedAppointment(appointment);
+        setSelectedStaff(appointment.assignedStaff);
+        setShowAssignModal(true);
     };
 
     const roundToNearest30 = (dateString) => {
@@ -368,7 +379,7 @@ export default function ScheduleManagementPage() {
                                                                 Xác nhận
                                                             </button>
                                                             <button
-                                                                onClick={() => handleAssignStaff(appointment.id)}
+                                                                onClick={() => handleAssignStaff(appointment)}
                                                                 className="text-green-600 hover:text-green-900"
                                                             >
                                                                 Gán NV
@@ -465,6 +476,56 @@ export default function ScheduleManagementPage() {
                     )}
                 </div>
             </div>
+            {showAssignModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+                    <h2 className="text-lg font-bold mb-4">Gán nhân viên</h2>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Chọn nhân viên
+                        </label>
+                        <select
+                        value={selectedStaff}
+                        onChange={(e) => setSelectedStaff(e.target.value)}
+                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                        <option value="">-- Chọn nhân viên --</option>
+                        {staffList.map((staff) => (
+                            <option key={staff.id} value={staff.name}>
+                            {staff.name}
+                            </option>
+                        ))}
+                        </select>
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                        <button
+                        onClick={() => setShowAssignModal(false)}
+                        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+                        >
+                        Huỷ
+                        </button>
+                        <button
+                        onClick={() => {
+                            if (!selectedStaff) {
+                            showError("Vui lòng chọn nhân viên!");
+                            return;
+                            }
+                            // TODO: call API
+                            console.log(
+                            `Gán ${selectedStaff} cho lịch hẹn ${selectedAppointment.id}`
+                            );
+                            setShowAssignModal(false);
+                        }}
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                        Xác nhận
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 } 
