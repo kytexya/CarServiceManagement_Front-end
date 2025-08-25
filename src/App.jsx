@@ -58,6 +58,9 @@ import PromotionPage from "./pages/admin/promotion/list";
 import CreatePromotion from "./pages/admin/promotion/create";
 import CreateComboService from "./pages/admin/service/create-combo";
 import CreateService from "./pages/admin/service/create";
+import InventoryDetailsPage from "./pages/admin/inventory-detail";
+import CreateServiceOrder from "./pages/service-staff/create-service-order";
+import EditServiceOrder from "./pages/admin/edit-service-order";
 
 // Placeholder for new pages
 const ServicesPage = () => (
@@ -106,6 +109,8 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="service-orders" element={<ServiceOrders />} />
+          <Route path="service-order/new" element={<CreateServiceOrder />} />
+          <Route path="service-order/:id" element={<CreateServiceOrder />} />
           <Route
             path="update-service-history"
             element={<UpdateServiceHistory />}
@@ -172,6 +177,7 @@ function App() {
             element={<ServiceManagementPage2 />}
           />
           <Route path="service-orders" element={<ServiceOrdersPage />} />
+          <Route path="service-order/:id" element={<EditServiceOrder />} />
           <Route
             path="schedule-management"
             element={<ScheduleManagementPage />}
@@ -182,6 +188,12 @@ function App() {
             path="inventory-overview"
             element={<InventoryOverviewPage />}
           />
+          <Route
+            path="inventory-details"
+            element={<InventoryDetailsPage />}
+          />
+          <Route path="parts/new" element={<AddInventoryPage />} />
+          <Route path="parts/:id" element={<EditInventoryPage />} />
           <Route path="report" element={<ReportPage />} />
           <Route path="promotions" element={<PromotionPage />} />
           <Route path="promotion/new" element={<CreatePromotion />} />
