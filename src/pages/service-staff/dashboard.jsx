@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
+import moment from 'moment';
 
 const ENV = import.meta.env.VITE_API_BASE_URL;
 const Dashboard = () => {
@@ -14,28 +15,28 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [summaryRes, statusRes, topRes, recentRes] = await Promise.all([
-          axios.get(`/api/Dashboard/summary`, {
+          axios.get(`/api/services/generate-daily-services-revenue-report?date=${moment().format('YYYY-MM-DD')}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true,
+          }),
+          axios.get(`/api/Vehicle`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'ngrok-skip-browser-warning': 'anyvalue',
+            },
+            withCredentials: true,
+          }),
+          axios.get(`/api/services/get-top-used-services`, {
             headers: { 
               Authorization: `Bearer ${token}`,
               'ngrok-skip-browser-warning': 'anyvalue',
             },
             withCredentials: true,
           }),
-          axios.get(`/api/Dashboard/services-by-status`, {
-            headers: { 
-              Authorization: `Bearer ${token}`,
-              'ngrok-skip-browser-warning': 'anyvalue',
-            },
-            withCredentials: true,
-          }),
-          axios.get(`/api/Dashboard/top-services`, {
-            headers: { 
-              Authorization: `Bearer ${token}`,
-              'ngrok-skip-browser-warning': 'anyvalue',
-            },
-            withCredentials: true,
-          }),
-          axios.get(`/api/Dashboard/recent-services`, {
+          axios.get(`/api/services/get-most-recent-services`, {
             headers: { 
               Authorization: `Bearer ${token}`,
               'ngrok-skip-browser-warning': 'anyvalue',
@@ -56,6 +57,14 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  function getTotalHours(timespan) {
+    if (!timespan) return 0;
+    const [dayPart, timePart] = timespan.split(".");
+    const days = parseInt(dayPart, 10);
+    const [hours] = timePart.split(":").map(Number);
+    return days * 24 + hours;
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
@@ -70,7 +79,7 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Dịch vụ chờ xử lý</p>
-              <p className="text-2xl font-bold text-gray-900">5</p>
+              <p className="text-2xl font-bold text-gray-900">{statusStats.filter(i => i.status === "pending" || i.status === null).length}</p>
             </div>
           </div>
         </div>
@@ -83,14 +92,14 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Xe đã hoàn thành</p>
-              <p className="text-2xl font-bold text-gray-900">12</p>
+              <p className="text-2xl font-bold text-gray-900">{statusStats.filter(i => i.status === "Completed").length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border p-6 shadow-sm">
+        {/* <div className="bg-white rounded-lg border p-6 shadow-sm">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-yellow-100">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 rounded-full bg-amber-100">
+              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
@@ -99,7 +108,7 @@ const Dashboard = () => {
               <p className="text-2xl font-bold text-gray-900">85%</p>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className="bg-white rounded-lg border p-6 shadow-sm">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-purple-100">
@@ -121,46 +130,48 @@ const Dashboard = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Đang chờ</span>
-              <span className="text-sm font-medium">5 xe</span>
+              <span className="text-sm font-medium">{statusStats.filter(i => i.status === "pending" || i.status === null).length} xe</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-yellow-500 h-2 rounded-full" style={{width: '25%'}}></div>
+              <div className="bg-amber-500 h-2 rounded-full" style={{
+                width: `${(statusStats.filter(i => i.status === "Vehicle Received" || i.status === null).length / statusStats.length) * 100
+                  }%`
+              }}></div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Đang sửa</span>
-              <span className="text-sm font-medium">8 xe</span>
+              <span className="text-sm font-medium">{statusStats.filter(i => i.status === "In Service").length} xe</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-500 h-2 rounded-full" style={{width: '40%'}}></div>
+              <div className="bg-blue-500 h-2 rounded-full" style={{
+                width: `${(statusStats.filter(i => i.status === "process").length / statusStats.length) * 100
+                  }%`
+              }}></div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Hoàn thành</span>
-              <span className="text-sm font-medium">12 xe</span>
+              <span className="text-sm font-medium">{statusStats.filter(i => i.status === "Completed").length} xe</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-green-500 h-2 rounded-full" style={{width: '60%'}}></div>
+              <div className="bg-green-500 h-2 rounded-full" style={{
+                width: `${(statusStats.filter(i => i.status === "complete").length / statusStats.length) * 100
+                  }%`
+              }}></div>
             </div>
           </div>
         </div>
         <div className="bg-white rounded-lg border p-6 shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Top dịch vụ phổ biến</h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium">Thay dầu nhớt</span>
-              <span className="text-sm text-gray-600">8 lần</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium">Thay lốp xe</span>
-              <span className="text-sm text-gray-600">5 lần</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium">Bảo dưỡng định kỳ</span>
-              <span className="text-sm text-gray-600">4 lần</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium">Sửa chữa động cơ</span>
-              <span className="text-sm text-gray-600">3 lần</span>
-            </div>
+            {topServices?.map(item => {
+                return (
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <span className="text-sm font-medium">{item.name}</span>
+                    <span className="text-sm text-gray-600">{item.useCount} lần</span>
+                  </div>
+                )
+              })
+            }
           </div>
         </div>
       </div>
@@ -178,36 +189,21 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">30A-12345</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Thay dầu nhớt</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Hoàn thành
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 giờ trước</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">51B-67890</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bảo dưỡng định kỳ</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    Đang sửa
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 giờ trước</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">29C-11111</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Thay lốp xe</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                    Chờ xử lý
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 phút trước</td>
-              </tr>
+              {recentServices?.map(item => {
+                return (
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.vehicleLicensePlate}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full  
+                        ${item.status === 'Completed' ? 'bg-green-100 text-green-800' : item.status === 'In Service' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{getTotalHours(item.timeSinceServiced)} giờ trước</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

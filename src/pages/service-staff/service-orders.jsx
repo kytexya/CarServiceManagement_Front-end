@@ -2,7 +2,6 @@ import Pagination from '@/components/common/pagination';
 import IconEdit from '@/components/icons/IconEdit';
 import IconEye from '@/components/icons/IconEye';
 import { showError } from '@/utils';
-import { STATUS_CONFIG } from '@/utils/constant';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -25,7 +24,7 @@ const ServiceOrders = () => {
     const fetchServiceOrders = async (page = 1) => {
       try {
         setLoading(true);
-        const res = await axios.get(`/api/Order?currentPage=${page}&pageSize=${pagination.pageSize}`, {
+        const res = await axios.get(`/api/Appointment?currentPage=${page}&pageSize=${pagination.pageSize}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'ngrok-skip-browser-warning': 'anyvalue',
@@ -34,13 +33,13 @@ const ServiceOrders = () => {
         });
         const mapped = res.data.items?.map(order => ({
           id: order.orderId,
-          plateNumber: order.appointment?.vehicle?.licensePlate || 'N/A',
-          customerName: order.appointment?.customer?.customerNavigation?.fullName || 'N/A',
-          phone: order.appointment?.customer?.customerNavigation?.phoneNumber || 'N/A',
-          service: order.appointment?.appointmentServices?.map(s => s.service?.name).join(", ") || 'N/A',
-          status: order.appointment?.status || 'pending',
-          assignedTo: order.appointment?.serviceHistory?.staff?.staff || 'Chưa phân công',
-          createdAt: formatDate(order.appointment?.appointmentDate || order.createdAt),
+          plateNumber: order.vehicleLicensePlate || 'N/A',
+          customerName: order.customerName || 'N/A',
+          phone: order.customerPhone || 'N/A',
+          service: order.services.join(", ") || 'N/A',
+          status: order.status || 'pending',
+          assignedTo: order.assignedTo || 'Chưa phân công',
+          createdAt: formatDate(order.appointmentDate),
         })) || [];
         setServiceOrders(mapped);
         setPagination((prev) => ({
@@ -103,8 +102,16 @@ const ServiceOrders = () => {
     }
   ];
 
+  const STATUS = {
+    Booked: { color: "bg-yellow-100 text-yellow-800", text: "Đã đặt" },
+    "Vehicle Received": { color: "bg-amber-100 text-amber-800", text: "Đã nhận xe" },
+    "In Service": { color: "bg-blue-100 text-blue-800", text: "Đang thực hiện" },
+    Completed: { color: "bg-green-100 text-green-800", text: "Hoàn thành" },
+    Canceled: { color: "bg-red-100 text-red-800", text: "Đã hủy" },
+  }
+
   const getStatusBadge = (status) => {
-    const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+    const config = STATUS[status] || STATUS.pending;
     
     return (
       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${config.color}`}>

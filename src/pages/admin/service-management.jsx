@@ -288,7 +288,7 @@ export default function ServiceManagementPage() {
                         Danh Mục
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Thời Lượng (phút)
+                        Thời Lượng (giờ)
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Giá (VND)
@@ -315,7 +315,7 @@ export default function ServiceManagementPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {service.estimatedLaborHours} phút
+                          {service.estimatedLaborHours} giờ
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {service.price.toLocaleString()} VND
@@ -427,7 +427,7 @@ export default function ServiceManagementPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            {combo.discount ? combo.discount : 0} VND
+                            {combo.discount ? combo.discount : 0} %
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

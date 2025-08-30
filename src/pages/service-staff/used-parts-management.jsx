@@ -64,8 +64,8 @@ const UsedPartsManagement = () => {
   useEffect(() => {
     const fetchParts = async () => {
       try {
-        const res = await axios.get(`/api/Parts?CurrentPage=1&pageSize=100`, { headers });
-        setParts(res.data.items || []);
+        const res = await axios.get(`/api/Parts/used-parts`, { headers });
+        setParts(res.data || []);
       } catch (err) {
         showError("Không tải được danh sách phụ tùng đã sử dụng");
       }
@@ -169,11 +169,11 @@ const UsedPartsManagement = () => {
               {parts.map((part) => (
                 <tr key={part.partId}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{part.partName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.code}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.quantity}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.partID}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.quantityUsed}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.unit}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.serviceOrder}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.serviceID}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.usedDate}</td>
                 </tr>
               ))}
             </tbody>
