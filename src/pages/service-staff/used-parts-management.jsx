@@ -1,5 +1,6 @@
 import { showError } from '@/utils';
 import axios from 'axios';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 
 const UsedPartsManagement = () => {
@@ -173,7 +174,7 @@ const UsedPartsManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.quantityUsed}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.unit}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.serviceID}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{part.usedDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{moment(part.lastUsed).format('YYYY-MM-DD')}</td>
                 </tr>
               ))}
             </tbody>

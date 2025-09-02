@@ -15,7 +15,7 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [summaryRes, statusRes, topRes, recentRes] = await Promise.all([
-          axios.get(`/api/services/generate-daily-services-revenue-report?date=${moment().format('YYYY-MM-DD')}`, {
+          axios.get(`/api/services/generate-services-revenue-report-sum`, {
             headers: {
               Authorization: `Bearer ${token}`,
               'ngrok-skip-browser-warning': 'anyvalue',
@@ -118,7 +118,7 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Doanh thu hôm nay</p>
-              <p className="text-2xl font-bold text-gray-900">2.5M</p>
+              <p className="text-2xl font-bold text-gray-900">{summary?.[0].totalRevenue}M</p>
             </div>
           </div>
         </div>
