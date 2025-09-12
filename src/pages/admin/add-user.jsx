@@ -12,44 +12,43 @@ import axios from 'axios';
 
 const schema = yup.object().shape({
     fullName: yup
-    .string()
-    .required("Họ và tên là bắt buộc")
-    .min(2, "Tên phải có ít nhất 2 ký tự"),
+        .string()
+        .required("Họ và tên là bắt buộc")
+        .min(2, "Tên phải có ít nhất 2 ký tự"),
 
     email: yup
-    .string()
-    .required("Email là bắt buộc")
-    .email("Email không hợp lệ"),
+        .string()
+        .required("Email là bắt buộc")
+        .email("Email không hợp lệ"),
 
-    PhoneNumber: yup
-    .string()
-    .required("Số điện thoại là bắt buộc")
-    .matches(/^[0-9]{10,11}$/, "Số điện thoại không hợp lệ"),
+    phoneNumber: yup
+        .string()
+        .required("Số điện thoại là bắt buộc")
+        .matches(/^[0-9]{10,11}$/, "Số điện thoại không hợp lệ"),
 
-    username: yup
-    .string()
-    .required("Tên đăng nhập là bắt buộc")
-    .min(2, "Tên đăng nhập phải có ít nhất 3 ký tự"),
+    address: yup
+        .string()
+        .required("Địa chỉ là bắt buộc"),
 
-    RoleName: yup
-    .string()
-    .required("Vai trò là bắt buộc"),
+    roleName: yup
+        .string()
+        .required("Vai trò là bắt buộc"),
 
     password: yup
-    .string()
-    .required("Mật khẩu là bắt buộc")
-    .min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+        .string()
+        .required("Mật khẩu là bắt buộc")
+        .min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 
     confirmPassword: yup
-    .string()
-    .required("Xác nhận mật khẩu là bắt buộc")
-    .oneOf([yup.ref('password')], "Mật khẩu không khớp"),
+        .string()
+        .required("Xác nhận mật khẩu là bắt buộc")
+        .oneOf([yup.ref('password')], "Mật khẩu không khớp"),
 });
 
 export default function AddUserPage() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    
+
     const {
         register,
         handleSubmit,
@@ -63,32 +62,39 @@ export default function AddUserPage() {
     const selectedRole = watch('RoleName');
 
     const roles = [
-        { value: 'admin', label: 'Admin', description: 'Quản trị viên hệ thống' },
-        { value: 'staff', label: 'Nhân viên', description: 'Nhân viên phục vụ khách hàng' },
-        { value: 'inventory_manager', label: 'Quản lý kho', description: 'Quản lý kho phụ tùng' },
-        { value: 'technician', label: 'Kỹ thuật viên', description: 'Kỹ thuật viên sửa chữa' },
-        { value: 'customer', label: 'Khách hàng', description: 'Khách hàng sử dụng dịch vụ' }
+        { value: 'Staff', label: 'Nhân viên dịch vụ', description: 'Nhân viên phục vụ khách hàng' },
+        { value: 'InventoryManager', label: 'Nhân viên quản lý kho', description: 'Quản lý kho phụ tùng' },
     ];
 
     const onSubmit = async (data) => {
         setIsLoading(true);
         try {
-        const token = localStorage.getItem("carserv-token");
-        const res = await axios.post(`/api/Account/create-new-account`, data, {
-            headers: {
-            Authorization: `Bearer ${token}`,
-            'ngrok-skip-browser-warning': 'anyvalue',
-            },
-        });
+            const token = localStorage.getItem("carserv-token");
 
-        showSuccess("Thêm người dùng thành công!");
-        reset();
-        navigate("/admin/user-management");
+            const payload = {
+                fullName: data.fullName,
+                email: data.email,
+                phoneNumber: data.phoneNumber,
+                address: data.address,
+                roleName: data.roleName,
+                password: data.password,
+            };
+
+            const res = await axios.post(`/api/Account/create-new-account`, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+            });
+
+            showSuccess("Thêm người dùng thành công!");
+            reset();
+            navigate("/admin/user-management");
         } catch (error) {
-        console.error("Thêm người dùng thất bại:", error);
-        showError(error.response?.data?.message || "Có lỗi xảy ra khi thêm người dùng!");
+            console.error("Thêm người dùng thất bại:", error);
+            showError(error.response?.data?.message || "Có lỗi xảy ra khi thêm người dùng!");
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -114,7 +120,7 @@ export default function AddUserPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-3">
+                    {/* <div className="flex items-center gap-3">
                         <button
                             onClick={handleCancel}
                             className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -128,21 +134,21 @@ export default function AddUserPage() {
                         >
                             {isLoading ? 'Đang xử lý...' : 'Thêm người dùng'}
                         </button>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Main Content */}
                 <div className="p-6">
                     <div className="max-w-6xl">
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        <div className="">
                             {/* Left Column - Main Form */}
                             <div className="space-y-6">
-                                {/* Basic Information */}
+                                {/* Account Information */}
                                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-4">Thông tin cơ bản</h2>
-                                    
+                                    <h2 className="text-lg font-bold text-gray-900 mb-4">Thông tin tài khoản</h2>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Full Name */}
+                                        {/* Username */}
                                         <div>
                                             <TextInput
                                                 isRequired
@@ -153,69 +159,34 @@ export default function AddUserPage() {
                                                 error={errors?.fullName}
                                             />
                                         </div>
-
-                                        {/* Email */}
                                         <div>
                                             <TextInput
-                                                type={"email"}
                                                 isRequired
                                                 label={"Email"}
-                                                placeholder={"example@email.com"}
+                                                placeholder={"Nhập email"}
                                                 register={register}
                                                 name={"email"}
                                                 error={errors?.email}
                                             />
                                         </div>
-
-                                        {/* Phone */}
-                                        <div>
-                                            <TextInput
-                                                type={"tel"}
+                                        <div className="md:col-span-2">
+                                            <TextArea
                                                 isRequired
-                                                label={"Số điện thoại"}
-                                                placeholder={"0123456789"}
+                                                label={"Địa chỉ"}
+                                                placeholder={"Nhập địa chỉ"}
                                                 register={register}
-                                                name={"PhoneNumber"}
-                                                error={errors?.PhoneNumber}
+                                                name={"address"}
+                                                error={errors?.address}
                                             />
                                         </div>
-
-                                        {/* Date of Birth */}
-                                        <div>
-                                            <TextInput
-                                                type={"date"}
-                                                label={"Ngày sinh"}
-                                                register={register}
-                                                name={"dateOfBirth"}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Address */}
-                                    <div className="mt-4">
-                                        <TextArea
-                                            label={"Địa chỉ"}
-                                            register={register}
-                                            name={"address"}
-                                            placeholder={"Nhập địa chỉ chi tiết"}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Account Information */}
-                                <div className="bg-white p-6 rounded-lg shadow-sm">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-4">Thông tin tài khoản</h2>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Username */}
                                         <div>
                                             <TextInput
                                                 isRequired
-                                                label={"Tên đăng nhập"}
-                                                placeholder={"Nhập tên đăng nhập"}
+                                                label={"Số điện thoại"}
+                                                placeholder={"Nhập số điện thoại"}
                                                 register={register}
-                                                name={"username"}
-                                                error={errors?.username}
+                                                name={"phoneNumber"}
+                                                error={errors?.phoneNumber}
                                             />
                                         </div>
 
@@ -226,8 +197,8 @@ export default function AddUserPage() {
                                                 label={"Vai trò"}
                                                 placeholder={"Chọn vai trò"}
                                                 register={register}
-                                                name={"RoleName"}
-                                                error={errors?.RoleName}
+                                                name={"roleName"}
+                                                error={errors?.roleName}
                                                 options={roles}
                                             />
                                             {selectedRole && (
@@ -263,46 +234,6 @@ export default function AddUserPage() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Right Column - Additional Information */}
-                            <div className="space-y-6">
-                                {/* Additional Information */}
-                                <div className="bg-white p-6 rounded-lg shadow-sm">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-4">Thông tin bổ sung</h2>
-                                    
-                                    <div className="space-y-4">
-                                        {/* Department */}
-                                        <div>
-                                            <TextInput
-                                                label={"Phòng ban"}
-                                                placeholder={"Nhập phòng ban"}
-                                                register={register}
-                                                name={"department"}
-                                            />
-                                        </div>
-
-                                        {/* Position */}
-                                        <div>
-                                            <TextInput
-                                                label={"Chức vụ"}
-                                                placeholder={"Nhập chức vụ"}
-                                                register={register}
-                                                name={"position"}
-                                            />
-                                        </div>
-
-                                        {/* Notes */}
-                                        <div>
-                                            <TextArea
-                                                label={"Ghi chú"}
-                                                placeholder={"Ghi chú thêm về người dùng"}
-                                                register={register}
-                                                name={"notes"}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Form Actions */}
@@ -315,7 +246,7 @@ export default function AddUserPage() {
                                 Hủy
                             </button>
                             <button
-                                type="submit"
+                                onClick={handleSubmit(onSubmit)}
                                 disabled={isLoading}
                                 className="px-6 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                             >

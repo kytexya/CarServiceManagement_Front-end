@@ -49,7 +49,7 @@ export default function LoginPage() {
         window.location.href = "/admin";
       } else if (parsedProfile?.roleName === 'Staff') {
         window.location.href = "/service-staff";
-      } else if (parsedProfile?.roleName === 'Inventory manager') {
+      } else if (parsedProfile?.roleName === 'InventoryManager') {
         window.location.href = "/inventory-manager";
       } else {
         window.location.href = "/service-staff";
@@ -90,7 +90,7 @@ export default function LoginPage() {
           window.location.href = "/admin";
         } else if (role === 'Staff') {
           window.location.href = "/service-staff";
-        } else if (role === 'Inventory manager') {
+        } else if (role === 'InventoryManager') {
           window.location.href = "/inventory-manager";
         } else {
           window.location.href = "/service-staff";

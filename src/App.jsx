@@ -110,7 +110,7 @@ function App() {
 
           {/* Service Staff routes */}
           <Route path="/service-staff" element={
-            <RoleRoute allowedRoles={["Admin", "Staff"]}>
+            <RoleRoute allowedRoles={["Admin", "ServiceStaff"]}>
               <ServiceStaffLayout />
             </RoleRoute>
           }>
@@ -144,7 +144,7 @@ function App() {
 
           {/* Inventory Manager routes */}
           <Route path="/inventory-manager" element={
-            <RoleRoute allowedRoles={["Admin", "Inventory manager"]}>
+            <RoleRoute allowedRoles={["Admin", "InventoryManager"]}>
               <InventoryManagerLayout />
             </RoleRoute>
           }>
