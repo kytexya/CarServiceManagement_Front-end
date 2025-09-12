@@ -62,6 +62,7 @@ import PrivateRoute from "./components/common/privateRoute";
 import InventoryDetailsPage from "./pages/admin/inventory-detail";
 import CreateServiceOrder from "./pages/service-staff/create-service-order";
 import EditServiceOrder from "./pages/admin/edit-service-order";
+import RoleRoute from "./components/common/roleRoute";
 
 // Placeholder for new pages
 const ServicesPage = () => (
@@ -108,7 +109,11 @@ function App() {
           </Route>
 
           {/* Service Staff routes */}
-          <Route path="/service-staff" element={<ServiceStaffLayout />}>
+          <Route path="/service-staff" element={
+            <RoleRoute allowedRoles={["Admin", "Staff"]}>
+              <ServiceStaffLayout />
+            </RoleRoute>
+          }>
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="service-orders" element={<ServiceOrders />} />
@@ -137,23 +142,31 @@ function App() {
             />
           </Route>
 
-            {/* Inventory Manager routes */}
-            <Route path="/inventory-manager" element={<InventoryManagerLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="inventory" element={<InventoryPage />} />
-              <Route path="inventory/add" element={<AddInventoryPage />} />
-              <Route path="inventory/edit/:id" element={<EditInventoryPage />} />
-              <Route path="import" element={<ImportPage />} />
-              <Route path="export" element={<ExportPage />} />
-              <Route path="history" element={<HistoryPage />} />
-              <Route path="parts" element={<Parts />} />
-              <Route path="parts/new" element={<CreateParts />} />
-              <Route path="parts/:id" element={<CreateParts />} />
-            </Route>
+          {/* Inventory Manager routes */}
+          <Route path="/inventory-manager" element={
+            <RoleRoute allowedRoles={["Admin", "Inventory manager"]}>
+              <InventoryManagerLayout />
+            </RoleRoute>
+          }>
+            <Route index element={<DashboardPage />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="inventory" element={<InventoryPage />} />
+            <Route path="inventory/add" element={<AddInventoryPage />} />
+            <Route path="inventory/edit/:id" element={<EditInventoryPage />} />
+            <Route path="import" element={<ImportPage />} />
+            <Route path="export" element={<ExportPage />} />
+            <Route path="history" element={<HistoryPage />} />
+            <Route path="parts" element={<Parts />} />
+            <Route path="parts/new" element={<CreateParts />} />
+            <Route path="parts/:id" element={<CreateParts />} />
+          </Route>
 
           {/* Admin routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={
+            <RoleRoute allowedRoles={["Admin"]}>
+              <AdminLayout />
+            </RoleRoute>
+          }>
             <Route index element={<ReportPage />} />
             <Route
               path="service-management"

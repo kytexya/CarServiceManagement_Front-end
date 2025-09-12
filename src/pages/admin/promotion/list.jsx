@@ -265,9 +265,6 @@ export default function PromotionPage() {
                       Phần trăm
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Dịch vụ áp dụng
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Trạng thái
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -286,11 +283,6 @@ export default function PromotionPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           {item.discountPercentage}%
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center flex-wrap gap-1">
-                          {item.services?.map(item => <div className="bg-gray-100 text-xs px-2 rounded-full w-fit">{item}</div>)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

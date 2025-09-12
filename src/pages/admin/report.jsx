@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import SidebarAdmin from '@/components/common/sidebar-admin';
 import {
     Chart as ChartJS,
@@ -34,17 +34,17 @@ const StatCard = ({ title, value, icon, color = "blue", trend = null }) => (
 
 const AlertCard = ({ title, message, type = "warning" }) => {
     const colors = {
-        warning: "bg-yellow-50 border-yellow-200 text-yellow-800",
+        warning: "bg-amber-50 border-amber-200 text-amber-800",
         danger: "bg-red-50 border-red-200 text-red-800",
         info: "bg-blue-50 border-blue-200 text-blue-800"
     };
-    
+
     return (
         <div className={`p-3 rounded-lg border ${colors[type]}`}>
             <div className="flex items-center">
                 <div className="flex-shrink-0">
                     {type === "warning" && (
-                        <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
                     )}
@@ -173,23 +173,62 @@ export default function AdminReportPage() {
         fetchSparePartsUsage();
     };
     const [summary, setSummary] = useState(null);
-    const [alerts, setAlerts] = useState(null);
     const [revenueData, setRevenueData] = useState(null);
+    const [revenue, setRevenue] = useState(null);
     const [emplouyee, setEmployee] = useState(null);
     const [sparePartsUsageData, setSparePartsUsageData] = useState(null);
+    const [lowParts, setLowParts] = useState([]);
+    const [parts, setParts] = useState([]);
+    const [outOfStockParts, setOutOfStockParts] = useState([]);
 
     useEffect(() => {
         fetchDashboardSummary();
-        fetchAlert();
+        fetchLowParts();
+        fetchParts();
+        fetchOutOfStockParts();
         fetchRevenue();
-        fetchEmployeePerformace();
-        fetchSparePartsUsage();
+        // fetchEmployeePerformace();
+        // fetchSparePartsUsage();
     }, []);
+
+    const inventoryStats = useMemo(() => {
+        if (!parts || parts.length === 0) {
+            return {
+                totalItems: 0,
+                lowStock: 0,
+                outOfStock: 0,
+                expiringSoon: 0,
+                totalValue: "0 VND"
+            };
+        }
+
+        const soonThreshold = new Date();
+        soonThreshold.setMonth(soonThreshold.getMonth() + 1);
+
+        let expiringSoon = 0;
+        let totalValue = 0;
+
+        parts.forEach(part => {
+            totalValue += (part.unitPrice || 0) * (part.quantity || 0);
+
+            if (part.expiryDate && new Date(part.expiryDate) <= soonThreshold) {
+                expiringSoon++;
+            }
+        });
+
+        return {
+            totalItems: parts.length,
+            lowStock: lowParts.length,
+            outOfStock: outOfStockParts.length,
+            expiringSoon,
+            totalValue: totalValue.toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+        };
+    }, [parts, lowParts, outOfStockParts]);
 
     const fetchDashboardSummary = async () => {
         try {
-            const res = await axios.get(`/api/Admin/dashboard-summary?month=${month}&year=${year}`, {
-                headers: { 
+            const res = await axios.get(`/api/Parts/dashboard-summary?month=${month}&year=${year}`, {
+                headers: {
                     Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
                 }
@@ -200,61 +239,104 @@ export default function AdminReportPage() {
         }
     };
 
-    const fetchAlert = async () => {
+    const fetchParts = async () => {
         try {
-            const res = await axios.get(`/api/Admin/alerts`, {
-                headers: { 
+            const res = await axios.get("/api/Parts", {
+                headers: {
                     Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
-                }
+                },
+                withCredentials: true
             });
-            setAlerts(res.data);
+            setParts(res.data.items || []);
         } catch (err) {
-            // showError("Không tải được dữ liệu thống kê");
+            showError("Không tải được danh sách phụ tùng");
         }
-    };
+    }
+
+    const fetchLowParts = async () => {
+        try {
+            const res = await axios.get("/api/Parts/get-low-parts", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                withCredentials: true
+            });
+            setLowParts(res.data || []);
+        } catch (err) {
+            showError("Không tải được danh sách phụ tùng");
+        }
+    }
+    const fetchOutOfStockParts = async () => {
+        try {
+            const res = await axios.get("/api/Parts/get-out-of-stock-parts", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                withCredentials: true
+            });
+            setOutOfStockParts(res.data || []);
+        } catch (err) {
+            showError("Không tải được danh sách phụ tùng");
+        }
+    }
 
     const fetchRevenue = async () => {
         try {
-            const res = await axios.get(`/api/Admin/revenue?month=${month}&year=${year}`, {
-                headers: { 
+            const res = await axios.get(`/api/Parts/revenue?month=${month}&year=${year}`, {
+                headers: {
                     Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
                 }
             });
-            setRevenueData(res.data);
+            setRevenue(res.data.totalRevenue);
+            setRevenueData({
+                labels: ['Hôm nay', 'Tuần này', 'Tháng này'],
+                datasets: [
+                    {
+                        label: 'Doanh thu (VND)',
+                        data: [res.data.totalRevenue, res.data.totalRevenue, res.data.totalRevenue],
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        tension: 0.3,
+                    },
+                ],
+            });
         } catch (err) {
             // showError("Không tải được dữ liệu thống kê");
         }
     };
 
-    const fetchEmployeePerformace = async () => {
-        try {
-            const res = await axios.get(`/api/Admin/employee-performance?month=${month}&year=${year}`, {
-                headers: { 
-                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
-                    'ngrok-skip-browser-warning': 'anyvalue',
-                }
-            });
-            setEmployee(res.data);
-        } catch (err) {
-            // showError("Không tải được dữ liệu thống kê");
-        }
-    };
+    // const fetchEmployeePerformace = async () => {
+    //     try {
+    //         const res = await axios.get(`/api/Admin/employee-performance?month=${month}&year=${year}`, {
+    //             headers: {
+    //                 Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+    //                 'ngrok-skip-browser-warning': 'anyvalue',
+    //             }
+    //         });
+    //         setEmployee(res.data);
+    //     } catch (err) {
+    //         // showError("Không tải được dữ liệu thống kê");
+    //     }
+    // };
 
-    const fetchSparePartsUsage = async () => {
-        try {
-            const res = await axios.get(`/api/Admin/spare-parts-usage?month=${month}&year=${year}`, {
-                headers: { 
-                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
-                    'ngrok-skip-browser-warning': 'anyvalue',
-                }
-            });
-            setSparePartsUsageData(res.data);
-        } catch (err) {
-            // showError("Không tải được dữ liệu thống kê");
-        }
-    };
+    // const fetchSparePartsUsage = async () => {
+    //     try {
+    //         const res = await axios.get(`/api/Admin/spare-parts-usage?month=${month}&year=${year}`, {
+    //             headers: {
+    //                 Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+    //                 'ngrok-skip-browser-warning': 'anyvalue',
+    //             }
+    //         });
+    //         setSparePartsUsageData(res.data);
+    //     } catch (err) {
+    //         // showError("Không tải được dữ liệu thống kê");
+    //     }
+    // };
 
 
 
@@ -301,30 +383,30 @@ export default function AdminReportPage() {
                 <div className="p-6">
                     {/* Stat Cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <StatCard 
-                            title="Đơn đang xử lý" 
-                            value="12" 
-                            icon="🔧" 
+                        <StatCard
+                            title="Đơn đang xử lý"
+                            value="12"
+                            icon="🔧"
                             color="blue"
                         />
-                        <StatCard 
-                            title="Đơn hoàn thành" 
-                            value="45" 
-                            icon="✅" 
+                        <StatCard
+                            title="Đơn hoàn thành"
+                            value="45"
+                            icon="✅"
                             color="green"
                             trend={8}
                         />
-                        <StatCard 
-                            title="Doanh thu hôm nay" 
-                            value="2.5M VND" 
-                            icon="💰" 
-                            color="yellow"
+                        <StatCard
+                            title="Doanh thu hôm nay"
+                            value={`${revenue} VND`}
+                            icon="💰"
+                            color="amber"
                             trend={12}
                         />
-                        <StatCard 
-                            title="Doanh thu tháng" 
-                            value="75M VND" 
-                            icon="📈" 
+                        <StatCard
+                            title="Doanh thu tháng"
+                            value={`${revenue} VND`}
+                            icon="📈"
                             color="purple"
                             trend={-3}
                         />
@@ -334,14 +416,36 @@ export default function AdminReportPage() {
                     <div className="mb-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-3">Cảnh báo & Thông báo</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            {alertsMock.map((alert, index) => (
-                                <AlertCard 
-                                    key={index}
-                                    title={alert.title}
-                                    message={alert.message}
-                                    type={alert.type}
-                                />
-                            ))}
+                            {
+                                inventoryStats.lowStock > 0 && (
+                                    <AlertCard
+                                        key={0}
+                                        title={'Tồn kho thấp'}
+                                        message={`Có ${inventoryStats.lowStock} phụ tùng sắp hết, cần nhập thêm`}
+                                        type={'warning'}
+                                    />
+                                )
+                            }
+                            {
+                                inventoryStats.outOfStock > 0 && (
+                                    <AlertCard
+                                        key={0}
+                                        title={'Phụ tùng đã hết'}
+                                        message={`Có ${inventoryStats.outOfStock} phụ tùng đã hết, cần nhập thêm`}
+                                        type={'danger'}
+                                    />
+                                )
+                            }
+                            {
+                                inventoryStats.expiringSoon > 0 && (
+                                    <AlertCard
+                                        key={0}
+                                        title={'phụ tùng sắp hết hạn bảo hành'}
+                                        message={`Có ${inventoryStats.expiringSoon} phụ tùng sắp hết hạn bảo hành`}
+                                        type={'warning'}
+                                    />
+                                )
+                            }
                         </div>
                     </div>
 
@@ -351,7 +455,9 @@ export default function AdminReportPage() {
                         <div className="lg:col-span-2 bg-white p-4 shadow-sm rounded-lg">
                             <h2 className="text-lg font-bold text-gray-900 mb-3">Doanh thu theo thời gian</h2>
                             <div className="h-64">
-                                <Line data={revenueDataMock} options={chartOptions} />
+                                {revenueData &&
+                                    <Line data={revenueData} options={chartOptions} />
+                                }
                             </div>
                         </div>
 
