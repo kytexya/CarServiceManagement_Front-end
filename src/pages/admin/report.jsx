@@ -187,8 +187,8 @@ export default function AdminReportPage() {
         fetchParts();
         fetchOutOfStockParts();
         fetchRevenue();
-        fetchEmployeePerformace();
-        fetchSparePartsUsage();
+        // fetchEmployeePerformace();
+        // fetchSparePartsUsage();
     }, []);
 
     const inventoryStats = useMemo(() => {
@@ -310,33 +310,33 @@ export default function AdminReportPage() {
         }
     };
 
-    const fetchEmployeePerformace = async () => {
-        try {
-            const res = await axios.get(`/api/Admin/employee-performance?month=${month}&year=${year}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
-                    'ngrok-skip-browser-warning': 'anyvalue',
-                }
-            });
-            setEmployee(res.data);
-        } catch (err) {
-            // showError("Không tải được dữ liệu thống kê");
-        }
-    };
+    // const fetchEmployeePerformace = async () => {
+    //     try {
+    //         const res = await axios.get(`/api/Admin/employee-performance?month=${month}&year=${year}`, {
+    //             headers: {
+    //                 Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+    //                 'ngrok-skip-browser-warning': 'anyvalue',
+    //             }
+    //         });
+    //         setEmployee(res.data);
+    //     } catch (err) {
+    //         // showError("Không tải được dữ liệu thống kê");
+    //     }
+    // };
 
-    const fetchSparePartsUsage = async () => {
-        try {
-            const res = await axios.get(`/api/Admin/spare-parts-usage?month=${month}&year=${year}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
-                    'ngrok-skip-browser-warning': 'anyvalue',
-                }
-            });
-            setSparePartsUsageData(res.data);
-        } catch (err) {
-            // showError("Không tải được dữ liệu thống kê");
-        }
-    };
+    // const fetchSparePartsUsage = async () => {
+    //     try {
+    //         const res = await axios.get(`/api/Admin/spare-parts-usage?month=${month}&year=${year}`, {
+    //             headers: {
+    //                 Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
+    //                 'ngrok-skip-browser-warning': 'anyvalue',
+    //             }
+    //         });
+    //         setSparePartsUsageData(res.data);
+    //     } catch (err) {
+    //         // showError("Không tải được dữ liệu thống kê");
+    //     }
+    // };
 
 
 

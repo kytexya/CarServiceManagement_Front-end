@@ -176,7 +176,8 @@ export default function UserManagementPage() {
               </p>
             </div>
           </div>
-          <Link to="/admin/user-management/add" className="button primary">
+          {/* todo QA no8 */}
+          {/* <Link to="/admin/user-management/add" className="button primary">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -191,7 +192,7 @@ export default function UserManagementPage() {
               />
             </svg>
             Thêm Người Dùng
-          </Link>
+          </Link> */}
         </div>
 
         {/* Main Content */}
