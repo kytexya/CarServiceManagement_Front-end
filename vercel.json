@@ -1,8 +1,12 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://keysurv-d5hqbafbhfejebh7.southeastasia-01.azurewebsites.net/api/$1"
-    }
-  ]
+    "rewrites": [
+        {
+            "source": "/api/(.*)",
+            "destination": "https://keysurv-d5hqbafbhfejebh7.southeastasia-01.azurewebsites.net/api/$1"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
 }
