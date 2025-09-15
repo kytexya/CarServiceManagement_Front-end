@@ -24,5 +24,6 @@ export default ({ mode }) => {
         },
       },
     },
+    plugins: [vercel()],
   });
 };
