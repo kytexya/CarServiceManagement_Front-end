@@ -6,7 +6,10 @@ export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd());
 
   return defineConfig({
-    plugins: [react()],
+    plugins: [
+      react(), 
+      vercel()
+    ],
     resolve: {
       alias: [
         {
@@ -24,6 +27,5 @@ export default ({ mode }) => {
         },
       },
     },
-    plugins: [vercel()],
   });
 };
