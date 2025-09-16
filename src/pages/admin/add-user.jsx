@@ -62,7 +62,7 @@ export default function AddUserPage() {
     const selectedRole = watch('RoleName');
 
     const roles = [
-        { value: 'Staff', label: 'Nhân viên dịch vụ', description: 'Nhân viên phục vụ khách hàng' },
+        { value: 'ServiceStaff', label: 'Nhân viên dịch vụ', description: 'Nhân viên phục vụ khách hàng' },
         { value: 'InventoryManager', label: 'Nhân viên quản lý kho', description: 'Quản lý kho phụ tùng' },
     ];
 
