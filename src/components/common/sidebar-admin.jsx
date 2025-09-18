@@ -6,7 +6,9 @@ export default function SidebarAdmin() {
   const location = useLocation();
 
   const checkActive = (keyword) => {
-    // Ensure the check is for a whole path segment to avoid partial matches
+    if (keyword === '') {
+      return location.pathname === '/admin';
+    }
     return location.pathname.startsWith(`/admin/${keyword}`);
   };
 
@@ -21,7 +23,7 @@ export default function SidebarAdmin() {
       <div className='flex-grow flex flex-col'>
         <Link to='/admin/report'>
           <div
-            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('report') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${(checkActive('report') || checkActive('')) ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
             Báo cáo
           </div>

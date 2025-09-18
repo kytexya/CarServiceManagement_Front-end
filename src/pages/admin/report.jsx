@@ -167,16 +167,19 @@ export default function AdminReportPage() {
 
     const handleFilterChange = () => {
         fetchDashboardSummary();
-        fetchAlert();
+        fetchLowParts();
+        fetchParts();
+        fetchOutOfStockParts();
         fetchRevenue();
-        fetchEmployeePerformace();
-        fetchSparePartsUsage();
     };
     const [summary, setSummary] = useState(null);
     const [revenueData, setRevenueData] = useState(null);
     const [revenue, setRevenue] = useState(null);
     const [emplouyee, setEmployee] = useState(null);
-    const [sparePartsUsageData, setSparePartsUsageData] = useState(null);
+    const [sparePartsUsageData, setSparePartsUsageData] = useState({
+        labels: [],
+        datasets: [],
+    });
     const [lowParts, setLowParts] = useState([]);
     const [parts, setParts] = useState([]);
     const [outOfStockParts, setOutOfStockParts] = useState([]);
@@ -234,6 +237,23 @@ export default function AdminReportPage() {
                 }
             });
             setSummary(res.data);
+            const partsUsage = res.data?.partsUsage;
+            if (partsUsage) {
+                const labels = Object.keys(partsUsage);
+                const data = Object.values(partsUsage);
+                setSparePartsUsageData({
+                    labels,
+                    datasets: [
+                        {
+                        label: 'Lượt sử dụng',
+                        data,
+                        backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        borderWidth: 1,
+                        },
+                    ],
+                });
+            }
         } catch (err) {
             // showError("Không tải được dữ liệu thống kê");
         }
@@ -419,7 +439,7 @@ export default function AdminReportPage() {
                             {
                                 inventoryStats.lowStock > 0 && (
                                     <AlertCard
-                                        key={0}
+                                        // key={0}
                                         title={'Tồn kho thấp'}
                                         message={`Có ${inventoryStats.lowStock} phụ tùng sắp hết, cần nhập thêm`}
                                         type={'warning'}
@@ -429,7 +449,7 @@ export default function AdminReportPage() {
                             {
                                 inventoryStats.outOfStock > 0 && (
                                     <AlertCard
-                                        key={0}
+                                        // key={0}
                                         title={'Phụ tùng đã hết'}
                                         message={`Có ${inventoryStats.outOfStock} phụ tùng đã hết, cần nhập thêm`}
                                         type={'danger'}
@@ -439,7 +459,7 @@ export default function AdminReportPage() {
                             {
                                 inventoryStats.expiringSoon > 0 && (
                                     <AlertCard
-                                        key={0}
+                                        // key={0}
                                         title={'phụ tùng sắp hết hạn bảo hành'}
                                         message={`Có ${inventoryStats.expiringSoon} phụ tùng sắp hết hạn bảo hành`}
                                         type={'warning'}
@@ -475,7 +495,7 @@ export default function AdminReportPage() {
                         <div className="bg-white p-4 shadow-sm rounded-lg">
                             <h2 className="text-lg font-bold text-gray-900 mb-3">Sử dụng phụ tùng</h2>
                             <div className="h-48">
-                                <Bar data={sparePartsUsageDataMock} options={chartOptions} />
+                                <Bar data={sparePartsUsageData} options={chartOptions} />
                             </div>
                         </div>
                     </div>

@@ -6,6 +6,9 @@ export default function SidebarStaff() {
   const location = useLocation();
 
   const checkActive = (keyword) => {
+    if (keyword === '') {
+      return location.pathname === '/service-staff';
+    }
     return location.pathname.startsWith(`/service-staff/${keyword}`);
   };
 
@@ -21,7 +24,7 @@ export default function SidebarStaff() {
         <Link to="/service-staff/dashboard">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
-              checkActive("dashboard") ? "bg-white text-primary" : "text-white hover:bg-white/20"
+              (checkActive("dashboard") || checkActive("")) ? "bg-white text-primary" : "text-white hover:bg-white/20"
             }`}
           >
             Dashboard

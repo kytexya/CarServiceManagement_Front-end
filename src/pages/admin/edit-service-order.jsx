@@ -68,7 +68,7 @@ export default function EditServiceOrder() {
     console.log("Cập nhật đơn dịch vụ:", data);
     // TODO: call API PUT /ServiceOrders/{id}
     alert("Cập nhật thành công!");
-    navigate("/service-orders");
+    navigate("/admin/service-orders");
   };
 
   const staffList = [

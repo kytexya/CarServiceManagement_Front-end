@@ -410,7 +410,7 @@ export default function DashboardPage() {
           )}
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white rounded-lg border p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -499,7 +499,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border p-4 shadow-sm">
+          {/* <div className="bg-white rounded-lg border p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Phụ tùng mới thêm</p>
@@ -509,7 +509,7 @@ export default function DashboardPage() {
                 <IconPackage className={"text-purple-400"} />
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="bg-white rounded-lg border p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -545,12 +545,12 @@ export default function DashboardPage() {
           <RevenueLineChart />
         </div>
 
-        <div className="bg-white rounded-lg border p-6 shadow-sm mb-6">
+        {/* <div className="bg-white rounded-lg border p-6 shadow-sm mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Phụ tùng sử dụng nhiều nhất
           </h3>
           <BarChart data={topUsedParts} maxValue={maxUsage} />
-        </div>
+        </div> */}
 
 
         {/* Quick Actions */}

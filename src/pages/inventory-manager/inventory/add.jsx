@@ -4,6 +4,7 @@ import { showError, showSuccess } from "@/utils";
 import { UNITS } from "@/utils/constant";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
+import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -79,7 +80,7 @@ export default function AddInventoryPage() {
                 ],
                 warrantyClaims: [{
                     supplierId: data.supplierName,
-                    claimDate: '',
+                    claimDate: moment(new Date(now.setFullYear(now.getFullYear() + 1))).format('YYYY-MM-DD'),
                     notes: '',
                 }],
                 description: data.description,
@@ -95,7 +96,7 @@ export default function AddInventoryPage() {
             });
 
             showSuccess("Thêm phụ tùng thành công!");
-            // navigate("/inventory-manager/inventory");
+            navigate("/inventory-manager/inventory");
         } catch (err) {
             console.error(err);
             showError("Không thể thêm phụ tùng. Vui lòng thử lại.");
