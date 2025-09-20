@@ -273,7 +273,7 @@ export default function InventoryListPage() {
                   onChange={(e) => setSupplierFilter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="all">Tất cả NCC</option>
+                  <option value="all">Tất cả</option>
                   {suppliers.map(supplier => (
                     <option key={supplier} value={supplier}>{supplier}</option>
                   ))}
@@ -408,7 +408,7 @@ export default function InventoryListPage() {
                               </svg>
                               Cập nhật
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => {
                                 // TODO: Implement view usage history functionality
                                 alert(`Lịch sử sử dụng: ${item.monthlyUsage} lượt/tháng`);
@@ -419,7 +419,7 @@ export default function InventoryListPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                               </svg>
                               Lịch sử
-                            </button>
+                            </button> */}
                           </div>
                         </td>
                       </tr>

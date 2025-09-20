@@ -104,7 +104,7 @@ export default function EditInventoryPage() {
                 headers: { Authorization: `Bearer ${token}` },
             });
             showSuccess("Cập nhật phụ tùng thành công!");
-            // navigate("/inventory-manager/inventory");
+            navigate("/inventory-manager/inventory");
         } catch (error) {
             console.error(error);
             showError(error.response?.data?.message || "Không thể cập nhật phụ tùng!");

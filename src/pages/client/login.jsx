@@ -115,8 +115,8 @@ export default function LoginPage() {
         <form className="w-full text-base" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2 mb-5">
             <TextInput
-              label={"Tên tài khoản"}
-              placeholder={"Nhập tên tài khoản"}
+              label={"Gmail"}
+              placeholder={"Nhập gmail"}
               register={register}
               name={"username"}
               error={errors?.username}
@@ -131,7 +131,6 @@ export default function LoginPage() {
               name={"password"}
               error={errors?.password}
             />
-            <label className="text-sm font-medium">Mật khẩu</label>
           </div>
           <button
             type="submit"
@@ -139,9 +138,9 @@ export default function LoginPage() {
           >
             Đăng nhập
           </button>
-          <a href="/signup" className="w-full block mt-2 text-center text-blue-600 hover:underline text-sm">
+          {/* <a href="/signup" className="w-full block mt-2 text-center text-blue-600 hover:underline text-sm">
             Đăng ký tài khoản mới
-          </a>
+          </a> */}
         </form>
       </div>
     </div>

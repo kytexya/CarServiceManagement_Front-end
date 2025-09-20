@@ -6,6 +6,9 @@ export default function SidebarInventoryManager() {
   const location = useLocation();
 
   const checkActive = (keyword) => {
+    if (keyword === '') {
+      return location.pathname === '/inventory-manager';
+    }
     return location.pathname.startsWith(`/inventory-manager/${keyword}`);
   };
 
@@ -21,7 +24,7 @@ export default function SidebarInventoryManager() {
         <Link to="/inventory-manager/dashboard">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
-              checkActive("dashboard")
+              (checkActive("dashboard") || checkActive(""))
                 ? "bg-white text-primary"
                 : "text-white hover:bg-white/20"
             }`}
@@ -40,7 +43,7 @@ export default function SidebarInventoryManager() {
             Danh Sách Phụ Tùng
           </div>
         </Link>
-        <Link to="/inventory-manager/parts">
+        {/* <Link to="/inventory-manager/parts">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
               checkActive("parts")
@@ -50,8 +53,8 @@ export default function SidebarInventoryManager() {
           >
             Quản Lý Phụ Tùng
           </div>
-        </Link>
-        <Link to="/inventory-manager/history">
+        </Link> */}
+        {/* <Link to="/inventory-manager/history">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
               checkActive("history")
@@ -61,7 +64,7 @@ export default function SidebarInventoryManager() {
           >
             Lịch Sử Nhập - Xuất
           </div>
-        </Link>
+        </Link> */}
       </div>
       <div className="py-4 flex flex-col justify-center w-full px-4 gap-3">
         <button className="button !bg-success !text-white !min-w-[104px]">
