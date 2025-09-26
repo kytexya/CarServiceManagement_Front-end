@@ -1,3 +1,4 @@
+import Pagination from '@/components/common/pagination';
 import { showError, showSuccess } from '@/utils';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -11,13 +12,22 @@ const MySchedule = () => {
   const [requests, setRequests] = useState([]);
   const [requestDate, setRequestDate] = useState('');
   const [reason, setReason] = useState('');
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
 
   const token = localStorage.getItem("carserv-token");
   const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
 
   const fetchSchedule = async () => {
     try {
-      const res = await axios.get("/api/schedules/my", {
+      const storedProfile = localStorage.getItem("carserv-profile");
+      const parsedProfile = JSON.parse(storedProfile);
+      const staffId = parsedProfile.userID ?? 0
+      const res = await axios.get(`/api/Schedule/working-schedule/${staffId}`, {
         headers
       });
       setScheduleData(res.data || []);
@@ -26,12 +36,19 @@ const MySchedule = () => {
     }
   };
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (page = 1) => {
     try {
-      const res = await axios.get("/api/schedule-requests/my", {
+      const res = await axios.get(`/api/Schedule/dayoff/view-requests?currentPage=${page}&pageSize=${pagination.pageSize}`, {
         headers
       });
-      setRequests(res.data || []);
+      setRequests(res.data.items || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.data.totalItems,
+        totalPages: res.data.totalPages,
+        currentPage: res.data.currentPage,
+        pageSize: res.data.pageSize,
+      }));
     } catch (err) {
       // showError("Không tải được danh sách yêu cầu");
     }
@@ -48,7 +65,7 @@ const MySchedule = () => {
       });
       showSuccess("Gửi yêu cầu thành công!");
       setShowRequestModal(false);
-      fetchRequests();
+      fetchRequests(pagination.currentPage);
     } catch (err) {
       showError(err.response?.data?.message || "Không thể gửi yêu cầu");
     }
@@ -56,7 +73,7 @@ const MySchedule = () => {
 
   useEffect(() => {
     fetchSchedule();
-    fetchRequests();
+    fetchRequests(pagination.currentPage);
   }, []);
 
   const scheduleDataMock = [
@@ -136,9 +153,9 @@ const MySchedule = () => {
           >
             Yêu cầu nghỉ phép
           </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+          {/* <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
             Đổi lịch
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -266,6 +283,17 @@ const MySchedule = () => {
           </table>
         </div>
       </div>
+      {pagination.totalItems > 0 && (
+        <Pagination
+          totalPage={pagination.totalPages}
+          currentPage={pagination.currentPage}
+          totalItems={pagination.totalItems}
+          pageSize={pagination.pageSize}
+          onPageChange={(page) =>
+            setPagination((prev) => ({ ...prev, currentPage: page }))
+          }
+        />
+      )}
 
       {/* Modal yêu cầu nghỉ phép */}
       {showRequestModal && (

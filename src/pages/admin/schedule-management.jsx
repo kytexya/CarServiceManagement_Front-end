@@ -12,6 +12,7 @@ export default function ScheduleManagementPage() {
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [selectedStaff, setSelectedStaff] = useState("");
     const [appointments, setAppointments] = useState(null);
+    const [workingHours, setWorkingHours] = useState([]);
     const [pagination, setPagination] = useState({
         totalItems: 0,
         totalPages: 1,
@@ -53,14 +54,37 @@ export default function ScheduleManagementPage() {
 
     const fetchWokingHours = async () => {
         try {
-        const res = await axios.get("/api/Appointment", { 
+        const res = await axios.get("/api/Schedule/system-schedule", { 
             headers: {
             Authorization: `Bearer ${token}`,
             'ngrok-skip-browser-warning': 'anyvalue',
             },
             withCredentials: true
         });
-        // setAppointments(res.data || []);
+        if (res.data?.data?.days) {
+            const formattedWorkingHours = Object.values(res.data.data.days).map(day => {
+                const isOpen = day.totalAvailableStaff > 0;
+                const firstSlot = day.timeSlots[0];
+                const lastSlot = day.timeSlots[day.timeSlots.length - 1];
+
+                return {
+                    dayName: day.dayName, 
+                    displayName: day.dayName === 'Monday' ? 'Thứ 2' :
+                                day.dayName === 'Tuesday' ? 'Thứ 3' :
+                                day.dayName === 'Wednesday' ? 'Thứ 4' :
+                                day.dayName === 'Thursday' ? 'Thứ 5' :
+                                day.dayName === 'Friday' ? 'Thứ 6' :
+                                day.dayName === 'Saturday' ? 'Thứ 7' : 'Chủ nhật',
+                    start: firstSlot.startTime.slice(0,5),
+                    end: lastSlot.endTime.slice(0,5),
+                    isOpen,
+                    timeSlots: day.timeSlots
+                };
+            });
+            setWorkingHours(formattedWorkingHours)
+        } else {
+            setWorkingHours([])
+        }
         } catch (err) {
         console.log(err);
         showError("Không tải được");
@@ -68,66 +92,7 @@ export default function ScheduleManagementPage() {
     };
 
     // Mock data
-    const workingHours = {
-        monday: { start: "08:00", end: "18:00", isOpen: true },
-        tuesday: { start: "08:00", end: "18:00", isOpen: true },
-        wednesday: { start: "08:00", end: "18:00", isOpen: true },
-        thursday: { start: "08:00", end: "18:00", isOpen: true },
-        friday: { start: "08:00", end: "18:00", isOpen: true },
-        saturday: { start: "08:00", end: "16:00", isOpen: true },
-        sunday: { start: "09:00", end: "15:00", isOpen: false },
-    };
 
-    const appointmentsMock = [
-        {
-            id: 1,
-            customerName: "Nguyễn Văn A",
-            customerPhone: "0123456789",
-            service: "Bảo trì định kỳ",
-            date: "2024-01-15",
-            time: "09:00",
-            duration: 120,
-            status: "Confirmed",
-            assignedStaff: "Nguyễn Thị B",
-            vehicleInfo: "Toyota Vios 2022"
-        },
-        {
-            id: 2,
-            customerName: "Trần Thị C",
-            customerPhone: "0987654321",
-            service: "Thay nhớt động cơ",
-            date: "2024-01-15",
-            time: "10:30",
-            duration: 45,
-            status: "Confirmed",
-            assignedStaff: "Lê Văn D",
-            vehicleInfo: "Honda City 2021"
-        },
-        {
-            id: 3,
-            customerName: "Phạm Văn E",
-            customerPhone: "0555666777",
-            service: "Kiểm tra động cơ",
-            date: "2024-01-15",
-            time: "14:00",
-            duration: 90,
-            status: "Pending",
-            assignedStaff: "",
-            vehicleInfo: "Ford Ranger 2023"
-        },
-        {
-            id: 4,
-            customerName: "Hoàng Thị F",
-            customerPhone: "0333444555",
-            service: "Gói Bảo Dưỡng Cơ Bản",
-            date: "2024-01-16",
-            time: "11:00",
-            duration: 180,
-            status: "Confirmed",
-            assignedStaff: "Nguyễn Thị B",
-            vehicleInfo: "Mazda 3 2020"
-        }
-    ];
 
     const timeSlots = [
         "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -222,7 +187,7 @@ export default function ScheduleManagementPage() {
         }
 
         return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-        }
+    }
 
 
     return (
@@ -433,50 +398,45 @@ export default function ScheduleManagementPage() {
 
                             <div className="p-8">
                                 <div className="space-y-4">
-                                    {Object.entries(workingHours).map(([day, hours]) => (
-                                        <div key={day} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    {workingHours.map((day) => (
+                                        <div key={day.dayName} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-24">
-                                                    <span className="text-sm font-medium text-gray-900 capitalize">
-                                                        {day === 'monday' ? 'Thứ 2' :
-                                                         day === 'tuesday' ? 'Thứ 3' :
-                                                         day === 'wednesday' ? 'Thứ 4' :
-                                                         day === 'thursday' ? 'Thứ 5' :
-                                                         day === 'friday' ? 'Thứ 6' :
-                                                         day === 'saturday' ? 'Thứ 7' : 'Chủ nhật'}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <input
-                                                        type="time"
-                                                        value={hours.start}
-                                                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                        disabled={!hours.isOpen}
-                                                        readOnly
-                                                    />
-                                                    <span className="text-gray-500">-</span>
-                                                    <input
-                                                        type="time"
-                                                        value={hours.end}
-                                                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                        disabled={!hours.isOpen}
-                                                        readOnly
-                                                    />
-                                                </div>
+                                            <div className="w-24">
+                                                <span className="text-sm font-medium text-gray-900 capitalize">
+                                                {day.displayName}
+                                                </span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <label className="flex items-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={hours.isOpen}
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                        readOnly
-                                                    />
-                                                    <span className="ml-2 text-sm text-gray-700">Mở cửa</span>
-                                                </label>
+                                                <input
+                                                type="time"
+                                                value={day.start}
+                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                disabled={!day.isOpen}
+                                                readOnly
+                                                />
+                                                <span className="text-gray-500">-</span>
+                                                <input
+                                                type="time"
+                                                value={day.end}
+                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                disabled={!day.isOpen}
+                                                readOnly
+                                                />
+                                            </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                            <label className="flex items-center">
+                                                <input
+                                                type="checkbox"
+                                                checked={day.isOpen}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                readOnly
+                                                />
+                                                <span className="ml-2 text-sm text-gray-700">Mở cửa</span>
+                                            </label>
                                             </div>
                                         </div>
-                                    ))}
+                                        ))}
                                 </div>
                             </div>
                         </div>
