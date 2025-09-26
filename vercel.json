@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "https://keysurv-d5hqbafbhfejebh7.southeastasia-01.azurewebsites.net/api/$1"
+            "destination": "https://keysurv-carservapi-development-fca9a2anbzc7hrhb.southeastasia-01.azurewebsites.net//api/$1"
         },
         {
             "source": "/(.*)",
