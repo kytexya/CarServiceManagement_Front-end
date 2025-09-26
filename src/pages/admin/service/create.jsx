@@ -172,7 +172,7 @@ const CreateService = () => {
             error={errors?.price}
           />
           <TextInput
-            label={"Thời gian thực hiện (phút)"}
+            label={"Thời gian thực hiện (giờ)"}
             placeholder={"Nhập thời gian"}
             register={register}
             type="number"
