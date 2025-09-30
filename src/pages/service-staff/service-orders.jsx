@@ -1,7 +1,7 @@
 import Pagination from '@/components/common/pagination';
 import IconEdit from '@/components/icons/IconEdit';
 import IconEye from '@/components/icons/IconEye';
-import { showError } from '@/utils';
+import { showError, showSuccess } from '@/utils';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -33,6 +33,7 @@ const ServiceOrders = () => {
         });
         const mapped = res.data.items?.map(order => ({
           id: order.orderId,
+          appointmentId: order.appointmentId,
           plateNumber: order.vehicleLicensePlate || 'N/A',
           customerName: order.customerName || 'N/A',
           phone: order.customerPhone || 'N/A',
@@ -65,42 +66,6 @@ const ServiceOrders = () => {
       hour12: false
     });
   };
-
-  const serviceOrdersMock = [
-    {
-      id: 1,
-      plateNumber: '30A-12345',
-      customerName: 'Nguyễn Văn A',
-      phone: '0123456789',
-      service: 'Thay dầu nhớt',
-      status: 'pending',
-      assignedTo: 'Nhân viên 1',
-      createdAt: '2024-01-15 09:30',
-      estimatedTime: '2 giờ'
-    },
-    {
-      id: 2,
-      plateNumber: '51B-67890',
-      customerName: 'Trần Thị B',
-      phone: '0987654321',
-      service: 'Bảo dưỡng định kỳ',
-      status: 'in-progress',
-      assignedTo: 'Nhân viên 2',
-      createdAt: '2024-01-15 08:15',
-      estimatedTime: '4 giờ'
-    },
-    {
-      id: 3,
-      plateNumber: '29C-11111',
-      customerName: 'Lê Văn C',
-      phone: '0555666777',
-      service: 'Thay lốp xe',
-      status: 'completed',
-      assignedTo: 'Nhân viên 1',
-      createdAt: '2024-01-15 07:00',
-      estimatedTime: '1 giờ'
-    }
-  ];
 
   const STATUS = {
     Booked: { color: "bg-yellow-100 text-yellow-800", text: "Đã đặt" },
@@ -153,18 +118,50 @@ const ServiceOrders = () => {
 
   const sortedOrders = sortOrders(filteredOrders);
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [appStatus, setAppStatus] = useState("");
+
+  const handleOpenPopup = (order) => {
+    setSelectedOrder(order);
+    setAppStatus(order.status);
+    setShowPopup(true);
+  };
+
+  const handleConfirmStatus = async () => {
+    try {
+      await axios.put(
+        "/api/Part/updateServiceProgress",
+        {
+          appointmentId: selectedOrder.appointmentId,
+          status: appStatus,
+          note: "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "anyvalue",
+          },
+          withCredentials: true,
+        }
+      );
+      setShowPopup(false);
+
+      setServiceOrders((prev) =>
+        prev.map((order) =>
+          order.appointmentId === selectedOrder.appointmentId ? { ...order, status: appStatus } : order
+        )
+      );
+      showSuccess("cập nhật trạng thái thành công");
+    } catch (err) {
+      showError("Không thể cập nhật trạng thái");
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Danh sách phiếu dịch vụ</h1>
-        <Link to="/service-staff/service-order/new">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-semibold shadow transition-colors duration-200 flex items-center">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Tạo phiếu mới
-          </button>
-        </Link>
+        <h1 className="text-2xl font-bold">Danh sách lịch hẹn</h1>
       </div>
       {/* Filters */}
       <div className="bg-white rounded-lg border p-6 shadow-sm mb-6">
@@ -231,8 +228,8 @@ const ServiceOrders = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sortedOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
+              {sortedOrders.map((order, index) => (
+                <tr key={index} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{order.plateNumber}</div>
@@ -251,12 +248,12 @@ const ServiceOrders = () => {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className="rounded-full p-2 hover:bg-blue-100 transition-colors text-blue-600">
-                        <IconEye />
-                      </button>
-                      <a href={`/service-staff/service-order/${order.id}`} className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600">
+                      <button
+                        onClick={() => handleOpenPopup(order)}
+                        className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
+                      >
                         <IconEdit />
-                      </a>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -276,6 +273,47 @@ const ServiceOrders = () => {
             setPagination((prev) => ({ ...prev, currentPage: page }))
           }
         />
+      )}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-bold mb-4">Cập nhật trạng thái</h2>
+            <div className="space-y-2">
+              {Object.entries(STATUS).map(([key, config]) => (
+                <button
+                  key={key}
+                  onClick={() => setAppStatus(key)}
+                  className={`w-full flex justify-between items-center px-4 py-2 border rounded-lg text-left ${
+                    appStatus === key
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  {/* <span>{config.text}</span> */}
+                  <span
+                    className={`px-2 py-0.5 text-xs rounded-full ${config.color}`}
+                  >
+                    {config.text}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowPopup(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmStatus}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

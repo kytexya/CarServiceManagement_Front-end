@@ -1,4 +1,3 @@
-import Pagination from '@/components/common/pagination';
 import { showError, showSuccess } from '@/utils';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -9,15 +8,8 @@ const MySchedule = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestType, setRequestType] = useState('leave');
   const [scheduleData, setScheduleData] = useState([]);
-  const [requests, setRequests] = useState([]);
   const [requestDate, setRequestDate] = useState('');
   const [reason, setReason] = useState('');
-  const [pagination, setPagination] = useState({
-    totalItems: 0,
-    totalPages: 1,
-    currentPage: 1,
-    pageSize: 10,
-  });
 
   const token = localStorage.getItem("carserv-token");
   const headers = { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'anyvalue' };
@@ -32,77 +24,17 @@ const MySchedule = () => {
       });
       setScheduleData(res.data || []);
     } catch (err) {
-      // showError("Không tải được lịch làm việc");
-    }
-  };
-
-  const fetchRequests = async (page = 1) => {
-    try {
-      const res = await axios.get(`/api/Schedule/dayoff/view-requests?currentPage=${page}&pageSize=${pagination.pageSize}`, {
-        headers
-      });
-      setRequests(res.data.items || []);
-      setPagination((prev) => ({
-        ...prev,
-        totalItems: res.data.totalItems,
-        totalPages: res.data.totalPages,
-        currentPage: res.data.currentPage,
-        pageSize: res.data.pageSize,
-      }));
-    } catch (err) {
-      // showError("Không tải được danh sách yêu cầu");
-    }
-  };
-
-  const handleSendRequest = async () => {
-    try {
-      await axios.post("/api/schedule-requests", {
-        type: requestType,
-        date: requestDate,
-        reason: reason
-      }, {
-        headers
-      });
-      showSuccess("Gửi yêu cầu thành công!");
-      setShowRequestModal(false);
-      fetchRequests(pagination.currentPage);
-    } catch (err) {
-      showError(err.response?.data?.message || "Không thể gửi yêu cầu");
+      showError("Không tải được lịch làm việc");
     }
   };
 
   useEffect(() => {
     fetchSchedule();
-    fetchRequests(pagination.currentPage);
   }, []);
-
-  const scheduleDataMock = [
-    {
-      id: 1,
-      date: '2024-01-15',
-      shift: 'Ca sáng (8:00 - 16:00)',
-      status: 'confirmed',
-      tasks: ['Thay dầu xe 30A-12345', 'Bảo dưỡng xe 51B-67890']
-    },
-    {
-      id: 2,
-      date: '2024-01-16',
-      shift: 'Ca chiều (16:00 - 24:00)',
-      status: 'pending',
-      tasks: ['Sửa chữa xe 29C-11111']
-    },
-    {
-      id: 3,
-      date: '2024-01-17',
-      shift: 'Ca sáng (8:00 - 16:00)',
-      status: 'confirmed',
-      tasks: ['Kiểm tra xe 40D-22222']
-    }
-  ];
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      confirmed: { color: 'bg-green-100 text-green-800', text: 'Đã xác nhận' },
+      approved: { color: 'bg-green-100 text-green-800', text: 'Đã xác nhận' },
       pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Chờ xác nhận' },
       rejected: { color: 'bg-red-100 text-red-800', text: 'Từ chối' }
     };
@@ -137,9 +69,45 @@ const MySchedule = () => {
   const monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
                      'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
 
+
   const getScheduleForDate = (date) => {
-    const dateStr = date.toISOString().slice(0, 10);
-    return scheduleDataMock.find(schedule => schedule.date === dateStr);
+    if (!date || scheduleData.length === 0) return null;
+    
+    const jsDay = date.getDay();
+    const apiDayOfWeek = jsDay === 0 ? 7 : jsDay;
+    
+    const schedule = scheduleData.find(s => s.dayOfWeek === apiDayOfWeek);
+    if (!schedule || !schedule.isActive) return null;
+    
+    return {
+      shift: `Ca làm việc (${schedule.startTime.slice(0, 5)} - ${schedule.endTime.slice(0, 5)})`,
+      status: "confirmed",
+      tasks: []
+    };
+  };
+
+  const handleSendRequest = async () => {
+    try {
+      const storedProfile = localStorage.getItem("carserv-profile");
+      const parsedProfile = JSON.parse(storedProfile);
+      const staffId = parsedProfile.userID ?? 0;
+
+      await axios.post(`/api/Schedule/dayoff/make-request/${staffId}`, {
+        type: requestType,
+        requestedDate: requestDate,
+        reason: reason
+      }, {
+        headers
+      });
+
+      showSuccess("Gửi yêu cầu thành công!");
+      setShowRequestModal(false);
+      setRequestDate('');
+      setReason('');
+      fetchRequests(pagination.currentPage);
+    } catch (err) {
+      showError(err.response?.data?.message || "Không thể gửi yêu cầu");
+    }
   };
 
   return (
@@ -249,52 +217,6 @@ const MySchedule = () => {
         </div>
       )}
 
-      {/* Danh sách yêu cầu */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">Yêu cầu nghỉ phép/đổi lịch</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại yêu cầu</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lý do</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Nghỉ phép</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-20</td>
-                <td className="px-6 py-4 text-sm text-gray-500">Bị ốm</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge('pending')}
-                </td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Đổi ca</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-25</td>
-                <td className="px-6 py-4 text-sm text-gray-500">Có việc riêng</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge('confirmed')}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {pagination.totalItems > 0 && (
-        <Pagination
-          totalPage={pagination.totalPages}
-          currentPage={pagination.currentPage}
-          totalItems={pagination.totalItems}
-          pageSize={pagination.pageSize}
-          onPageChange={(page) =>
-            setPagination((prev) => ({ ...prev, currentPage: page }))
-          }
-        />
-      )}
-
       {/* Modal yêu cầu nghỉ phép */}
       {showRequestModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
@@ -319,6 +241,8 @@ const MySchedule = () => {
                   <input
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    value={requestDate}
+                    onChange={(e) => setRequestDate(e.target.value)}
                   />
                 </div>
                 <div>
@@ -327,6 +251,8 @@ const MySchedule = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     rows="3"
                     placeholder="Nhập lý do..."
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
                   ></textarea>
                 </div>
               </div>
@@ -337,7 +263,7 @@ const MySchedule = () => {
                 >
                   Hủy
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" onClick={handleSendRequest}>
                   Gửi yêu cầu
                 </button>
               </div>

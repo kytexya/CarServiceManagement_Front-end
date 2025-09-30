@@ -63,6 +63,7 @@ import InventoryDetailsPage from "./pages/admin/inventory-detail";
 import CreateServiceOrder from "./pages/service-staff/create-service-order";
 import EditServiceOrder from "./pages/admin/edit-service-order";
 import RoleRoute from "./components/common/roleRoute";
+import RequestsApproval from "./pages/admin/RequestsApproval";
 
 // Placeholder for new pages
 const ServicesPage = () => (
@@ -214,6 +215,7 @@ function App() {
             <Route path="promotions" element={<PromotionPage />} />
             <Route path="promotion/new" element={<CreatePromotion />} />
             <Route path="promotion/:id" element={<CreatePromotion />} />
+            <Route path="request" element={<RequestsApproval />} />
           </Route>
         </Route>
       </Routes>
