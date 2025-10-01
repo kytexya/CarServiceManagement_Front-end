@@ -36,10 +36,10 @@ export default function SidebarStaff() {
               checkActive("service-orders") ? "bg-white text-primary" : "text-white hover:bg-white/20"
             }`}
           >
-            Danh sách phiếu dịch vụ
+            Danh sách lịch hẹn
           </div>
         </Link>
-        <Link to="/service-staff/update-service-history">
+        {/* <Link to="/service-staff/update-service-history">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
               checkActive("update-service-history") ? "bg-white text-primary" : "text-white hover:bg-white/20"
@@ -47,7 +47,7 @@ export default function SidebarStaff() {
           >
             Cập nhật lịch sử sửa chữa
           </div>
-        </Link>
+        </Link> */}
         <Link to="/service-staff/used-parts-management">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${

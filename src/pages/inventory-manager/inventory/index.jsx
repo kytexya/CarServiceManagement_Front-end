@@ -1,5 +1,5 @@
 import Pagination from '@/components/common/pagination';
-import { showError } from '@/utils';
+import { showError, showSuccess } from '@/utils';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';

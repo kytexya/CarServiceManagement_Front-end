@@ -1,6 +1,6 @@
 import Pagination from "@/components/common/pagination";
 import SidebarAdmin from "@/components/common/sidebar-admin";
-import { showError } from "@/utils";
+import { showError, showSuccess } from "@/utils";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -131,42 +131,38 @@ export default function ScheduleManagementPage() {
         { id: 3, name: "Trần Văn F" },
     ];
 
-    const handleUpdateWorkingHours = () => {
-        showError("Chức năng cập nhật giờ làm việc chưa được kết nối API.");
-    };
-
     const handleConfirmAppointment = async (appointment) => {
-        showError("Chức năng cập nhật giờ làm việc chưa được kết nối API.");
-        // try {
-        //     const token = localStorage.getItem("carserv-token");
-        //     const response = await axios.post(
-        //         `/api/Appointment/schedule`,
-        //         {
-        //             vehicleId: appointment.vehicleId,
-        //             packageId: appointment.packageId,
-        //             promotionId: appointment.promotionId,
-        //             appointmentDate: appointment.appointmentDate,
-        //             serviceIds: appointment.appointmentServices,
-        //         },
-        //         {
-        //             headers: {
-        //                 Authorization: `Bearer ${token}`,
-        //                 "ngrok-skip-browser-warning": "anyvalue",
-        //             },
-        //             params: {
-        //                 customerId: appointment.customerId
-        //             }
-        //         }
-        //     );
-        //     showSuccess("Xác nhận lịch hẹn thành công!");
+        try {
+            const token = localStorage.getItem("carserv-token");
+            const response = await axios.post(
+                `/api/Appointment/schedule`,
+                {
+                    staffId: appointment.staffId ?? null,
+                    vehicleId: appointment.vehicleId ?? null,
+                    packageId: appointment.packageId ?? null,
+                    serviceIds: appointment.appointmentServices ?? [],
+                    promotionId: appointment.promotionId ?? null,
+                    appointmentDate: appointment.appointmentDate ?? '',
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "ngrok-skip-browser-warning": "anyvalue",
+                    },
+                    params: {
+                        customerId: appointment.customerId
+                    }
+                }
+            );
+            showSuccess("Xác nhận lịch hẹn thành công!");
 
-        //     navigate('/admin/service-management')
-        // } catch (error) {
-        //     console.error("Error:", error);
-        //     showError(
-        //         error.response?.data?.message || "Xác nhận lịch hẹn thất bại!"
-        //     );
-        // }
+            navigate('/admin/service-management')
+        } catch (error) {
+            console.error("Error:", error);
+            showError(
+                error.response?.data?.message || "Xác nhận lịch hẹn thất bại!"
+            );
+        }
     };
 
     const handleAssignStaff = (appointment) => {
@@ -189,6 +185,63 @@ export default function ScheduleManagementPage() {
         return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
     }
 
+    const [showStaffModal, setShowStaffModal] = useState(false);
+    const [staffs, setStaffs] = useState([]);
+
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [selectedStaffV2, setSelectedStaffV2] = useState(null);
+    const [schedules, setSchedules] = useState([]);
+    const headers = { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" };
+
+    const handleUpdateWorkingHours = async () => {
+        try {
+        const res = await axios.get("/api/Account/service-staffs", { headers });
+        setStaffs(res.data || []);
+        setShowStaffModal(true);
+        } catch (err) {
+        showError("Không tải được danh sách nhân viên");
+        }
+    };
+
+    const handleEditStaffSchedule = async (staff) => {
+        try {
+        setSelectedStaffV2(staff);
+        const res = await axios.get(`/api/Schedule/working-schedule/${staff.userId}`, { headers });
+        setSchedules(res.data || []);
+        setShowStaffModal(false);
+        setShowScheduleModal(true);
+        } catch (err) {
+        showError("Không tải được lịch làm việc");
+        }
+    };
+
+    const updateScheduleField = (dayIndex, field, value) => {
+        setSchedules(prev =>
+        prev.map((d, idx) => (idx === dayIndex ? { ...d, [field]: value } : d))
+        );
+    };
+
+    const handleSubmitSchedule = async () => {
+        try {
+            const payload = {
+                dailySchedules: schedules
+                    .filter(d => d.isActive)
+                    .map(d => ({
+                    dayOfWeek: d.dayOfWeek,
+                    startTime: d.startTime,
+                    endTime: d.endTime,
+                    isActive: d.isActive,
+                    notes: d.notes || ""
+                    }))
+            };
+
+            await axios.post(`/api/Schedule/weekly-schedule/${selectedStaffV2.userId}`, payload, { headers });
+            showSuccess("Cập nhật lịch làm việc thành công");
+            setShowScheduleModal(false);
+        } catch (err) {
+            showError("Cập nhật thất bại");
+        }
+    };
 
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
@@ -203,7 +256,7 @@ export default function ScheduleManagementPage() {
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900">Quản Lý Lịch Làm Việc</h1>
-                            <p className="text-sm text-gray-600">Cấu hình giờ làm việc và quản lý lịch hẹn</p>
+                            <p className="text-sm text-gray-600">Lịch làm việc và quản lý lịch hẹn</p>
                         </div>
                     </div>
                 </div>
@@ -341,12 +394,12 @@ export default function ScheduleManagementPage() {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <div className="flex gap-2">
-                                                            <button
+                                                            {/* <button
                                                                 onClick={() => handleConfirmAppointment(appointment)}
                                                                 className="text-blue-600 hover:text-blue-900"
                                                             >
                                                                 Xác nhận
-                                                            </button>
+                                                            </button> */}
                                                             <button
                                                                 onClick={() => handleAssignStaff(appointment)}
                                                                 className="text-green-600 hover:text-green-900"
@@ -381,8 +434,8 @@ export default function ScheduleManagementPage() {
                             <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-8 py-6 border-b border-gray-100">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h2 className="text-xl font-bold text-gray-900">Cấu Hình Giờ Làm Việc</h2>
-                                        <p className="text-sm text-gray-600">Thiết lập khung giờ làm việc của trung tâm</p>
+                                        <h2 className="text-xl font-bold text-gray-900">Lịch làm việc</h2>
+                                        <p className="text-sm text-gray-600">Thiết lập khung giờ làm việc của nhân viên</p>
                                     </div>
                                     <button
                                         onClick={handleUpdateWorkingHours}
@@ -491,6 +544,85 @@ export default function ScheduleManagementPage() {
                         </button>
                     </div>
                     </div>
+                </div>
+            )}
+            {showStaffModal && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-[500px]">
+                    <h2 className="text-lg font-bold mb-4">Chọn nhân viên</h2>
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {staffs.map(s => (
+                        <div key={s.userId} className="flex justify-between items-center p-3 border rounded-md">
+                        <span>{s.user.fullName}</span>
+                        <button
+                            onClick={() => handleEditStaffSchedule(s)}
+                            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                            Chỉnh sửa
+                        </button>
+                        </div>
+                    ))}
+                    </div>
+                    <div className="mt-4 text-right">
+                    <button
+                        onClick={() => setShowStaffModal(false)}
+                        className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                    >
+                        Đóng
+                    </button>
+                    </div>
+                </div>
+                </div>
+            )}
+            {showScheduleModal && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-[600px]">
+                    <h2 className="text-lg font-bold mb-4">Lịch làm việc - {selectedStaffV2?.user.fullName}</h2>
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {schedules.map((day, idx) => (
+                        <div key={day.dayOfWeek} className="flex justify-between items-center p-3 border rounded-md">
+                        <span className="w-28">{day.dayName}</span>
+                        <input
+                            type="time"
+                            value={day.startTime.slice(0, 5)}
+                            onChange={e => updateScheduleField(idx, "startTime", e.target.value + ":00")}
+                            className="border rounded px-2 py-1"
+                            disabled={!day.isActive}
+                        />
+                        <span>-</span>
+                        <input
+                            type="time"
+                            value={day.endTime.slice(0, 5)}
+                            onChange={e => updateScheduleField(idx, "endTime", e.target.value + ":00")}
+                            className="border rounded px-2 py-1"
+                            disabled={!day.isActive}
+                        />
+                        <label className="flex items-center ml-4">
+                            <input
+                            type="checkbox"
+                            checked={day.isActive}
+                            onChange={e => updateScheduleField(idx, "isActive", e.target.checked)}
+                            />
+                            <span className="ml-1 text-sm">Mở cửa</span>
+                        </label>
+                        </div>
+                    ))}
+                    </div>
+                    <div className="flex justify-end mt-6 space-x-3">
+                    <button
+                        onClick={() => setShowScheduleModal(false)}
+                        className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                    >
+                        Đóng
+                    </button>
+                    <button
+                        onClick={handleSubmitSchedule}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    >
+                        Lưu
+                    </button>
+                    </div>
+                </div>
                 </div>
             )}
         </div>

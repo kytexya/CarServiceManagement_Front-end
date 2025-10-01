@@ -56,6 +56,13 @@ export default function SidebarAdmin() {
             Quản lý lịch làm việc
           </div>
         </Link>
+        <Link to='/admin/request'>
+          <div
+            className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('request') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
+          >
+            Quản lý đơn xin nghỉ phép
+          </div>
+        </Link>
         <Link to='/admin/inventory-overview'>
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('inventory-overview') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
