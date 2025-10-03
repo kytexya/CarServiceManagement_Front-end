@@ -4,80 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Link } from "react-router-dom";
 
-const mockData = [
-  {
-    partId: "PT001",
-    partName: "Lọc dầu động cơ",
-    stockQuantity: 5,
-    price: 350000,
-    supplier: "Toyota Long Biên",
-    status: "Sắp hết",
-    warranty: "2025-06-30",
-    minThreshold: 10,
-    monthlyUsage: 45,
-    lastImported: "2024-01-15",
-  },
-  {
-    partId: "PT002",
-    partName: "Bugi đánh lửa",
-    stockQuantity: 50,
-    price: 120000,
-    supplier: "Honda Việt Nam",
-    status: "Còn hàng",
-    warranty: "2026-01-15",
-    minThreshold: 20,
-    monthlyUsage: 120,
-    lastImported: "2024-01-20",
-  },
-  {
-    partId: "PT003",
-    partName: "Dây curoa tổng",
-    stockQuantity: 0,
-    price: 800000,
-    supplier: "Hyundai",
-    status: "Hết hàng",
-    warranty: "2024-12-01",
-    minThreshold: 5,
-    monthlyUsage: 8,
-    lastImported: "2023-12-10",
-  },
-  {
-    partId: "PT004",
-    partName: "Bộ lọc gió động cơ",
-    stockQuantity: 3,
-    price: 250000,
-    supplier: "Ford Việt Nam",
-    status: "Sắp hết",
-    warranty: "2025-03-15",
-    minThreshold: 8,
-    monthlyUsage: 25,
-    lastImported: "2024-01-18",
-  },
-  {
-    partId: "PT005",
-    partName: "Bộ phanh trước",
-    stockQuantity: 15,
-    price: 1200000,
-    supplier: "BMW Việt Nam",
-    status: "Còn hàng",
-    warranty: "2025-08-20",
-    minThreshold: 12,
-    monthlyUsage: 35,
-    lastImported: "2024-01-22",
-  },
-];
-
-// Icon component for low stock warning
-const WarningIcon = () => (
-  <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-    <path
-      fillRule="evenodd"
-      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
-
 // Icon component for out of stock warning
 const OutOfStockIcon = () => (
   <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -150,53 +76,7 @@ const BarChart = ({ data, maxValue }) => {
   );
 };
 
-const RevenueLineChart = () => {
-  // giả sử có doanh thu 30 ngày trong 1 tháng
-  const labels = Array.from({ length: 30 }, (_, i) => `${i + 1}`);
-  const revenueData = [
-    120, 150, 200, 180, 250, 300, 280, 400, 350, 500, 450, 470, 490, 520, 600,
-    580, 610, 630, 700, 750, 720, 680, 660, 690, 710, 750, 770, 800, 820, 850,
-  ];
-
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: "Doanh thu (VNĐ x 1000)",
-        data: revenueData,
-        fill: false,
-        borderColor: "rgb(37, 99, 235)", // màu xanh dương
-        backgroundColor: "rgba(37, 99, 235, 0.5)",
-        tension: 0.3, // độ cong của line
-        pointRadius: 4,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" },
-      title: {
-        display: true,
-        text: "Biểu đồ Doanh thu theo ngày trong tháng",
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: (value) => value + "k",
-        },
-      },
-    },
-  };
-
-  return <Line height={100} data={data} options={options} />;
-};
-
 export default function DashboardPage() {
-  const [dataList] = useState(mockData);
   const [parts, setParts] = useState([]);
   const [lowParts, setLowParts] = useState([]);
   const [outOfStockParts, setOutOfStockParts] = useState([]);
@@ -286,45 +166,6 @@ export default function DashboardPage() {
     };
   }, [parts, lowParts, outOfStockParts]);
 
-  // Count different stock statuses
-  const lowStockCount = dataList.filter(
-    (item) => item.stockQuantity <= item.minThreshold && item.stockQuantity > 0
-  ).length;
-  const outOfStockCount = dataList.filter(
-    (item) => item.stockQuantity === 0
-  ).length;
-
-  // Calculate total inventory value
-  const totalInventoryValue = dataList.reduce(
-    (sum, item) => sum + item.stockQuantity * item.price,
-    0
-  );
-
-  // Get recently imported parts (last 7 days)
-  const recentlyImported = dataList.filter((item) => {
-    const importDate = new Date(item.lastImported);
-    const currentDate = new Date();
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(currentDate.getDate() - 7);
-    return importDate >= sevenDaysAgo;
-  });
-
-  // Get top used parts (sorted by monthly usage)
-  const topUsedParts = [...dataList]
-    .sort((a, b) => b.monthlyUsage - a.monthlyUsage)
-    .slice(0, 5);
-
-  // Get max usage for chart scaling
-  const maxUsage = Math.max(...topUsedParts.map((part) => part.monthlyUsage));
-
-  // Check warranty expiration (within 3 months)
-  const warrantyWarnings = dataList.filter((item) => {
-    const warrantyDate = new Date(item.warranty);
-    const currentDate = new Date();
-    const threeMonthsFromNow = new Date();
-    threeMonthsFromNow.setMonth(currentDate.getMonth() + 3);
-    return warrantyDate <= threeMonthsFromNow && warrantyDate > currentDate;
-  });
 
   return (
     <div className="flex flex-col w-full">
@@ -499,17 +340,6 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          {/* <div className="bg-white rounded-lg border p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Phụ tùng mới thêm</p>
-                <p className="text-2xl font-bold text-purple-600">30</p>
-              </div>
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <IconPackage className={"text-purple-400"} />
-              </div>
-            </div>
-          </div> */}
           <div className="bg-white rounded-lg border p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -537,28 +367,13 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Charts Section */}
-        <div className="bg-white rounded-lg border p-6 shadow-sm mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Doanh thu tháng trước
-          </h3>
-          <RevenueLineChart />
-        </div>
-
-        {/* <div className="bg-white rounded-lg border p-6 shadow-sm mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Phụ tùng sử dụng nhiều nhất
-          </h3>
-          <BarChart data={topUsedParts} maxValue={maxUsage} />
-        </div> */}
-
 
         {/* Quick Actions */}
         <div className="bg-white rounded-lg border p-6 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Hành động nhanh
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Link
               to="/inventory-manager/inventory/add"
               className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
@@ -586,30 +401,6 @@ export default function DashboardPage() {
               </div>
             </Link>
             <Link
-              to="/inventory-manager/import"
-              className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
-            >
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Nhập kho</p>
-                <p className="text-sm text-gray-600">Tạo phiếu nhập kho</p>
-              </div>
-            </Link>
-            <Link
               to="/inventory-manager/inventory"
               className="flex items-center gap-3 p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
             >
@@ -631,30 +422,6 @@ export default function DashboardPage() {
               <div>
                 <p className="font-medium text-gray-900">Xem danh sách</p>
                 <p className="text-sm text-gray-600">Quản lý tất cả phụ tùng</p>
-              </div>
-            </Link>
-            <Link
-              to="/inventory-manager/history"
-              className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
-            >
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-orange-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Lịch sử</p>
-                <p className="text-sm text-gray-600">Xem lịch sử nhập xuất</p>
               </div>
             </Link>
           </div>

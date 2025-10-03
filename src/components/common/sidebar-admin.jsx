@@ -46,7 +46,7 @@ export default function SidebarAdmin() {
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('service-orders') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
-            Quản lý đơn dịch vụ
+            Quản lý đơn hàng
           </div>
         </Link>
         <Link to='/admin/schedule-management'>

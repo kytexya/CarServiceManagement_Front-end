@@ -1,33 +1,23 @@
 import TextInput from "@/components/form/input";
 import { showError, showSuccess } from "@/utils";
-import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import * as yup from "yup";
 
-const schema = yup.object().shape({
-    partName: yup.string().required("Vui lòng nhập tên phụ tùng"),
-    quantity: yup
-        .number()
-        .typeError("Vui lòng nhập số lượng hợp lệ")
-        .required("Vui lòng nhập số lượng")
-        .min(1, "Số lượng phải lớn hơn 0"),
-    unitPrice: yup
-        .number()
-        .typeError("Vui lòng nhập giá hợp lệ")
-        .required("Vui lòng nhập giá")
-        .min(0, "Giá không được âm"),
-    supplierName: yup.string().required("Vui lòng nhập nhà cung cấp"),
-    unit: yup
-        .string()
-        .matches(/^[\p{L}\s]+$/u, "Đơn vị chỉ được nhập chữ")
-        .required("Vui lòng nhập đơn vị"),
-});
+// Mock data for demonstration
+const mockPart = {
+    id: "PART001",
+    partName: "Lọc gió điều hòa",
+    partNumber: "PNJ-39281",
+    quantity: 80,
+    unitPrice: 350000,
+    supplierName: "Toyota Long Biên",
+    description: "Lọc gió cho điều hòa xe Toyota Vios 2022. Hàng chính hãng."
+};
 
-export default function EditInventoryPage() {
+export default function EditInventoryAdminPage() {
     const { id } = useParams();
     const partId = /^\d+$/.test(id) ? id : null;
     const navigate = useNavigate();
@@ -38,9 +28,7 @@ export default function EditInventoryPage() {
         handleSubmit,
         setValue,
         formState: { errors },
-    } = useForm({
-        resolver: yupResolver(schema),
-    });
+    } = useForm();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -69,9 +57,11 @@ export default function EditInventoryPage() {
 
             // set form values
             setValue("partName", part.partName);
+            setValue("partNumber", part.partNumber);
             setValue("quantity", part.quantity);
             setValue("unitPrice", part.currentUnitPrice);
             setValue("supplierName", suppliersData.find(i => i.name === part.supplierName)?.supplierId || "");
+            setValue("description", part.description);
             setValue("unit", part.unit);
             } catch (error) {
             console.error(error);
@@ -91,12 +81,12 @@ export default function EditInventoryPage() {
                 .split("T")[0];
             const payload = {
                 partName: data.partName,
+                partNumber: data.partNumber,
                 quantity: data.quantity,
                 unitPrice: data.unitPrice,
                 expiryDate: expiryDate,
                 warrantyMonths: 12,
                 unit: data.unit,
-                supplierName: data.supplierName,
                 partPrices: [
                     {
                         price: 0,
@@ -108,12 +98,13 @@ export default function EditInventoryPage() {
                     claimDate: moment(new Date(now.setFullYear(now.getFullYear() + 1))).format('YYYY-MM-DD'),
                     notes: 'notes',
                 }],
+                description: data.description,
             };
             await axios.put(`/api/parts/update/${partId}`, payload, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             showSuccess("Cập nhật phụ tùng thành công!");
-            navigate("/inventory-manager/inventory");
+            navigate("/admin/inventory-overview");
         } catch (error) {
             console.error(error);
             showError(error.response?.data?.message || "Không thể cập nhật phụ tùng!");
@@ -136,7 +127,7 @@ export default function EditInventoryPage() {
                             <p className="text-sm text-gray-600">Cập nhật thông tin chi tiết phụ tùng</p>
                         </div>
                     </div>
-                    <Link to="/inventory-manager/inventory" className="button">
+                    <Link to="/admin/inventory-overview" className="button">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
@@ -148,7 +139,7 @@ export default function EditInventoryPage() {
                 <div className="p-8">
                     {/* Breadcrumb */}
                     <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
-                        <Link to="/inventory-manager/inventory" className="hover:text-blue-600">Kho phụ tùng</Link>
+                        <Link to="/admin/inventory-overview" className="hover:text-blue-600">Quản lý phụ tùng</Link>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -296,7 +287,7 @@ export default function EditInventoryPage() {
                             
                             {/* Form Actions */}
                             <div className="flex gap-4 justify-end mt-8 pt-6 border-t border-gray-100">
-                                <Link to="/inventory-manager/inventory" className="button">
+                                <Link to="/admin/inventory-overview" className="button">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>

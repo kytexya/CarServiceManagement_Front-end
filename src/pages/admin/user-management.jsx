@@ -1,8 +1,3 @@
-import SidebarAdmin from "@/components/common/sidebar-admin";
-import IconEdit from "@/components/icons/IconEdit";
-import IconEmail from "@/components/icons/IconEmail";
-import IconLock from "@/components/icons/IconLock";
-import IconUnlock from "@/components/icons/IconUnlock";
 import { showError, showSuccess } from "@/utils";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";import axios from "axios";
@@ -298,17 +293,8 @@ export default function UserManagementPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Thông Tin
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Phân Quyền
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Trạng Thái
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hoạt Động
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Thao Tác
                     </th>
                   </tr>
                 </thead>
@@ -321,18 +307,18 @@ export default function UserManagementPage() {
                             {user.fullName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            @{user.username}
-                          </div>
-                          <div className="text-xs text-gray-400">
                             {user.email}
                           </div>
                           <div className="text-xs text-gray-400">
                             {user.phoneNumber}
                           </div>
+                          <div className="text-xs text-gray-500">
+                            {user.address}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
+                        <div className="text-right">
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
                               user.roleName
@@ -343,54 +329,6 @@ export default function UserManagementPage() {
                           <div className="text-xs text-gray-500 mt-1">
                             {user.department}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                            user.status
-                          )}`}
-                        >
-                          {getStatusText(user.status)}
-                        </span>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Đăng nhập: {user.lastLogin}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-xs text-gray-500">
-                          <div>Tạo: {user.createdAt}</div>
-                          <div>Cuối: {user.lastLogin}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex flex-wrap gap-2">
-                          {/* <a
-                            href={`/admin/user-management/${user.userID}`}
-                            className="rounded-full p-2 hover:bg-green-100 transition-colors text-green-600"
-                          >
-                            <IconEdit />
-                          </a> */}
-                          <button
-                            onClick={() => handleToggleStatus(user.userID)}
-                            className={`text-xs  rounded-full hover:bg-slate-300 transition-all duration-100 px-2 ${
-                              user.status === "active"
-                                ? "text-red-600 hover:text-red-900"
-                                : "text-green-600 hover:text-green-900"
-                            }`}
-                          >
-                            {user.status === "active" ? (
-                              <IconLock />
-                            ) : (
-                              <IconUnlock />
-                            )}
-                          </button>
-                          {/* <button
-                            onClick={() => handleSendActivation(user.userID)}
-                            className="text-purple-600 hover:text-purple-900 text-xs rounded-full hover:bg-slate-300 transition-all duration-100 px-2"
-                          >
-                            <IconEmail />
-                          </button> */}
                         </div>
                       </td>
                     </tr>

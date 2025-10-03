@@ -1,6 +1,6 @@
 import Select from "@/components/form/select";
 import { CATEGORIES, SERVICES, UNITS } from "@/utils/constant";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -35,7 +35,6 @@ const schema = yup.object().shape({
     .typeError("Vui lòng nhập giá khuyễn mãi")
     .optional(), // not null
 
-  status: yup.string().optional(),
 });
 
 const CreateService = () => {
@@ -56,29 +55,52 @@ const CreateService = () => {
   });
   const status = watch("status");
   const navigate = useNavigate();
+  const token = localStorage.getItem("carserv-token");
+  const [serviceTypes, setServiceTypes] = useState([]);
+
+  useEffect(() => {
+    const fetchService = async () => {
+      try {
+        const res = await axios.get(`/api/services/get-all-services?currentPage=1&pageSize=1000`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'anyvalue',
+          },
+          withCredentials: true
+        });
+        setServiceTypes(
+          (res.data?.items || []).map(item => ({
+            id: item.serviceId,
+            title: item.name
+          }))
+        );
+      } catch (err) {
+        showError("Không tải được danh sách dịch vụ");
+      }
+    };
+    fetchService();
+  }, []);
 
   useEffect(() => {
     if (comboId) {
-      const fetchService = async () => {
+      const fetchComboService = async () => {
         try {
-          const token = localStorage.getItem("carserv-token");
           const response = await axios.get(`/api/services/get-service-package/${comboId}`, {
             headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" },
           });
           const service = response.data;
           setValue("name", service.name);
           setValue("serviceIds", service.services.map(s => String(s.serviceId)));
+          setValue("discount", service.discount);
           setValue("price", service.price);
-          setValue("timer", service.timer);
           setValue("description", service.description);
-          setValue("status", service.status);
           console.log(service.services.map(s => s.serviceId));
         } catch (error) {
           console.error(error);
           showError("Không thể lấy dữ liệu dịch vụ!");
         }
       };
-      fetchService();
+      fetchComboService();
     }
   }, [comboId, setValue]);
 
@@ -126,7 +148,7 @@ const CreateService = () => {
   };
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Thêm combo dịch vụ</h1>
+      <h1 className="text-2xl font-bold mb-6">{comboId ? 'Chỉnh sửa combo dịch vụ' : 'Thêm combo dịch vụ'}</h1>
 
       {/* Form gửi thông báo */}
       <form
@@ -151,20 +173,12 @@ const CreateService = () => {
             error={errors?.price}
           />
           <TextInput
-            label={"Giảm giá (VND)"}
+            label={"Giảm giá (%)"}
             placeholder={"Nhập giảm giá"}
             register={register}
             type="number"
             name={"discount"}
             error={errors?.discount}
-          />
-          <Checkbox
-            name={"serviceIds"}
-            register={register}
-            label={"Dịch vụ trong gói"}
-            placeholder={"Nhập dịch vụ trong gói"}
-            error={errors?.serviceIds}
-            options={SERVICES}
           />
           <TextInput
             label={"Mô tả"}
@@ -173,19 +187,20 @@ const CreateService = () => {
             name={"description"}
             error={errors?.description}
           />
-          <Toggle
-            isActive={true}
-            onClick={() => {
-              status === "active"
-                ? setValue("status", "inactive")
-                : setValue("status", "active");
-            }}
-            label={"Trạng thái"}
-          />
+        </div>
+        <div className="mb-4">
+          <Checkbox
+          name={"serviceIds"}
+          register={register}
+          label={"Dịch vụ trong gói"}
+          placeholder={"Nhập dịch vụ trong gói"}
+          error={errors?.serviceIds}
+          options={serviceTypes}
+        />
         </div>
 
         <button className="bg-primary px-4 py-2 text-white font-bold rounded-md">
-          Tạo
+          {comboId ? 'Chỉnh sửa' : 'Tạo'}
         </button>
       </form>
     </div>

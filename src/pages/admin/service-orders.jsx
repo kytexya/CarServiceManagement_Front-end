@@ -9,9 +9,6 @@ export default function ServiceOrdersPage() {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
     const [orders, setOrders] = useState([]);
-    const [showAssignModal, setShowAssignModal] = useState(false);
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
-    const [selectedStaff, setSelectedStaff] = useState("");
     const [pagination, setPagination] = useState({
         totalItems: 0,
         totalPages: 1,
@@ -79,62 +76,6 @@ export default function ServiceOrdersPage() {
         });
     };
 
-    // Mock data
-    const serviceOrders = [
-        {
-            id: "SO001",
-            customerName: "Nguyễn Văn A",
-            customerPhone: "0123456789",
-            services: ["Bảo trì định kỳ", "Thay nhớt động cơ"],
-            totalAmount: 700000,
-            status: "Scheduled",
-            scheduledDate: "2024-01-15",
-            scheduledTime: "09:00",
-            assignedStaff: "Nguyễn Thị B",
-            vehicleInfo: "Toyota Vios 2022 - 30A-12345",
-            notes: "Khách hàng yêu cầu kiểm tra thêm hệ thống phanh"
-        },
-        {
-            id: "SO002",
-            customerName: "Trần Thị C",
-            customerPhone: "0987654321",
-            services: ["Kiểm tra động cơ"],
-            totalAmount: 400000,
-            status: "In Progress",
-            scheduledDate: "2024-01-15",
-            scheduledTime: "10:30",
-            assignedStaff: "Lê Văn D",
-            vehicleInfo: "Honda City 2021 - 29B-67890",
-            notes: ""
-        },
-        {
-            id: "SO003",
-            customerName: "Phạm Văn E",
-            customerPhone: "0555666777",
-            services: ["Thay lốp xe", "Bảo trì định kỳ"],
-            totalAmount: 1200000,
-            status: "Completed",
-            scheduledDate: "2024-01-14",
-            scheduledTime: "14:00",
-            assignedStaff: "Nguyễn Thị B",
-            vehicleInfo: "Ford Ranger 2023 - 30C-11111",
-            notes: "Đã hoàn thành, khách hàng hài lòng"
-        },
-        {
-            id: "SO004",
-            customerName: "Hoàng Thị F",
-            customerPhone: "0333444555",
-            services: ["Gói Bảo Dưỡng Cơ Bản"],
-            totalAmount: 630000,
-            status: "Cancelled",
-            scheduledDate: "2024-01-16",
-            scheduledTime: "11:00",
-            assignedStaff: "",
-            vehicleInfo: "Mazda 3 2020 - 29A-22222",
-            notes: "Khách hàng hủy do có việc đột xuất"
-        }
-    ];
-
     const getStatusColor = (status) => {
         switch (status) {
             case 'Scheduled':
@@ -175,16 +116,6 @@ export default function ServiceOrdersPage() {
         ? orders 
         : orders.filter(order => order.status.toLowerCase() === activeFilter.toLowerCase());
 
-    const handleAssignStaff = (appointment) => {
-        setSelectedAppointment(appointment);
-        setSelectedStaff(appointment.assignedStaff);
-        setShowAssignModal(true);
-    };
-
-    const handleUpdateStatus = (orderId) => {
-        navigate(`/admin/service-order/${orderId}`)
-    };
-
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
             <div className="flex flex-col w-full">
@@ -197,7 +128,7 @@ export default function ServiceOrdersPage() {
                             </svg>
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Quản Lý Đơn Dịch Vụ</h1>
+                            <h1 className="text-2xl font-bold text-gray-900">Quản Lý Đơn Hàng</h1>
                             <p className="text-sm text-gray-600">Theo dõi và quản lý các đơn dịch vụ từ khách hàng</p>
                         </div>
                     </div>
@@ -273,20 +204,6 @@ export default function ServiceOrdersPage() {
                                             <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(order.status)}`}>
                                                 {getStatusText(order.status)}
                                             </span>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleAssignStaff(order)}
-                                                    className="text-blue-600 hover:text-blue-900 text-sm font-medium"
-                                                >
-                                                    Gán NV
-                                                </button>
-                                                <button
-                                                    onClick={() => handleUpdateStatus(order.id)}
-                                                    className="text-green-600 hover:text-green-900 text-sm font-medium"
-                                                >
-                                                    Cập nhật
-                                                </button>
-                                            </div>
                                         </div>
                                     </div>
 
@@ -352,56 +269,6 @@ export default function ServiceOrdersPage() {
                     </div>
                 </div>
             </div>
-            {showAssignModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                    <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-                    <h2 className="text-lg font-bold mb-4">Gán nhân viên</h2>
-
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Chọn nhân viên
-                        </label>
-                        <select
-                        value={selectedStaff}
-                        onChange={(e) => setSelectedStaff(e.target.value)}
-                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                        <option value="">-- Chọn nhân viên --</option>
-                        {staffList.map((staff) => (
-                            <option key={staff.id} value={staff.name}>
-                            {staff.name}
-                            </option>
-                        ))}
-                        </select>
-                    </div>
-
-                    <div className="flex justify-end gap-2">
-                        <button
-                        onClick={() => setShowAssignModal(false)}
-                        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
-                        >
-                        Huỷ
-                        </button>
-                        <button
-                        onClick={() => {
-                            if (!selectedStaff) {
-                            showError("Vui lòng chọn nhân viên!");
-                            return;
-                            }
-                            // TODO: call API
-                            console.log(
-                            `Gán ${selectedStaff} cho lịch hẹn ${selectedAppointment.id}`
-                            );
-                            setShowAssignModal(false);
-                        }}
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                        >
-                        Xác nhận
-                        </button>
-                    </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 } 

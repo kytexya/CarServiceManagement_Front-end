@@ -64,6 +64,8 @@ import CreateServiceOrder from "./pages/service-staff/create-service-order";
 import EditServiceOrder from "./pages/admin/edit-service-order";
 import RoleRoute from "./components/common/roleRoute";
 import RequestsApproval from "./pages/admin/RequestsApproval";
+import AddInventoryAdminPage from "./pages/admin/inventory/add";
+import EditInventoryAdminPage from "./pages/admin/inventory/edit";
 
 // Placeholder for new pages
 const ServicesPage = () => (
@@ -111,7 +113,7 @@ function App() {
 
           {/* Service Staff routes */}
           <Route path="/service-staff" element={
-            <RoleRoute allowedRoles={["Admin", "ServiceStaff"]}>
+            <RoleRoute allowedRoles={["ServiceStaff"]}>
               <ServiceStaffLayout />
             </RoleRoute>
           }>
@@ -145,7 +147,7 @@ function App() {
 
           {/* Inventory Manager routes */}
           <Route path="/inventory-manager" element={
-            <RoleRoute allowedRoles={["Admin", "InventoryManager"]}>
+            <RoleRoute allowedRoles={["InventoryManager"]}>
               <InventoryManagerLayout />
             </RoleRoute>
           }>
@@ -205,10 +207,8 @@ function App() {
               path="inventory-overview"
               element={<InventoryOverviewPage />}
             />
-            <Route
-              path="inventory-details"
-              element={<InventoryDetailsPage />}
-            />
+            <Route path="inventory/add" element={<AddInventoryAdminPage />} />
+            <Route path="inventory/edit/:id" element={<EditInventoryAdminPage />} />
             <Route path="parts/new" element={<AddInventoryPage />} />
             <Route path="parts/:id" element={<EditInventoryPage />} />
             <Route path="report" element={<ReportPage />} />

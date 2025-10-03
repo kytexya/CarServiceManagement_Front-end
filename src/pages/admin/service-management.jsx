@@ -28,59 +28,6 @@ export default function ServiceManagementPage() {
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("carserv-token");
 
-  // Mock data
-  const serviceTypesMock = [
-    {
-      id: 1,
-      name: "Bảo trì định kỳ",
-      category: "Bảo trì",
-      duration: 120,
-      price: 500000,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Thay nhớt động cơ",
-      category: "Thay nhớt",
-      duration: 45,
-      price: 300000,
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Kiểm tra động cơ",
-      category: "Kiểm tra",
-      duration: 90,
-      price: 400000,
-      status: "Active",
-    },
-    {
-      id: 4,
-      name: "Thay lốp xe",
-      category: "Thay lốp",
-      duration: 60,
-      price: 800000,
-      status: "Inactive",
-    },
-  ];
-
-  const comboPackagesMock = [
-    {
-      id: 1,
-      name: "Gói Bảo Dưỡng Cơ Bản",
-      services: ["Bảo trì định kỳ", "Thay nhớt động cơ"],
-      price: 700000,
-      discount: 10,
-    },
-    {
-      id: 2,
-      name: "Gói Kiểm Tra Toàn Diện",
-      services: ["Kiểm tra động cơ", "Bảo trì định kỳ"],
-      price: 800000,
-      discount: 15,
-    },
-  ];
-
   useEffect(() => {
     if (activeTab === "services") {
       fetchServiceTypes(pagination.currentPage);
@@ -199,7 +146,7 @@ export default function ServiceManagementPage() {
                 Quản Lý Dịch Vụ
               </h1>
               <p className="text-sm text-gray-600">
-                Cấu hình loại dịch vụ và gói combo
+                Cấu hình dịch vụ và gói combo
               </p>
             </div>
           </div>
@@ -230,7 +177,7 @@ export default function ServiceManagementPage() {
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              Loại Dịch Vụ
+              Dịch Vụ
             </button>
             <button
               onClick={() => setActiveTab("combos")}
@@ -252,10 +199,10 @@ export default function ServiceManagementPage() {
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-xl font-bold text-gray-900">
-                      Loại Dịch Vụ
+                      Dịch Vụ
                     </h2>
                     <p className="text-sm text-gray-600">
-                      Quản lý các loại dịch vụ và thời lượng
+                      Quản lý các dịch vụ và thời lượng
                     </p>
                   </div>
                   <a href="/admin/service/new" className="button primary">
@@ -323,17 +270,9 @@ export default function ServiceManagementPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              // service?.status === "Active"
-                              //   ? "bg-green-100 text-green-800"
-                              //   : "bg-red-100 text-red-800"
-                              // todo
                               'bg-green-100 text-green-800'
                             }`}
                           >
-                            {/* {service?.status === "Active"
-                              ? "Hoạt động"
-                              : "Không hoạt động"} */}
-                            {/* todo */}
                             Hoạt động
                           </span>
                         </td>

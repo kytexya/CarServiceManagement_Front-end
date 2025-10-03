@@ -13,6 +13,7 @@ export default function ScheduleManagementPage() {
     const [selectedStaff, setSelectedStaff] = useState("");
     const [appointments, setAppointments] = useState(null);
     const [workingHours, setWorkingHours] = useState([]);
+    const [staffList, setStaffList] = useState([]);
     const [pagination, setPagination] = useState({
         totalItems: 0,
         totalPages: 1,
@@ -24,6 +25,7 @@ export default function ScheduleManagementPage() {
     useEffect(() => {
         if (activeTab === "appointments") {
           fetchAppointments(pagination.currentPage);
+          fetchStaffList();
         } else {
           fetchWokingHours();
         }
@@ -125,49 +127,18 @@ export default function ScheduleManagementPage() {
         }
     };
 
-    const staffList = [
-        { id: 1, name: "Nguyễn Thị B" },
-        { id: 2, name: "Lê Văn D" },
-        { id: 3, name: "Trần Văn F" },
-    ];
-
-    const handleConfirmAppointment = async (appointment) => {
+    const fetchStaffList = async () => {
         try {
-            const token = localStorage.getItem("carserv-token");
-            const response = await axios.post(
-                `/api/Appointment/schedule`,
-                {
-                    staffId: appointment.staffId ?? null,
-                    vehicleId: appointment.vehicleId ?? null,
-                    packageId: appointment.packageId ?? null,
-                    serviceIds: appointment.appointmentServices ?? [],
-                    promotionId: appointment.promotionId ?? null,
-                    appointmentDate: appointment.appointmentDate ?? '',
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "ngrok-skip-browser-warning": "anyvalue",
-                    },
-                    params: {
-                        customerId: appointment.customerId
-                    }
-                }
-            );
-            showSuccess("Xác nhận lịch hẹn thành công!");
-
-            navigate('/admin/service-management')
-        } catch (error) {
-            console.error("Error:", error);
-            showError(
-                error.response?.data?.message || "Xác nhận lịch hẹn thất bại!"
-            );
+        const res = await axios.get("/api/Account/service-staffs", { headers });
+        setStaffList(res.data || []);
+        } catch (err) {
+        showError("Không tải được danh sách nhân viên");
         }
     };
 
     const handleAssignStaff = (appointment) => {
         setSelectedAppointment(appointment);
-        setSelectedStaff(appointment.assignedStaff);
+        setSelectedStaff(appointment.staffId);
         setShowAssignModal(true);
     };
 
@@ -385,7 +356,7 @@ export default function ScheduleManagementPage() {
                                                     </td>
 
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900">{appointment.assignedStaff || 'Chưa gán'}</div>
+                                                        <div className="text-sm text-gray-900">{appointment.staffName || 'Chưa gán'}</div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(appointment.status)}`}>
@@ -394,12 +365,6 @@ export default function ScheduleManagementPage() {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <div className="flex gap-2">
-                                                            {/* <button
-                                                                onClick={() => handleConfirmAppointment(appointment)}
-                                                                className="text-blue-600 hover:text-blue-900"
-                                                            >
-                                                                Xác nhận
-                                                            </button> */}
                                                             <button
                                                                 onClick={() => handleAssignStaff(appointment)}
                                                                 className="text-green-600 hover:text-green-900"
@@ -479,13 +444,7 @@ export default function ScheduleManagementPage() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                             <label className="flex items-center">
-                                                <input
-                                                type="checkbox"
-                                                checked={day.isOpen}
-                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                readOnly
-                                                />
-                                                <span className="ml-2 text-sm text-gray-700">Mở cửa</span>
+                                                <span className="ml-2 text-sm text-gray-700">{day.isOpen ? 'Mở cửa' : 'Không mở cửa'}</span>
                                             </label>
                                             </div>
                                         </div>
@@ -512,8 +471,8 @@ export default function ScheduleManagementPage() {
                         >
                         <option value="">-- Chọn nhân viên --</option>
                         {staffList.map((staff) => (
-                            <option key={staff.id} value={staff.name}>
-                            {staff.name}
+                            <option key={staff.staffId} value={staff.staffId}>
+                            {staff.user.fullName}
                             </option>
                         ))}
                         </select>

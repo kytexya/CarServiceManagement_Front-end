@@ -16,11 +16,6 @@ const schema = yup.object().shape({
   description: yup
     .string()
     .required("Vui lòng nhập mô tả"), // not null
-
-  ServiceParts: yup
-    .number()
-    .typeError("Vui lòng chọn danh mục")
-    .required("Vui lòng chọn danh mục"),
   
   estimatedLaborHours: yup
     .number()
@@ -31,8 +26,6 @@ const schema = yup.object().shape({
     .number()
     .typeError("Vui lòng nhập giá tiền!")
     .required("Vui lòng nhập giá tiền!"), // not null
-
-  status: yup.string().optional(),
 });
 
 const CreateService = () => {
@@ -87,7 +80,7 @@ const CreateService = () => {
           {
             ...data,
             ServiceParts: [{
-              partId: data.ServiceParts,
+              partId: 1,
               quantityRequired: 0
             }]
           },
@@ -106,10 +99,10 @@ const CreateService = () => {
           `/api/services/create-service`,
           {
             ...data,
-            ServiceParts: [{
-              partId: data.ServiceParts,
-              quantityRequired: 0
-            }]
+            // ServiceParts: [{
+            //   partId: data.ServiceParts,
+            //   quantityRequired: 0
+            // }]
           },
           {
             headers: {
@@ -127,13 +120,13 @@ const CreateService = () => {
     } catch (error) {
       console.error("Error:", error);
       showError(
-        error.response?.data?.message || "Không thể tạo combo dịch vụ!"
+        error.response?.data?.message || "Không thể sửa dịch vụ!"
       );
     }
   };
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Thêm dịch vụ</h1>
+      <h1 className="text-2xl font-bold mb-6">{serId ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ'}</h1>
 
       {/* Form gửi thông báo */}
       <form
@@ -155,14 +148,6 @@ const CreateService = () => {
             name={"description"}
             error={errors?.description}
           />
-          <Select 
-            name={"ServiceParts"}
-            options={CATEGORIES}
-            register={register}
-            label={"Danh mục"}
-            placeholder="Chọn danh mục"
-            error={errors?.ServiceParts}
-          />
           <TextInput
             label={"Giá tiền (VND)"}
             placeholder={"Nhập giá tiền"}
@@ -177,21 +162,13 @@ const CreateService = () => {
             register={register}
             type="number"
             name={"estimatedLaborHours"}
+            step="0.1"
             error={errors?.estimatedLaborHours}
-          />
-          <Toggle
-            isActive={true}
-            onClick={() => {
-              status === "active"
-                ? setValue("status", "inactive")
-                : setValue("status", "active");
-            }}
-            label={"Trạng thái"}
           />
         </div>
 
-        <button className="bg-primary px-4 py-2 text-white font-bold rounded-md">
-          Tạo
+        <button type="submit" className="bg-primary px-4 py-2 text-white font-bold rounded-md">
+          {serId ? 'Chỉnh sửa' : 'Tạo'}
         </button>
       </form>
     </div>
