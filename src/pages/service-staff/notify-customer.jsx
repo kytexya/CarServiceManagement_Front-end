@@ -40,7 +40,7 @@ const NotifyCustomer = () => {
     {
       id: 'Promotion',
       title: 'Khuyến mãi',
-      message: '10% off on your next service!'
+      message: 'Giảm giá 10% cho dịch vụ tiếp theo của bạn!'
     }
   ];
 
@@ -145,7 +145,7 @@ const NotifyCustomer = () => {
             >
               <option value="">Chọn khách hàng</option>
               {customers.map(customer => (
-                <option key={customer.customerId} value={customer.customerId}>
+                <option key={customer.userId} value={customer.userId}>
                   {customer.user.fullName} - {customer.user.phoneNumber}
                 </option>
               ))}
