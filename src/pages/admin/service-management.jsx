@@ -99,7 +99,7 @@ export default function ServiceManagementPage() {
       showSuccess("Xóa dịch vụ thành công");
       fetchServiceTypes();
     } catch (err) {
-      showError("Xóa thất bại");
+      showError("Không thể xóa dịch vụ liên quan đến các cuộc hẹn chưa hoàn thành");
     }
   };
 
@@ -116,7 +116,7 @@ export default function ServiceManagementPage() {
       showSuccess("Xóa combo thành công");
       fetchCombos();
     } catch (err) {
-      showError("Xóa thất bại");
+      showError("Không thể xóa dịch vụ liên quan đến các cuộc hẹn chưa hoàn thành");
     }
   };
 

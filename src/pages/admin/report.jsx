@@ -373,7 +373,7 @@ export default function AdminReportPage() {
                                 inventoryStats.expiringSoon > 0 && (
                                     <AlertCard
                                         // key={0}
-                                        title={'phụ tùng sắp hết hạn bảo hành'}
+                                        title={'Phụ tùng sắp hết hạn bảo hành'}
                                         message={`Có ${inventoryStats.expiringSoon} phụ tùng sắp hết hạn bảo hành`}
                                         type={'warning'}
                                     />

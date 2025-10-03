@@ -39,7 +39,7 @@ const ServiceOrders = () => {
           phone: order.customerPhone || 'N/A',
           service: order.services.join(", ") || 'N/A',
           status: order.status || 'pending',
-          assignedTo: order.assignedTo || 'Chưa phân công',
+          assignedTo: order.staffName || 'Chưa phân công',
           createdAt: formatDate(order.appointmentDate),
         })) || [];
         setServiceOrders(mapped);
