@@ -4,74 +4,6 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-const mockData = [
-  {
-    partId: 'PT001',
-    partName: 'Lọc dầu động cơ',
-    quantity: 5,
-    unitPrice: 350000,
-    sellingPrice: 450000,
-    supplierName: 'Toyota Long Biên',
-    status: 'Sắp hết',
-    expiryDate: '2025-06-30',
-    minThreshold: 10,
-    monthlyUsage: 45,
-    lastImported: '2024-01-15',
-  },
-  {
-    partId: 'PT002',
-    partName: 'Bugi đánh lửa',
-    quantity: 50,
-    unitPrice: 120000,
-    sellingPrice: 180000,
-    supplierName: 'Honda Việt Nam',
-    status: 'Còn hàng',
-    expiryDate: '2026-01-15',
-    minThreshold: 20,
-    monthlyUsage: 120,
-    lastImported: '2024-01-20',
-  },
-  {
-    partId: 'PT003',
-    partName: 'Dây curoa tổng',
-    quantity: 0,
-    unitPrice: 800000,
-    sellingPrice: 1200000,
-    supplierName: 'Hyundai',
-    status: 'Hết hàng',
-    expiryDate: '2024-12-01',
-    minThreshold: 5,
-    monthlyUsage: 8,
-    lastImported: '2023-12-10',
-  },
-  {
-    partId: 'PT004',
-    partName: 'Bộ lọc gió động cơ',
-    quantity: 3,
-    unitPrice: 250000,
-    sellingPrice: 350000,
-    supplierName: 'Ford Việt Nam',
-    status: 'Sắp hết',
-    expiryDate: '2025-03-15',
-    minThreshold: 8,
-    monthlyUsage: 25,
-    lastImported: '2024-01-18',
-  },
-  {
-    partId: 'PT005',
-    partName: 'Bộ phanh trước',
-    quantity: 15,
-    unitPrice: 1200000,
-    sellingPrice: 1800000,
-    supplierName: 'BMW Việt Nam',
-    status: 'Còn hàng',
-    expiryDate: '2025-08-20',
-    minThreshold: 12,
-    monthlyUsage: 35,
-    lastImported: '2024-01-22',
-  },
-];
-
 const statusColor = {
   'Còn hàng': 'bg-green-100 text-green-700',
   'Sắp hết': 'bg-yellow-100 text-yellow-800',
@@ -93,7 +25,6 @@ const LowStockIcon = () => (
 );
 
 export default function InventoryListPage() {
-  const [dataList, setDataList] = useState(mockData);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [supplierFilter, setSupplierFilter] = useState('all');
@@ -173,7 +104,7 @@ export default function InventoryListPage() {
     item.quantity === 0
       ? 'Hết hàng'
       : item.quantity < 10
-        ? 'Sắp hết hàng'
+        ? 'Sắp hết'
         : 'Còn hàng';
     const matchKeyword =
       item.partName.toLowerCase().includes(keyword.toLowerCase()) ||
@@ -182,10 +113,6 @@ export default function InventoryListPage() {
     const matchSupplier = supplierFilter === 'all' || item.supplierName === supplierFilter;
     return matchKeyword && matchStatus && matchSupplier;
   });
-
-  // Count low stock items
-  const lowStockCount = dataList.filter(item => item.quantity <= item.minThreshold && item.quantity > 0).length;
-  const outOfStockCount = dataList.filter(item => item.quantity === 0).length;
 
   const handleDeletePart = async (partId) => {
     if (!window.confirm("Bạn có chắc muốn xóa phụ tùng này?")) return;
@@ -334,7 +261,7 @@ export default function InventoryListPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredList.map(item => {
-                    const isLowStock = item.quantity <= item.minThreshold && item.quantity > 0;
+                    const isLowStock = item.quantity < 10;
                     const isOutOfStock = item.quantity === 0;
                     return (
                       <tr key={item.partId} className={`border-b last:border-0 ${
@@ -396,30 +323,6 @@ export default function InventoryListPage() {
                               </svg>
                               Xóa
                             </button>
-                            <button
-                              onClick={() => {
-                                // TODO: Implement update stock functionality
-                                alert('Chức năng cập nhật tồn kho sẽ được thêm sau');
-                              }}
-                              className="button button-warning button-sm"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                              </svg>
-                              Cập nhật
-                            </button>
-                            {/* <button
-                              onClick={() => {
-                                // TODO: Implement view usage history functionality
-                                alert(`Lịch sử sử dụng: ${item.monthlyUsage} lượt/tháng`);
-                              }}
-                              className="button button-sm"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
-                              Lịch sử
-                            </button> */}
                           </div>
                         </td>
                       </tr>

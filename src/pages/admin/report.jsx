@@ -68,47 +68,6 @@ const AlertCard = ({ title, message, type = "warning" }) => {
     );
 };
 
-// Mock data for charts
-const revenueDataMock = {
-    labels: ['Hôm nay', 'Tuần này', 'Tháng này'],
-    datasets: [
-        {
-            label: 'Doanh thu (VND)',
-            data: [2500000, 18000000, 75000000],
-            fill: true,
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            tension: 0.3,
-        },
-    ],
-};
-
-const employeePerformanceData = {
-    labels: ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D', 'Hoàng Văn E'],
-    datasets: [
-        {
-            label: 'Đơn hoàn thành',
-            data: [25, 32, 28, 19, 35],
-            backgroundColor: 'rgba(16, 185, 129, 0.5)',
-            borderColor: 'rgba(16, 185, 129, 1)',
-            borderWidth: 1,
-        },
-    ],
-};
-
-const sparePartsUsageDataMock = {
-    labels: ['Dầu nhớt', 'Lọc gió', 'Phanh', 'Lốp xe', 'Bugi', 'Bình ắc quy'],
-    datasets: [
-        {
-            label: 'Lượt sử dụng',
-            data: [45, 32, 28, 15, 22, 18],
-            backgroundColor: 'rgba(245, 158, 11, 0.5)',
-            borderColor: 'rgba(245, 158, 11, 1)',
-            borderWidth: 1,
-        },
-    ],
-};
-
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -146,25 +105,6 @@ export default function AdminReportPage() {
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [year, setYear] = useState(new Date().getFullYear());
 
-    // Mock data
-    const alertsMock = [
-        {
-            title: "Tồn kho thấp",
-            message: "Dầu nhớt Mobil 1 chỉ còn 5 lít, cần nhập thêm",
-            type: "warning"
-        },
-        {
-            title: "Phụ tùng hết hạn bảo hành",
-            message: "3 bộ lọc gió sẽ hết hạn bảo hành trong 7 ngày tới",
-            type: "danger"
-        },
-        {
-            title: "Nhân viên nghỉ phép",
-            message: "Nguyễn Văn A sẽ nghỉ phép từ 15-20/01/2025",
-            type: "info"
-        }
-    ];
-
     const handleFilterChange = () => {
         fetchDashboardSummary();
         fetchLowParts();
@@ -173,7 +113,10 @@ export default function AdminReportPage() {
         fetchRevenue();
     };
     const [summary, setSummary] = useState(null);
-    const [revenueData, setRevenueData] = useState(null);
+    const [revenueData, setRevenueData] = useState({
+        labels: [],
+        datasets: [],
+    });
     const [revenue, setRevenue] = useState(null);
     const [emplouyee, setEmployee] = useState(null);
     const [sparePartsUsageData, setSparePartsUsageData] = useState({
@@ -190,8 +133,6 @@ export default function AdminReportPage() {
         fetchParts();
         fetchOutOfStockParts();
         fetchRevenue();
-        // fetchEmployeePerformace();
-        // fetchSparePartsUsage();
     }, []);
 
     const inventoryStats = useMemo(() => {
@@ -255,7 +196,7 @@ export default function AdminReportPage() {
                 });
             }
         } catch (err) {
-            // showError("Không tải được dữ liệu thống kê");
+            showError("Không tải được dữ liệu thống kê");
         }
     };
 
@@ -313,50 +254,22 @@ export default function AdminReportPage() {
             });
             setRevenue(res.data.totalRevenue);
             setRevenueData({
-                labels: ['Hôm nay', 'Tuần này', 'Tháng này'],
+                labels: ['Tháng này'],
                 datasets: [
                     {
                         label: 'Doanh thu (VND)',
-                        data: [res.data.totalRevenue, res.data.totalRevenue, res.data.totalRevenue],
+                        data: [res.data.totalRevenue],
                         fill: true,
                         backgroundColor: 'rgba(59, 130, 246, 0.2)',
                         borderColor: 'rgba(59, 130, 246, 1)',
-                        tension: 0.3,
+                        tension: 1000,
                     },
                 ],
             });
         } catch (err) {
-            // showError("Không tải được dữ liệu thống kê");
+            showError("Không tải được dữ liệu thống kê");
         }
     };
-
-    // const fetchEmployeePerformace = async () => {
-    //     try {
-    //         const res = await axios.get(`/api/Admin/employee-performance?month=${month}&year=${year}`, {
-    //             headers: {
-    //                 Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
-    //                 'ngrok-skip-browser-warning': 'anyvalue',
-    //             }
-    //         });
-    //         setEmployee(res.data);
-    //     } catch (err) {
-    //         // showError("Không tải được dữ liệu thống kê");
-    //     }
-    // };
-
-    // const fetchSparePartsUsage = async () => {
-    //     try {
-    //         const res = await axios.get(`/api/Admin/spare-parts-usage?month=${month}&year=${year}`, {
-    //             headers: {
-    //                 Authorization: `Bearer ${localStorage.getItem("carserv-token")}`,
-    //                 'ngrok-skip-browser-warning': 'anyvalue',
-    //             }
-    //         });
-    //         setSparePartsUsageData(res.data);
-    //     } catch (err) {
-    //         // showError("Không tải được dữ liệu thống kê");
-    //     }
-    // };
 
 
 
@@ -402,8 +315,8 @@ export default function AdminReportPage() {
                 {/* Main Content */}
                 <div className="p-6">
                     {/* Stat Cards */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <StatCard
+                    <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
+                        {/* <StatCard
                             title="Đơn đang xử lý"
                             value="12"
                             icon="🔧"
@@ -415,20 +328,20 @@ export default function AdminReportPage() {
                             icon="✅"
                             color="green"
                             trend={8}
-                        />
-                        <StatCard
+                        /> */}
+                        {/* <StatCard
                             title="Doanh thu hôm nay"
                             value={`${revenue} VND`}
                             icon="💰"
                             color="amber"
-                            trend={12}
-                        />
+                            // trend={12}
+                        /> */}
                         <StatCard
                             title="Doanh thu tháng"
                             value={`${revenue} VND`}
                             icon="📈"
                             color="purple"
-                            trend={-3}
+                            // trend={-3}
                         />
                     </div>
 
@@ -470,22 +383,15 @@ export default function AdminReportPage() {
                     </div>
 
                     {/* Charts */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                         {/* Revenue Chart */}
                         <div className="lg:col-span-2 bg-white p-4 shadow-sm rounded-lg">
                             <h2 className="text-lg font-bold text-gray-900 mb-3">Doanh thu theo thời gian</h2>
                             <div className="h-64">
                                 {revenueData &&
-                                    <Line data={revenueData} options={chartOptions} />
+                                    // <Line data={revenueData} options={chartOptions} />
+                                    <Bar data={revenueData} options={chartOptions} />
                                 }
-                            </div>
-                        </div>
-
-                        {/* Employee Performance */}
-                        <div className="bg-white p-4 shadow-sm rounded-lg">
-                            <h2 className="text-lg font-bold text-gray-900 mb-3">Hiệu suất nhân viên</h2>
-                            <div className="h-64">
-                                <Bar data={employeePerformanceData} options={chartOptions} />
                             </div>
                         </div>
                     </div>

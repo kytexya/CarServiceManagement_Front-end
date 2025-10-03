@@ -4,7 +4,7 @@ function Checkbox({ name, register, label, options, error }) {
       {label && (
         <p className="block text-sm font-medium text-gray-700 mb-2">{label}</p>
       )}
-      <div className="flex gap-3 items-center">
+      <div className="flex flex-wrap gap-3 items-center">
         {options.map((option, index) => (
           <label key={index} className="flex items-center space-x-2 cursor-pointer">
             <input

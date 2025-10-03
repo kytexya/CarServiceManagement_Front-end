@@ -8,7 +8,7 @@ import IconLock from "@/components/icons/IconLock";
 import IconNotFound from "@/components/icons/IconNotFound";
 import IconPlus from "@/components/icons/IconPlus";
 import IconUnlock from "@/components/icons/IconUnlock";
-import { showError } from "@/utils";
+import { showError, showSuccess } from "@/utils";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -51,78 +51,6 @@ export default function PromotionPage() {
     fetchPromotions(pagination.currentPage);
   }, [pagination.currentPage]);
 
-  const data = [
-    {
-      id: 1,
-      name: "Giảm giá mùa hè",
-      percent: 10,
-      services: ["Rửa xe", "Thay nhớt"],
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Khuyến mãi cuối tuần",
-      percent: 15,
-      services: ["Bảo dưỡng", "Rửa xe"],
-      status: "inactive",
-    },
-    {
-      id: 3,
-      name: "Giảm giá ngày lễ",
-      percent: 20,
-      services: ["Sửa chữa", "Thay nhớt"],
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "Tri ân khách hàng",
-      percent: 25,
-      services: ["Rửa xe", "Bảo dưỡng", "Sửa chữa"],
-      status: "inactive",
-    },
-    {
-      id: 5,
-      name: "Khuyến mãi khai trương",
-      percent: 30,
-      services: ["Thay nhớt", "Sửa chữa"],
-      status: "active",
-    },
-    {
-      id: 6,
-      name: "Giảm giá buổi tối",
-      percent: 12,
-      services: ["Rửa xe"],
-      status: "active",
-    },
-    {
-      id: 7,
-      name: "Giảm giá ngày chủ nhật",
-      percent: 18,
-      services: ["Bảo dưỡng"],
-      status: "inactive",
-    },
-    {
-      id: 8,
-      name: "Ưu đãi thành viên mới",
-      percent: 22,
-      services: ["Rửa xe", "Bảo dưỡng"],
-      status: "active",
-    },
-    {
-      id: 9,
-      name: "Combo tiết kiệm",
-      percent: 35,
-      services: ["Thay nhớt", "Rửa xe", "Sửa chữa"],
-      status: "inactive",
-    },
-    {
-      id: 10,
-      name: "Khuyến mãi đặc biệt",
-      percent: 40,
-      services: ["Bảo dưỡng", "Sửa chữa"],
-      status: "active",
-    },
-  ];
 
   const filteredData = promotions.filter((user) => {
     const matchesFilter = activeFilter === "all" || user.role === activeFilter;
@@ -136,8 +64,8 @@ export default function PromotionPage() {
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       await axios.put(
-        `/api/Promotion/${id}/status`,
-        `"${currentStatus === "active" ? "inactive" : "active"}"`,
+        `/api/Promotion/toggle-status/${id}`,
+        {status: currentStatus === "Active" ? "Inactive" : "Active"},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -147,33 +75,11 @@ export default function PromotionPage() {
         }
       );
       showSuccess("Cập nhật trạng thái thành công");
-      fetchPromotions();
+      window.location.reload();
     } catch (err) {
       console.error(err);
       showError("Cập nhật trạng thái thất bại");
     }
-  };
-
-   const handleDelete = async (id) => {
-    if (confirm(`Bạn có chắc chắn muốn xoá khuyến mãi #${id}?`)) {
-      try {
-        await axios.delete(`/api/Promotion/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "ngrok-skip-browser-warning": "anyvalue",
-          },
-        });
-        showSuccess("Xoá khuyến mãi thành công");
-        fetchPromotions();
-      } catch (err) {
-        console.error(err);
-        showError("Xoá khuyến mãi thất bại");
-      }
-    }
-  };
-
-  const handleSendActivation = (userId) => {
-    showError("Chức năng gửi email kích hoạt chưa được kết nối API.");
   };
 
   return (
@@ -287,8 +193,8 @@ export default function PromotionPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {/* todo */}
-                        {/* <Toggle isActive={item.status === "active"} onClick={() => handleToggleStatus(item.promotionId, item.status)}  /> */}
-                        <Toggle isActive={true} onClick={() => handleToggleStatus(item.promotionId, item.status)}  />
+                        <Toggle isActive={item.status === "Active"} onClick={() => handleToggleStatus(item.promotionId, item.status)}  />
+                        {/* <Toggle isActive={true} onClick={() => handleToggleStatus(item.promotionId, item.status)}  /> */}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex flex-wrap gap-2">
@@ -298,9 +204,9 @@ export default function PromotionPage() {
                           >
                             <IconEdit />
                           </a>
-                          <button onClick={() => handleDelete(item.promotionId)} className="text-red-600 hover:text-red-900">
+                          {/* <button onClick={() => handleDelete(item.promotionId)} className="text-red-600 hover:text-red-900">
                             <IconBin />
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>

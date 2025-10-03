@@ -75,7 +75,7 @@ export default function SidebarStaff() {
             Thông báo dịch vụ
           </div>
         </Link>
-        <Link to="/service-staff/vehicle-records">
+        {/* <Link to="/service-staff/vehicle-records">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
               checkActive("vehicle-records") ? "bg-white text-primary" : "text-white hover:bg-white/20"
@@ -83,8 +83,8 @@ export default function SidebarStaff() {
           >
             Quản lý hồ sơ xe khách hàng
           </div>
-        </Link>
-        <Link to="/service-staff/problem-reporting">
+        </Link> */}
+        {/* <Link to="/service-staff/problem-reporting">
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${
               checkActive("problem-reporting") ? "bg-white text-primary" : "text-white hover:bg-white/20"
@@ -92,7 +92,7 @@ export default function SidebarStaff() {
           >
             Báo cáo lỗi / Tạm ngừng xử lý
           </div>
-        </Link>
+        </Link> */}
       </div>
       <div className="py-4 flex flex-col justify-center w-full px-4 gap-3">
         <button className="button !bg-blue-600 !text-white !min-w-[104px]">

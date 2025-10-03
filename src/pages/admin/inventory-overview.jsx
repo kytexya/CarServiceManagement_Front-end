@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import SidebarAdmin from '@/components/common/sidebar-admin';
-import { showError } from '@/utils';
+import { showError, showSuccess } from '@/utils';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import Pagination from '@/components/common/pagination';
 
 const StatCard = ({ title, value, icon, color = "blue", trend = null }) => (
     <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -27,7 +27,7 @@ const AlertCard = ({ title, message, type = "warning", count = 0 }) => {
         danger: "bg-red-50 border-red-200 text-red-800",
         info: "bg-blue-50 border-blue-200 text-blue-800"
     };
-    
+
     return (
         <div className={`p-3 rounded-lg border ${colors[type]}`}>
             <div className="flex items-center justify-between">
@@ -64,62 +64,14 @@ const AlertCard = ({ title, message, type = "warning", count = 0 }) => {
     );
 };
 
-const InventoryItem = ({ item }) => (
-    <div className="bg-white p-3 rounded-lg shadow-sm border">
-        <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-600">{item.partName}</span>
-                </div>
-                <div>
-                    <h4 className="text-sm font-medium text-gray-900">{item.partName}</h4>
-                    <p className="text-xs text-gray-500">{item.category}</p>
-                </div>
-            </div>
-            <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{item.quantity} {item.unit}</p>
-                <p className={`text-xs ${item.status === 'low' ? 'text-red-600' : item.status === 'normal' ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {item.status === 'low' ? 'Sắp hết' : item.status === 'normal' ? 'Bình thường' : 'Cần nhập'}
-                </p>
-            </div>
-        </div>
-    </div>
-);
-
-const HistoryItem = ({ transaction }) => (
-    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border">
-        <div className="flex items-center space-x-3">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                transaction.type === 'import' ? 'bg-green-100' : 'bg-red-100'
-            }`}>
-                <span className={`text-sm font-medium ${
-                    transaction.type === 'import' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                    {transaction.type === 'import' ? '↓' : '↑'}
-                </span>
-            </div>
-            <div>
-                <h4 className="text-sm font-medium text-gray-900">{transaction.item}</h4>
-                <p className="text-xs text-gray-500">{transaction.date}</p>
-            </div>
-        </div>
-        <div className="text-right">
-            <p className={`text-sm font-medium ${
-                transaction.type === 'import' ? 'text-green-600' : 'text-red-600'
-            }`}>
-                {transaction.type === 'import' ? '+' : '-'}{transaction.quantity} {transaction.unit}
-            </p>
-            <p className="text-xs text-gray-500">{transaction.user}</p>
-        </div>
-    </div>
-);
-
 export default function InventoryOverviewPage() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('overview');
     const [parts, setParts] = useState([]);
     const [lowParts, setLowParts] = useState([]);
     const [outOfStockParts, setOutOfStockParts] = useState([]);
+    const [keyword, setKeyword] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [supplierFilter, setSupplierFilter] = useState('all');
     const [pagination, setPagination] = useState({
         totalItems: 0,
         totalPages: 1,
@@ -184,40 +136,6 @@ export default function InventoryOverviewPage() {
         }
     ].filter(alert => alert.count > 0);
 
-    const lowStockItemsMock = [
-        { name: "Dầu nhớt Mobil 1", category: "Dầu nhớt", quantity: 5, unit: "lít", status: "low" },
-        { name: "Lọc gió động cơ", category: "Lọc", quantity: 2, unit: "cái", status: "low" },
-        { name: "Phanh trước", category: "Phanh", quantity: 1, unit: "bộ", status: "out" },
-        { name: "Bugi đánh lửa", category: "Điện", quantity: 3, unit: "bộ", status: "low" },
-        { name: "Bình ắc quy", category: "Điện", quantity: 0, unit: "cái", status: "out" }
-    ];
-
-    const lowStockItems = parts
-    .filter(part => part.quantity <= 10 && part.quantity > 0)
-    .map(part => ({
-        name: part.partName,
-        category: "Chưa phân loại",
-        quantity: part.quantity,
-        unit: 'cái',
-        status: part.quantity === 0 ? "out" : "low"
-    }));
-
-    const recentHistory = [
-        { type: "import", item: "Dầu nhớt Mobil 1", quantity: 50, unit: "lít", date: "Hôm nay 14:30", user: "Nguyễn Văn A" },
-        { type: "export", item: "Lọc gió động cơ", quantity: 2, unit: "cái", date: "Hôm nay 11:15", user: "Trần Thị B" },
-        { type: "import", item: "Phanh trước", quantity: 10, unit: "bộ", date: "Hôm qua 16:45", user: "Lê Văn C" },
-        { type: "export", item: "Bugi đánh lửa", quantity: 1, unit: "bộ", date: "Hôm qua 09:20", user: "Phạm Thị D" },
-        { type: "import", item: "Bình ắc quy", quantity: 5, unit: "cái", date: "2 ngày trước", user: "Hoàng Văn E" }
-    ];
-
-    const handleViewDetails = () => {
-        navigate('/admin/inventory-details');
-    };
-
-    const handleExportReport = () => {
-        showError("Chức năng xuất báo cáo chưa được kết nối API.");
-    };
-
     useEffect(() => {
         fetchParts(pagination.currentPage)
         fetchLowParts()
@@ -226,7 +144,7 @@ export default function InventoryOverviewPage() {
 
     const fetchParts = async (page = 1) => {
         try {
-            const res = await axios.get(`/api/Parts?currentPage=${page}&pageSize=${pagination.pageSize}`, { 
+            const res = await axios.get(`/api/Parts?currentPage=${page}&pageSize=${pagination.pageSize}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
@@ -247,7 +165,7 @@ export default function InventoryOverviewPage() {
     }
     const fetchLowParts = async () => {
         try {
-            const res = await axios.get("/api/Parts/get-low-parts", { 
+            const res = await axios.get("/api/Parts/get-low-parts", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
@@ -261,7 +179,7 @@ export default function InventoryOverviewPage() {
     }
     const fetchOutOfStockParts = async () => {
         try {
-            const res = await axios.get("/api/Parts/get-out-of-stock-parts", { 
+            const res = await axios.get("/api/Parts/get-out-of-stock-parts", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'ngrok-skip-browser-warning': 'anyvalue',
@@ -273,6 +191,61 @@ export default function InventoryOverviewPage() {
             showError("Không tải được danh sách phụ tùng");
         }
     }
+
+    const suppliers = Array.from(new Set(parts.map(item => item.supplierName)));
+
+    const filteredList = parts.filter(item => {
+        const status =
+            item.quantity === 0
+                ? 'Hết hàng'
+                : item.quantity < 10
+                    ? 'Sắp hết'
+                    : 'Còn hàng';
+        const matchKeyword =
+            item.partName.toLowerCase().includes(keyword.toLowerCase()) ||
+            item.partId.toString().toLowerCase().includes(keyword.toLowerCase());
+        const matchStatus = statusFilter === 'all' || status === statusFilter;
+        const matchSupplier = supplierFilter === 'all' || item.supplierName === supplierFilter;
+        return matchKeyword && matchStatus && matchSupplier;
+    });
+
+    const statusColor = {
+        'Còn hàng': 'bg-green-100 text-green-700',
+        'Sắp hết': 'bg-yellow-100 text-yellow-800',
+        'Hết hàng': 'bg-red-100 text-red-700',
+    };
+
+    const handleDeletePart = async (partId) => {
+        if (!window.confirm("Bạn có chắc muốn xóa phụ tùng này?")) return;
+
+        try {
+            await axios.delete(`/api/Parts/delete-part/${partId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                }
+            });
+            fetchParts();
+            showSuccess("Xóa phụ tùng thành công!");
+        } catch (err) {
+            console.error("Lỗi khi xoá:", err);
+            showError("Xóa phụ tùng thất bại!");
+        }
+    };
+
+    // Icon component for out of stock warning
+    const OutOfStockIcon = () => (
+        <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        </svg>
+    );
+
+    // Icon component for low stock warning (yellow)
+    const LowStockIcon = () => (
+        <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        </svg>
+    );
 
     return (
         <div className="flex flex-row w-full h-screen bg-gray-50">
@@ -290,50 +263,40 @@ export default function InventoryOverviewPage() {
                             <p className="text-xs text-gray-600">Tổng quan kho và cảnh báo</p>
                         </div>
                     </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-3">
-                        <button onClick={handleViewDetails} className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Xem chi tiết
-                        </button>
-                        <button onClick={handleExportReport} className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            Xuất báo cáo
-                        </button>
-                    </div>
                 </div>
 
                 {/* Main Content */}
                 <div className="p-6">
                     {/* Stat Cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                        <StatCard 
-                            title="Tổng phụ tùng" 
-                            value={inventoryStats.totalItems.toString()} 
-                            icon="📦" 
+                        <StatCard
+                            title="Tổng phụ tùng"
+                            value={inventoryStats.totalItems.toString()}
+                            icon="📦"
                             color="blue"
                         />
-                        <StatCard 
-                            title="Sắp hết" 
-                            value={inventoryStats.lowStock.toString()} 
-                            icon="⚠️" 
+                        <StatCard
+                            title="Sắp hết"
+                            value={inventoryStats.lowStock.toString()}
+                            icon="⚠️"
                             color="yellow"
                         />
-                        <StatCard 
-                            title="Hết hàng" 
-                            value={inventoryStats.outOfStock.toString()} 
-                            icon="❌" 
+                        <StatCard
+                            title="Hết hàng"
+                            value={inventoryStats.outOfStock.toString()}
+                            icon="❌"
                             color="red"
                         />
-                        <StatCard 
-                            title="Sắp hết hạn" 
-                            value={inventoryStats.expiringSoon.toString()} 
-                            icon="⏰" 
+                        <StatCard
+                            title="Sắp hết hạn"
+                            value={inventoryStats.expiringSoon.toString()}
+                            icon="⏰"
                             color="orange"
                         />
-                        <StatCard 
-                            title="Tổng giá trị" 
-                            value={inventoryStats.totalValue} 
-                            icon="💰" 
+                        <StatCard
+                            title="Tổng giá trị"
+                            value={inventoryStats.totalValue}
+                            icon="💰"
                             color="green"
                         />
                     </div>
@@ -343,7 +306,7 @@ export default function InventoryOverviewPage() {
                         <h2 className="text-lg font-bold text-gray-900 mb-3">Cảnh báo kho</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             {alerts.map((alert, index) => (
-                                <AlertCard 
+                                <AlertCard
                                     key={index}
                                     title={alert.title}
                                     message={alert.message}
@@ -354,106 +317,194 @@ export default function InventoryOverviewPage() {
                         </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="mb-6">
-                        <div className="border-b border-gray-200">
-                            <nav className="-mb-px flex space-x-8">
-                                <button
-                                    onClick={() => setActiveTab('overview')}
-                                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                                        activeTab === 'overview'
-                                            ? 'border-blue-500 text-blue-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
-                                >
-                                    Tổng quan
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('lowStock')}
-                                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                                        activeTab === 'lowStock'
-                                            ? 'border-blue-500 text-blue-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
-                                >
-                                    Sắp hết hàng
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('history')}
-                                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                                        activeTab === 'history'
-                                            ? 'border-blue-500 text-blue-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
-                                >
-                                    Lịch sử gần đây
-                                </button>
-                            </nav>
-                        </div>
-                    </div>
-
                     {/* Tab Content */}
                     <div>
-                        {activeTab === 'overview' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div className="bg-white p-4 rounded-lg shadow-sm">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-3">Phân bố theo danh mục</h3>
-                                    <div className="space-y-3">
-                                        {parts?.map(part => {
-                                            return (
-                                                <div key={part.partId} className="flex justify-between items-center">
-                                                    <span className="text-sm text-gray-600">{part.partName}</span>
-                                                    {/* <span className="text-sm text-gray-600">{part.partName} loại</span> */}
-                                                </div>
-                                            )
-                                        })}
+                        <div className="bg-white p-4 rounded-lg shadow-sm">
+                            <div className='flex justify-between px-2'>
+                                <h3 className="text-lg font-bold text-gray-900 mb-3">Danh sách phụ tùng</h3>
+                                <Link to="/inventory-manager/inventory/add" className="button primary">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Thêm Phụ Tùng
+                                </Link>
+                            </div>
+                            <div className="p-2">
+                                <div className="bg-white rounded-lg border p-6 mb-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Tìm kiếm</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Tìm theo tên hoặc mã phụ tùng..."
+                                                value={keyword}
+                                                onChange={(e) => setKeyword(e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
+                                            <select
+                                                value={statusFilter}
+                                                onChange={(e) => setStatusFilter(e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            >
+                                                <option value="all">Tất cả trạng thái</option>
+                                                <option value="Còn hàng">Còn hàng</option>
+                                                <option value="Sắp hết">Sắp hết</option>
+                                                <option value="Hết hàng">Hết hàng</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Nhà cung cấp</label>
+                                            <select
+                                                value={supplierFilter}
+                                                onChange={(e) => setSupplierFilter(e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            >
+                                                <option value="all">Tất cả</option>
+                                                {suppliers.map(supplier => (
+                                                    <option key={supplier} value={supplier}>{supplier}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="flex items-end">
+                                            <button
+                                                onClick={() => {
+                                                    setKeyword('');
+                                                    setStatusFilter('all');
+                                                    setSupplierFilter('all');
+                                                }}
+                                                className="w-full button"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                Làm mới
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="bg-white p-4 rounded-lg shadow-sm">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-3">Hoạt động gần đây</h3>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Nhập hàng hôm nay</span>
-                                            <span className="text-sm font-medium text-green-600">+15</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Xuất hàng hôm nay</span>
-                                            <span className="text-sm font-medium text-red-600">-8</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Đơn hàng đang xử lý</span>
-                                            <span className="text-sm font-medium">3</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Cần nhập gấp</span>
-                                            <span className="text-sm font-medium text-red-600">5</span>
-                                        </div>
+
+                                <div className="bg-white rounded-lg border overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Mã phụ tùng
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Tên phụ tùng
+                                                    </th>
+                                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Số lượng
+                                                    </th>
+                                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Giá nhập
+                                                    </th>
+                                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Giá bán
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Nhà cung cấp
+                                                    </th>
+                                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Hạn bảo hành
+                                                    </th>
+                                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Trạng thái
+                                                    </th>
+                                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Hành động
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {filteredList.map(item => {
+                                                    const isLowStock = item.quantity < 10;
+                                                    const isOutOfStock = item.quantity === 0;
+                                                    return (
+                                                        <tr key={item.partId} className={`border-b last:border-0 ${isOutOfStock ? 'bg-red-50' : isLowStock ? 'bg-amber-50' : ''
+                                                            }`}>
+                                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                                                {item.partId}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-gray-900">
+                                                                {item.partName}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-center">
+                                                                <div className="flex items-center justify-center gap-2">
+                                                                    <span className={`font-bold ${isOutOfStock ? 'text-red-600' :
+                                                                        isLowStock ? 'text-amber-600' :
+                                                                            'text-gray-900'
+                                                                        }`}>
+                                                                        {item.quantity}
+                                                                    </span>
+                                                                    {isOutOfStock && <OutOfStockIcon />}
+                                                                    {isLowStock && <LowStockIcon />}
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-right text-gray-900">
+                                                                {item.currentUnitPrice?.toLocaleString('vi-VN')} ₫
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-right text-gray-900">
+                                                                {item.currentUnitPrice?.toLocaleString('vi-VN')} ₫
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-gray-900">
+                                                                {item.supplierName}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
+                                                                {item.expiryDate}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-center">
+                                                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColor[item.status]}`}>
+                                                                    {item.quantity === 0 ? 'Hết hàng' : item.quantity < 10 ? 'Sắp hết hàng' : 'Còn hàng'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-center">
+                                                                <div className="flex items-center justify-center gap-2">
+                                                                    <button
+                                                                        onClick={() => navigate(`/inventory-manager/inventory/edit/${item.partId}`)}
+                                                                        className="button button-info button-sm"
+                                                                    >
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                        </svg>
+                                                                        Sửa
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeletePart(item.partId)}
+                                                                        className="button button-danger button-sm"
+                                                                    >
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                        </svg>
+                                                                        Xóa
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
-                            </div>
-                        )}
 
-                        {activeTab === 'lowStock' && (
-                            <div className="bg-white p-4 rounded-lg shadow-sm">
-                                <h3 className="text-lg font-bold text-gray-900 mb-3">Phụ tùng sắp hết / hết hàng</h3>
-                                <div className="space-y-3">
-                                    {lowParts.map((item, index) => (
-                                        <InventoryItem key={index} item={item} />
-                                    ))}
-                                </div>
+                                {pagination.totalItems > 0 && filteredList.length > 0 && (
+                                    <Pagination
+                                        totalPage={pagination.totalPages}
+                                        currentPage={pagination.currentPage}
+                                        totalItems={pagination.totalItems}
+                                        pageSize={pagination.pageSize}
+                                        onPageChange={(page) =>
+                                            setPagination((prev) => ({ ...prev, currentPage: page }))
+                                        }
+                                    />
+                                )}
                             </div>
-                        )}
-
-                        {activeTab === 'history' && (
-                            <div className="bg-white p-4 rounded-lg shadow-sm">
-                                <h3 className="text-lg font-bold text-gray-900 mb-3">Lịch sử nhập - xuất gần đây</h3>
-                                <div className="space-y-3">
-                                    {recentHistory.map((transaction, index) => (
-                                        <HistoryItem key={index} transaction={transaction} />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>

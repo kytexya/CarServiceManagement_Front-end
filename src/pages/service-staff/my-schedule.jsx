@@ -175,7 +175,7 @@ const MySchedule = () => {
                     {schedule && (
                       <div className="mt-1">
                         <div className="text-xs text-blue-600 font-medium">{schedule.shift}</div>
-                        {getStatusBadge(schedule.status)}
+                        {/* {getStatusBadge(schedule.status)} */}
                       </div>
                     )}
                   </>
@@ -197,10 +197,6 @@ const MySchedule = () => {
               <div className="flex items-center justify-between">
                 <span className="font-medium">Ca làm việc:</span>
                 <span>{getScheduleForDate(selectedDate).shift}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Trạng thái:</span>
-                {getStatusBadge(getScheduleForDate(selectedDate).status)}
               </div>
               <div>
                 <span className="font-medium">Công việc:</span>

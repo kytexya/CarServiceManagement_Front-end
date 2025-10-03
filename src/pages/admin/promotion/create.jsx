@@ -1,12 +1,8 @@
-import Select from "@/components/form/select";
-import { SERVICES, UNITS } from "@/utils/constant";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import TextInput from "@/components/form/input";
-import Checkbox from "@/components/form/checkbox";
-import Toggle from "@/components/form/toggle";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { showError, showSuccess } from "@/utils";
@@ -18,15 +14,6 @@ const schema = yup.object().shape({
     .number()
     .typeError("Vui lòng chọn phần trăm")
     .required("Vui lòng chọn phần trăm"), // not null
-
-  services: yup
-    .array()
-    .of(yup.number().integer("Mỗi dịch vụ phải là số nguyên"))
-    .min(1, "Phải chọn ít nhất một dịch vụ")
-    .typeError("Phải chọn ít nhất một dịch vụ")
-    .required("Trường dịch vụ không được để trống"),
-
-  status: yup.string().optional(),
 });
 
 const CreatePromotion = () => {
@@ -45,7 +32,6 @@ const CreatePromotion = () => {
       status: "active",
     },
   });
-  const status = watch("status");
 
   useEffect(() => {
     if (promotionId) {
@@ -62,8 +48,6 @@ const CreatePromotion = () => {
 
           setValue("title", promo.title);
           setValue("discountPercentage", promo.discountPercentage);
-          setValue("services", promo.services?.map(s => s.id));
-          setValue("status", promo.status);
         } catch (error) {
           console.error(error);
           showError("Không thể lấy dữ liệu khuyến mãi!");
@@ -107,7 +91,7 @@ const CreatePromotion = () => {
   };
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Thêm khuyến mãi</h1>
+      <h1 className="text-2xl font-bold mb-6">{promotionId ? 'Chỉnh sửa khuyến mãi' : 'Thêm khuyến mãi'}</h1>
 
       {/* Form gửi thông báo */}
       <form
@@ -130,26 +114,10 @@ const CreatePromotion = () => {
             name={"discountPercentage"}
             error={errors?.discountPercentage}
           />
-          <Checkbox
-            name={"services"}
-            register={register}
-            label={"Dịch vụ được áp dụng"}
-            error={errors?.services}
-            options={SERVICES}
-          />
-          <Toggle
-            isActive={true}
-            onClick={() => {
-              status === "active"
-                ? setValue("status", "inactive")
-                : setValue("status", "active");
-            }}
-            label={"Trạng thái"}
-          />
         </div>
 
         <button className="bg-primary px-4 py-2 text-white font-bold rounded-md">
-          Tạo
+          {promotionId ? 'Chỉnh sửa' : 'Tạo'}
         </button>
       </form>
     </div>

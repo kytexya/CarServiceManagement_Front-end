@@ -79,7 +79,7 @@ const UsedPartsManagement = () => {
       <h1 className="text-2xl font-bold mb-6">Quản lý phụ tùng đã sử dụng</h1>
 
       {/* Form thêm phụ tùng đã sử dụng */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
+      {/* <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Thêm phụ tùng đã sử dụng</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
@@ -149,7 +149,7 @@ const UsedPartsManagement = () => {
         >
           Thêm phụ tùng
         </button>
-      </div>
+      </div> */}
 
       {/* Bảng danh sách phụ tùng đã sử dụng */}
       <div className="bg-white rounded-lg shadow p-6">

@@ -69,7 +69,7 @@ const Dashboard = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
       {/* Thống kê tổng quan */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg border p-6 shadow-sm">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-blue-100">
@@ -96,19 +96,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        {/* <div className="bg-white rounded-lg border p-6 shadow-sm">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-amber-100">
-              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Hiệu suất làm việc</p>
-              <p className="text-2xl font-bold text-gray-900">85%</p>
-            </div>
-          </div>
-        </div> */}
         <div className="bg-white rounded-lg border p-6 shadow-sm">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-purple-100">
@@ -134,7 +121,7 @@ const Dashboard = () => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div className="bg-amber-500 h-2 rounded-full" style={{
-                width: `${(statusStats.filter(i => i.status === "Vehicle Received" || i.status === null).length / statusStats.length) * 100
+                width: `${(statusStats.filter(i => i.status === "pending" || i.status === null).length / statusStats.length) * 100
                   }%`
               }}></div>
             </div>
@@ -144,7 +131,7 @@ const Dashboard = () => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div className="bg-blue-500 h-2 rounded-full" style={{
-                width: `${(statusStats.filter(i => i.status === "process").length / statusStats.length) * 100
+                width: `${(statusStats.filter(i => i.status === "In Service").length / statusStats.length) * 100
                   }%`
               }}></div>
             </div>
@@ -154,7 +141,7 @@ const Dashboard = () => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div className="bg-green-500 h-2 rounded-full" style={{
-                width: `${(statusStats.filter(i => i.status === "complete").length / statusStats.length) * 100
+                width: `${(statusStats.filter(i => i.status === "Completed").length / statusStats.length) * 100
                   }%`
               }}></div>
             </div>
