@@ -42,13 +42,13 @@ export default function SidebarAdmin() {
             Cấu hình dịch vụ
           </div>
         </Link>
-        <Link to='/admin/service-orders'>
+        {/* <Link to='/admin/service-orders'>
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('service-orders') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}
           >
             Quản lý đơn hàng
           </div>
-        </Link>
+        </Link> */}
         <Link to='/admin/schedule-management'>
           <div
             className={`px-6 py-4 w-full text-md font-bold transition-all duration-300 ${checkActive('schedule-management') ? 'bg-white text-primary' : 'text-white hover:bg-white/20'}`}

@@ -81,7 +81,7 @@ const NotifyCustomer = () => {
           message: message,
           sentAt: new Date().toISOString(),
           isRead: false,
-          type: selectedTemplate,
+          type: 'System',
         }, {
           headers
         });

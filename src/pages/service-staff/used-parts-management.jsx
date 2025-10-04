@@ -181,7 +181,7 @@ const UsedPartsManagement = () => {
           </table>
         </div>
         {/* Chức năng cảnh báo tồn kho sẽ được tích hợp với API backend */}
-        <p className="mt-4 text-sm text-gray-600">* Chức năng tự động trừ tồn kho và cảnh báo nếu thiếu sẽ được tích hợp khi có API backend.</p>
+        {/* <p className="mt-4 text-sm text-gray-600">* Chức năng tự động trừ tồn kho và cảnh báo nếu thiếu sẽ được tích hợp khi có API backend.</p> */}
       </div>
     </div>
   );
