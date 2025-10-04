@@ -21,6 +21,7 @@ export default function ScheduleManagementPage() {
         pageSize: 10,
     });
     const token = localStorage.getItem("carserv-token");
+    const headers = { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" };
 
     useEffect(() => {
         if (activeTab === "appointments") {
@@ -142,6 +143,22 @@ export default function ScheduleManagementPage() {
         setShowAssignModal(true);
     };
 
+    const handleAssign = async () => {
+        if (!selectedStaff) {
+            showError("Vui lòng chọn nhân viên!");
+            return;
+        }
+        try {
+
+            await axios.put(`/api/Appointment/${selectedAppointment.appointmentId},${selectedStaff}`, {}, { headers });
+            setShowAssignModal(false);
+            fetchAppointments(pagination.currentPage);
+            fetchStaffList();
+        } catch (err) {
+            showError("Không tải được danh sách nhân viên");
+        }
+    }
+
     const roundToNearest30 = (dateString) => {
         const d = new Date(dateString);
 
@@ -162,7 +179,6 @@ export default function ScheduleManagementPage() {
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [selectedStaffV2, setSelectedStaffV2] = useState(null);
     const [schedules, setSchedules] = useState([]);
-    const headers = { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "anyvalue" };
 
     const handleUpdateWorkingHours = async () => {
         try {
@@ -212,6 +228,11 @@ export default function ScheduleManagementPage() {
         } catch (err) {
             showError("Cập nhật thất bại");
         }
+    };
+
+    const [openDay, setOpenDay] = useState(null);
+    const toggleDay = (dayName) => {
+        setOpenDay(openDay === dayName ? null : dayName);
     };
 
     return (
@@ -366,7 +387,7 @@ export default function ScheduleManagementPage() {
                                                                 onClick={() => handleAssignStaff(appointment)}
                                                                 className="text-green-600 hover:text-green-900"
                                                             >
-                                                                Gán NV
+                                                                Gán nhân viên
                                                             </button>
                                                         </div>
                                                     </td>
@@ -445,8 +466,35 @@ export default function ScheduleManagementPage() {
                                                         <span className="ml-2 text-sm text-gray-700">{day.isOpen ? 'Mở cửa' : 'Không mở cửa'}</span>
                                                     </label>
                                                 </div>
+                                                <button
+                                                    onClick={() => toggleDay(day.dayName)}
+                                                    className="ml-2 p-1 rounded transition"
+                                                >
+                                                    {openDay === day.dayName ? (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-5 w-5 text-gray-600"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-5 w-5 text-gray-600"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    )}
+                                                </button>
                                             </div>
-                                            <div className="px-8 mt-2">
+                                            <div className={`px-8 transition-all duration-300 ease-in-out overflow-hidden ${openDay === day.dayName ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"
+                                                }`}>
                                                 <table className="w-full text-sm border-collapse">
                                                     <thead>
                                                         <tr className="bg-gray-100 text-left">
@@ -517,17 +565,7 @@ export default function ScheduleManagementPage() {
                                 Huỷ
                             </button>
                             <button
-                                onClick={() => {
-                                    if (!selectedStaff) {
-                                        showError("Vui lòng chọn nhân viên!");
-                                        return;
-                                    }
-                                    // TODO: call API
-                                    console.log(
-                                        `Gán ${selectedStaff} cho lịch hẹn ${selectedAppointment.id}`
-                                    );
-                                    setShowAssignModal(false);
-                                }}
+                                onClick={() => handleAssign()}
                                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
                             >
                                 Xác nhận
