@@ -80,12 +80,14 @@ export default function DashboardPage() {
   const [parts, setParts] = useState([]);
   const [lowParts, setLowParts] = useState([]);
   const [outOfStockParts, setOutOfStockParts] = useState([]);
+  const [sum, setSum] = useState(0);
   const token = localStorage.getItem("carserv-token");
 
   useEffect(() => {
     fetchParts()
     fetchLowParts()
     fetchOutOfStockParts()
+    fetchLatestPriceSum()
   }, []);
 
 
@@ -131,6 +133,20 @@ export default function DashboardPage() {
       showError("Không tải được danh sách phụ tùng");
     }
   }
+  const fetchLatestPriceSum = async () => {
+    try {
+      const res = await axios.get("/api/Parts/latest-price-sum", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'anyvalue',
+        },
+        withCredentials: true
+      });
+      setSum(res.data.totalLatestPrice || 0);
+    } catch (err) {
+      showError("Không tải được danh sách phụ tùng");
+    }
+  }
 
   const inventoryStats = useMemo(() => {
     if (!parts || parts.length === 0) {
@@ -147,11 +163,8 @@ export default function DashboardPage() {
     soonThreshold.setMonth(soonThreshold.getMonth() + 1);
 
     let expiringSoon = 0;
-    let totalValue = 0;
 
     parts.forEach(part => {
-      totalValue += (part.unitPrice || 0) * (part.quantity || 0);
-
       if (part.expiryDate && new Date(part.expiryDate) <= soonThreshold) {
         expiringSoon++;
       }
@@ -162,7 +175,7 @@ export default function DashboardPage() {
       lowStock: lowParts.length,
       outOfStock: outOfStockParts.length,
       expiringSoon,
-      totalValue: totalValue.toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+      totalValue: sum.toString() + ' VND'
     };
   }, [parts, lowParts, outOfStockParts]);
 
