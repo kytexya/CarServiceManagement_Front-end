@@ -24,72 +24,72 @@ export default function ScheduleManagementPage() {
 
     useEffect(() => {
         if (activeTab === "appointments") {
-          fetchAppointments(pagination.currentPage);
-          fetchStaffList();
+            fetchAppointments(pagination.currentPage);
+            fetchStaffList();
         } else {
-          fetchWokingHours();
+            fetchWokingHours();
         }
     }, [activeTab, pagination.currentPage]);
 
     const fetchAppointments = async (page = 1) => {
         try {
-        const res = await axios.get(`/api/Appointment?currentPage=${page}&pageSize=${pagination.pageSize}`, { 
-            headers: {
-            Authorization: `Bearer ${token}`,
-            'ngrok-skip-browser-warning': 'anyvalue',
-            },
-            withCredentials: true
-        });
-        setAppointments(res.data.items || []);
-        setPagination((prev) => ({
-            ...prev,
-            totalItems: res.data.totalItems,
-            totalPages: res.data.totalPages,
-            currentPage: res.data.currentPage,
-            pageSize: res.data.pageSize,
-        }));
+            const res = await axios.get(`/api/Appointment?currentPage=${page}&pageSize=${pagination.pageSize}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                withCredentials: true
+            });
+            setAppointments(res.data.items || []);
+            setPagination((prev) => ({
+                ...prev,
+                totalItems: res.data.totalItems,
+                totalPages: res.data.totalPages,
+                currentPage: res.data.currentPage,
+                pageSize: res.data.pageSize,
+            }));
         } catch (err) {
-        console.log(err);
-        showError("Không tải được");
+            console.log(err);
+            showError("Không tải được");
         }
     };
 
     const fetchWokingHours = async () => {
         try {
-        const res = await axios.get("/api/Schedule/system-schedule", { 
-            headers: {
-            Authorization: `Bearer ${token}`,
-            'ngrok-skip-browser-warning': 'anyvalue',
-            },
-            withCredentials: true
-        });
-        if (res.data?.data?.days) {
-            const formattedWorkingHours = Object.values(res.data.data.days).map(day => {
-                const isOpen = day.totalAvailableStaff > 0;
-                const firstSlot = day.timeSlots[0];
-                const lastSlot = day.timeSlots[day.timeSlots.length - 1];
-
-                return {
-                    dayName: day.dayName, 
-                    displayName: day.dayName === 'Monday' ? 'Thứ 2' :
-                                day.dayName === 'Tuesday' ? 'Thứ 3' :
-                                day.dayName === 'Wednesday' ? 'Thứ 4' :
-                                day.dayName === 'Thursday' ? 'Thứ 5' :
-                                day.dayName === 'Friday' ? 'Thứ 6' :
-                                day.dayName === 'Saturday' ? 'Thứ 7' : 'Chủ nhật',
-                    start: firstSlot.startTime.slice(0,5),
-                    end: lastSlot.endTime.slice(0,5),
-                    isOpen,
-                    timeSlots: day.timeSlots
-                };
+            const res = await axios.get("/api/Schedule/system-schedule", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'anyvalue',
+                },
+                withCredentials: true
             });
-            setWorkingHours(formattedWorkingHours)
-        } else {
-            setWorkingHours([])
-        }
+            if (res.data?.data?.days) {
+                const formattedWorkingHours = Object.values(res.data.data.days).map(day => {
+                    const isOpen = day.totalAvailableStaff > 0;
+                    const firstSlot = day.timeSlots[0];
+                    const lastSlot = day.timeSlots[day.timeSlots.length - 1];
+
+                    return {
+                        dayName: day.dayName,
+                        displayName: day.dayName === 'Monday' ? 'Thứ 2' :
+                            day.dayName === 'Tuesday' ? 'Thứ 3' :
+                                day.dayName === 'Wednesday' ? 'Thứ 4' :
+                                    day.dayName === 'Thursday' ? 'Thứ 5' :
+                                        day.dayName === 'Friday' ? 'Thứ 6' :
+                                            day.dayName === 'Saturday' ? 'Thứ 7' : 'Chủ nhật',
+                        start: firstSlot.startTime.slice(0, 5),
+                        end: lastSlot.endTime.slice(0, 5),
+                        isOpen,
+                        timeSlots: day.timeSlots
+                    };
+                });
+                setWorkingHours(formattedWorkingHours)
+            } else {
+                setWorkingHours([])
+            }
         } catch (err) {
-        console.log(err);
-        showError("Không tải được");
+            console.log(err);
+            showError("Không tải được");
         }
     };
 
@@ -129,10 +129,10 @@ export default function ScheduleManagementPage() {
 
     const fetchStaffList = async () => {
         try {
-        const res = await axios.get("/api/Account/service-staffs", { headers });
-        setStaffList(res.data || []);
+            const res = await axios.get("/api/Account/service-staffs", { headers });
+            setStaffList(res.data || []);
         } catch (err) {
-        showError("Không tải được danh sách nhân viên");
+            showError("Không tải được danh sách nhân viên");
         }
     };
 
@@ -166,29 +166,29 @@ export default function ScheduleManagementPage() {
 
     const handleUpdateWorkingHours = async () => {
         try {
-        const res = await axios.get("/api/Account/service-staffs", { headers });
-        setStaffs(res.data || []);
-        setShowStaffModal(true);
+            const res = await axios.get("/api/Account/service-staffs", { headers });
+            setStaffs(res.data || []);
+            setShowStaffModal(true);
         } catch (err) {
-        showError("Không tải được danh sách nhân viên");
+            showError("Không tải được danh sách nhân viên");
         }
     };
 
     const handleEditStaffSchedule = async (staff) => {
         try {
-        setSelectedStaffV2(staff);
-        const res = await axios.get(`/api/Schedule/working-schedule/${staff.userId}`, { headers });
-        setSchedules(res.data || []);
-        setShowStaffModal(false);
-        setShowScheduleModal(true);
+            setSelectedStaffV2(staff);
+            const res = await axios.get(`/api/Schedule/working-schedule/${staff.userId}`, { headers });
+            setSchedules(res.data || []);
+            setShowStaffModal(false);
+            setShowScheduleModal(true);
         } catch (err) {
-        showError("Không tải được lịch làm việc");
+            showError("Không tải được lịch làm việc");
         }
     };
 
     const updateScheduleField = (dayIndex, field, value) => {
         setSchedules(prev =>
-        prev.map((d, idx) => (idx === dayIndex ? { ...d, [field]: value } : d))
+            prev.map((d, idx) => (idx === dayIndex ? { ...d, [field]: value } : d))
         );
     };
 
@@ -198,11 +198,11 @@ export default function ScheduleManagementPage() {
                 dailySchedules: schedules
                     .filter(d => d.isActive)
                     .map(d => ({
-                    dayOfWeek: d.dayOfWeek,
-                    startTime: d.startTime,
-                    endTime: d.endTime,
-                    isActive: d.isActive,
-                    notes: d.notes || ""
+                        dayOfWeek: d.dayOfWeek,
+                        startTime: d.startTime,
+                        endTime: d.endTime,
+                        isActive: d.isActive,
+                        notes: d.notes || ""
                     }))
             };
 
@@ -238,11 +238,10 @@ export default function ScheduleManagementPage() {
                     <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
                         <button
                             onClick={() => setActiveTab('appointments')}
-                            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                                activeTab === 'appointments'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'appointments'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
                             <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -251,11 +250,10 @@ export default function ScheduleManagementPage() {
                         </button>
                         <button
                             onClick={() => setActiveTab('working-hours')}
-                            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                                activeTab === 'working-hours'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'working-hours'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
                             <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -289,11 +287,10 @@ export default function ScheduleManagementPage() {
                                         });
                                         return (
                                             <div key={time} className="relative">
-                                                <div className={`p-3 rounded-lg border text-center text-sm ${
-                                                    appointment 
-                                                        ? 'bg-blue-100 border-blue-300' 
-                                                        : 'bg-gray-50 border-gray-200'
-                                                }`}>
+                                                <div className={`p-3 rounded-lg border text-center text-sm ${appointment
+                                                    ? 'bg-blue-100 border-blue-300'
+                                                    : 'bg-gray-50 border-gray-200'
+                                                    }`}>
                                                     <div className="font-medium">{time}</div>
                                                     {appointment && (
                                                         <div className="text-xs text-blue-700 mt-1">
@@ -339,8 +336,8 @@ export default function ScheduleManagementPage() {
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
                                                             <div className="text-sm text-gray-900">
-                                                                {appointment.services.length <= 2 
-                                                                    ? appointment.services.join(", ") 
+                                                                {appointment.services.length <= 2
+                                                                    ? appointment.services.join(", ")
                                                                     : `${appointment.services.slice(0, 2).join(", ")}, ...`}
                                                             </div>
                                                             <div className="text-xs text-gray-500">{appointment.duration} giờ</div>
@@ -385,7 +382,7 @@ export default function ScheduleManagementPage() {
                                         totalItems={pagination.totalItems}
                                         pageSize={pagination.pageSize}
                                         onPageChange={(page) =>
-                                        setPagination((prev) => ({ ...prev, currentPage: page }))
+                                            setPagination((prev) => ({ ...prev, currentPage: page }))
                                         }
                                     />
                                 )}
@@ -417,38 +414,72 @@ export default function ScheduleManagementPage() {
                             <div className="p-8">
                                 <div className="space-y-4">
                                     {workingHours.map((day) => (
-                                        <div key={day.dayName} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                            <div className="flex items-center gap-4">
-                                            <div className="w-24">
-                                                <span className="text-sm font-medium text-gray-900 capitalize">
-                                                {day.displayName}
-                                                </span>
+                                        <div key={day.dayName}>
+                                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-24">
+                                                        <span className="text-sm font-medium text-gray-900 capitalize">
+                                                            {day.dayName}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="time"
+                                                            value={day.start}
+                                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                            disabled={!day.isOpen}
+                                                            readOnly
+                                                        />
+                                                        <span className="text-gray-500">-</span>
+                                                        <input
+                                                            type="time"
+                                                            value={day.end}
+                                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                            disabled={!day.isOpen}
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <label className="flex items-center">
+                                                        <span className="ml-2 text-sm text-gray-700">{day.isOpen ? 'Mở cửa' : 'Không mở cửa'}</span>
+                                                    </label>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                type="time"
-                                                value={day.start}
-                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                disabled={!day.isOpen}
-                                                readOnly
-                                                />
-                                                <span className="text-gray-500">-</span>
-                                                <input
-                                                type="time"
-                                                value={day.end}
-                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                disabled={!day.isOpen}
-                                                readOnly
-                                                />
+                                            <div className="px-8 mt-2">
+                                                <table className="w-full text-sm border-collapse">
+                                                    <thead>
+                                                        <tr className="bg-gray-100 text-left">
+                                                            <th className="px-2 py-1 border">Thời gian</th>
+                                                            <th className="px-2 py-1 border">Nhân viên khả dụng</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {day.timeSlots?.map((slot, idx) => (
+                                                            <tr key={idx} className="hover:bg-gray-50">
+                                                                <td className="px-2 py-1 border">
+                                                                    {slot.startTime} - {slot.endTime}
+                                                                </td>
+                                                                <td className="px-2 py-1 border">
+                                                                    {slot.availableStaff.length > 0 ? (
+                                                                        slot.availableStaff.map((staff, sIdx) => (
+                                                                            <span key={staff.staffId}>
+                                                                                {staff.staffName}
+                                                                                {sIdx < slot.availableStaff.length - 1 && ", "}
+                                                                            </span>
+                                                                        ))
+                                                                    ) : (
+                                                                        <span className="text-gray-500">(Không có nhân viên)</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                            <label className="flex items-center">
-                                                <span className="ml-2 text-sm text-gray-700">{day.isOpen ? 'Mở cửa' : 'Không mở cửa'}</span>
-                                            </label>
-                                            </div>
+
                                         </div>
-                                        ))}
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -458,130 +489,130 @@ export default function ScheduleManagementPage() {
             {showAssignModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
                     <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-                    <h2 className="text-lg font-bold mb-4">Gán nhân viên</h2>
+                        <h2 className="text-lg font-bold mb-4">Gán nhân viên</h2>
 
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Chọn nhân viên
-                        </label>
-                        <select
-                        value={selectedStaff}
-                        onChange={(e) => setSelectedStaff(e.target.value)}
-                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                        <option value="">-- Chọn nhân viên --</option>
-                        {staffList.map((staff) => (
-                            <option key={staff.staffId} value={staff.staffId}>
-                            {staff.user.fullName}
-                            </option>
-                        ))}
-                        </select>
-                    </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Chọn nhân viên
+                            </label>
+                            <select
+                                value={selectedStaff}
+                                onChange={(e) => setSelectedStaff(e.target.value)}
+                                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">-- Chọn nhân viên --</option>
+                                {staffList.map((staff) => (
+                                    <option key={staff.staffId} value={staff.staffId}>
+                                        {staff.user.fullName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div className="flex justify-end gap-2">
-                        <button
-                        onClick={() => setShowAssignModal(false)}
-                        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
-                        >
-                        Huỷ
-                        </button>
-                        <button
-                        onClick={() => {
-                            if (!selectedStaff) {
-                            showError("Vui lòng chọn nhân viên!");
-                            return;
-                            }
-                            // TODO: call API
-                            console.log(
-                            `Gán ${selectedStaff} cho lịch hẹn ${selectedAppointment.id}`
-                            );
-                            setShowAssignModal(false);
-                        }}
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                        >
-                        Xác nhận
-                        </button>
-                    </div>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => setShowAssignModal(false)}
+                                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+                            >
+                                Huỷ
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (!selectedStaff) {
+                                        showError("Vui lòng chọn nhân viên!");
+                                        return;
+                                    }
+                                    // TODO: call API
+                                    console.log(
+                                        `Gán ${selectedStaff} cho lịch hẹn ${selectedAppointment.id}`
+                                    );
+                                    setShowAssignModal(false);
+                                }}
+                                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                            >
+                                Xác nhận
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
             {showStaffModal && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-[500px]">
-                    <h2 className="text-lg font-bold mb-4">Chọn nhân viên</h2>
-                    <div className="space-y-3 max-h-80 overflow-y-auto">
-                    {staffs.map(s => (
-                        <div key={s.userId} className="flex justify-between items-center p-3 border rounded-md">
-                        <span>{s.user.fullName}</span>
-                        <button
-                            onClick={() => handleEditStaffSchedule(s)}
-                            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                        >
-                            Chỉnh sửa
-                        </button>
+                    <div className="bg-white rounded-lg p-6 w-[500px]">
+                        <h2 className="text-lg font-bold mb-4">Chọn nhân viên</h2>
+                        <div className="space-y-3 max-h-80 overflow-y-auto">
+                            {staffs.map(s => (
+                                <div key={s.userId} className="flex justify-between items-center p-3 border rounded-md">
+                                    <span>{s.user.fullName}</span>
+                                    <button
+                                        onClick={() => handleEditStaffSchedule(s)}
+                                        className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                    >
+                                        Chỉnh sửa
+                                    </button>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                        <div className="mt-4 text-right">
+                            <button
+                                onClick={() => setShowStaffModal(false)}
+                                className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                            >
+                                Đóng
+                            </button>
+                        </div>
                     </div>
-                    <div className="mt-4 text-right">
-                    <button
-                        onClick={() => setShowStaffModal(false)}
-                        className="px-4 py-2 border rounded-md hover:bg-gray-100"
-                    >
-                        Đóng
-                    </button>
-                    </div>
-                </div>
                 </div>
             )}
             {showScheduleModal && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-[600px]">
-                    <h2 className="text-lg font-bold mb-4">Lịch làm việc - {selectedStaffV2?.user.fullName}</h2>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {schedules.map((day, idx) => (
-                        <div key={day.dayOfWeek} className="flex justify-between items-center p-3 border rounded-md">
-                        <span className="w-28">{day.dayName}</span>
-                        <input
-                            type="time"
-                            value={day.startTime.slice(0, 5)}
-                            onChange={e => updateScheduleField(idx, "startTime", e.target.value + ":00")}
-                            className="border rounded px-2 py-1"
-                            disabled={!day.isActive}
-                        />
-                        <span>-</span>
-                        <input
-                            type="time"
-                            value={day.endTime.slice(0, 5)}
-                            onChange={e => updateScheduleField(idx, "endTime", e.target.value + ":00")}
-                            className="border rounded px-2 py-1"
-                            disabled={!day.isActive}
-                        />
-                        <label className="flex items-center ml-4">
-                            <input
-                            type="checkbox"
-                            checked={day.isActive}
-                            onChange={e => updateScheduleField(idx, "isActive", e.target.checked)}
-                            />
-                            <span className="ml-1 text-sm">Mở cửa</span>
-                        </label>
+                    <div className="bg-white rounded-lg p-6 w-[600px]">
+                        <h2 className="text-lg font-bold mb-4">Lịch làm việc - {selectedStaffV2?.user.fullName}</h2>
+                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                            {schedules.map((day, idx) => (
+                                <div key={day.dayOfWeek} className="flex justify-between items-center p-3 border rounded-md">
+                                    <span className="w-28">{day.dayName}</span>
+                                    <input
+                                        type="time"
+                                        value={day.startTime.slice(0, 5)}
+                                        onChange={e => updateScheduleField(idx, "startTime", e.target.value + ":00")}
+                                        className="border rounded px-2 py-1"
+                                        disabled={!day.isActive}
+                                    />
+                                    <span>-</span>
+                                    <input
+                                        type="time"
+                                        value={day.endTime.slice(0, 5)}
+                                        onChange={e => updateScheduleField(idx, "endTime", e.target.value + ":00")}
+                                        className="border rounded px-2 py-1"
+                                        disabled={!day.isActive}
+                                    />
+                                    <label className="flex items-center ml-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={day.isActive}
+                                            onChange={e => updateScheduleField(idx, "isActive", e.target.checked)}
+                                        />
+                                        <span className="ml-1 text-sm">Mở cửa</span>
+                                    </label>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                        <div className="flex justify-end mt-6 space-x-3">
+                            <button
+                                onClick={() => setShowScheduleModal(false)}
+                                className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                onClick={handleSubmitSchedule}
+                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                            >
+                                Lưu
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex justify-end mt-6 space-x-3">
-                    <button
-                        onClick={() => setShowScheduleModal(false)}
-                        className="px-4 py-2 border rounded-md hover:bg-gray-100"
-                    >
-                        Đóng
-                    </button>
-                    <button
-                        onClick={handleSubmitSchedule}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                    >
-                        Lưu
-                    </button>
-                    </div>
-                </div>
                 </div>
             )}
         </div>
